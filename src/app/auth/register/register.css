@@ -1,0 +1,71 @@
+/* Password Eye-icon */
+.password-container {
+  position: relative;
+  display: flex;
+  align-items: center;  
+}
+ .password-container input {
+  padding-right: 30px; 
+} 
+ .toggle-icon {
+  position: absolute;
+  right: 10px; 
+  cursor: pointer;
+  height: 20px; 
+  width: 20px;
+  color: aqua !important;
+} 
+
+/* Phone Number */
+.iti {
+  display: block;
+  margin: 0rem 0;
+}
+.iti .dropdown-menu.country-dropdown {
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  border-color: #c7cace;
+  margin-top: -1px;
+}
+.iti .iti__country-list {
+  box-shadow: none;
+  font-size: 14px;
+  margin-left: 0;
+  width: 244px;
+  max-height: 170px;
+}
+.iti__flag-container.open+input {
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+.iti .search-container input {
+  font-size: 14px;
+  border-color: #c7cace;
+  border-radius: 0;
+  padding: 5px 10px;
+}
+.iti .search-container input:focus {
+  outline: none;
+}
+@media screen and (max-width: 479px) {
+  .iti .iti__country-list {
+    width: 88.3vw;
+  }
+}
+ngx-intl-tel-input.ng-invalid.ng-touched input {
+  border: 1px solid red !important;
+}
+
+/* Text for errors and Inputs */
+.text-danger {
+  color: red;
+  margin-top: 0px;
+}
+
+input[aria-required="true"],
+select[aria-required="true"],
+textarea[aria-required="true"] {
+  /* border-color: red !important; */
+  border: 1px solid red !important;
+}
+

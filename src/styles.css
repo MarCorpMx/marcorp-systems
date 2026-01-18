@@ -1,1 +1,22 @@
-/* You can add global styles to this file, and also import other style files */
+@import 'tailwindcss';
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #f5f1f1;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0f0f0f;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgb(16, 185, 129);
+    border-radius: 4px;
+}

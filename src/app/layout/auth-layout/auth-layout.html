@@ -1,0 +1,48 @@
+<div class="min-h-screen bg-[#050505] flex items-center justify-center p-4">
+  <div
+    class="w-full max-w-5xl bg-[#0f0f0f] rounded-2xl overflow-hidden shadow-2xl border border-white/5 flex flex-col md:flex-row min-h-[600px]">
+    <!-- Branding Side - Left on Desktop  -->
+    <div class="relative w-full md:w-1/2 h-50 md:h-auto overflow-hidden group" >
+      <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style="background-image: url({{urlImg}});
+          filter: brightness(0.4) contrast(1.2) "></div>
+      <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-black/80"></div>
+      <!-- Animated Grid Overlay to mimic the logo's background -->
+      <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: linear-gradient(rgba(16, 185, 129, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16, 185, 129, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px; "></div>
+
+      <!-- h-full -->
+      <div class="relative flex flex-col items-center justify-center p-8 text-center">
+        <!-- Logo Replacement representing the 'M' logo -->
+        <div class="w-20 h-20 md:w-40 md:h-40 mb-1 relative" >
+          <svg viewBox="0 0 512 512"
+            class="w-full h-full text-[#10b981] drop-shadow-[0_0_15px_rgba(16,185,129,0.8)]">
+            <!-- V superior -->
+            <path fill="currentColor"  d="M128 128 L256 256 L384 128 L384 176 L256 304 L128 176 Z" />
+            <!-- Pilar izquierdo -->
+            <path fill="currentColor"  d="M128 200 L192 256 L192 416 L128 368 Z" />
+            <!-- Pilar derecho -->
+            <path fill="currentColor"  d="M384 198 L320 256 L320 416 L384 368 Z" />
+          </svg>
+        </div>
+
+        <h1 class="text-2xl md:text-4xl font-bold tracking-tight text-white mb-2">
+          Mar<span class="text-[#10b981]">&#123;orp</span>
+        </h1>
+
+        <p class="text-sm md:text-base text-gray-400 max-w-xs mx-auto">
+          {{leftTitle}} 
+        </p>
+      </div>
+    </div>
+    <!-- Form Side - Right on Desktop  -->
+     <!-- justify-center -->
+    <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col  bg-[#0f0f0f]" >
+      <div class="max-w-md mx-auto w-full">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+
+    
+  </div>
+</div>

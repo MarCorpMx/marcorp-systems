@@ -1,0 +1,40 @@
+:host {
+    background-color: #0a0a0a;
+    display: block;
+    height: 100%;
+    color: #ffffff;
+}
+
+/* Text for errors and Inputs */
+.text-danger {
+  color: red;
+  margin-top: 0px;
+}
+
+input[aria-required="true"],
+select[aria-required="true"],
+textarea[aria-required="true"] {
+  /* border-color: red !important; */
+  border: 1px solid red !important;
+}
+
+
+/* html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; } */
+
+.mi-snackbar-success {
+  --mat-sys-inverse-surface: #28a745 !important;
+  --mat-sys-inverse-on-surface: #fff !important;
+} 
+.mi-snackbar-error {
+  --mat-sys-inverse-surface: #dc3545 !important;
+  --mat-sys-inverse-on-surface: #fff !important;
+}
+
+button:disabled,
+button[disabled]{
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed !important;
+}

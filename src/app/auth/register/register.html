@@ -1,0 +1,180 @@
+<div class="animate-in fade-in slide-in-from-left-4 duration-500">
+    <header class="mb-8">
+        <h2 class="text-3xl font-bold text-white mb-2">Registro</h2>
+        <p class="text-gray-400">Crea una nueva cuenta en la plataforma</p>
+    </header>
+
+    <form [formGroup]="registrationForm" (ngSubmit)="onSubmit($event)" class="space-y-4">
+        <!-- Name -->
+        <div class="w-full">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Nombre(s)</label>
+            <input formControlName="firstName" name="firstName" id="firstName" type="text"
+                class="w-full bg-black/40 border border-white/10 rounded-lg py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]/50 focus:border-[#10b981] transition-all"
+                [attr.aria-required]="firstName?.invalid && (firstName?.dirty || firstName?.touched)"
+                placeholder="Diana" required />
+
+            @if(firstName?.invalid && (firstName?.dirty || firstName?.touched)){
+            <div>
+                @if (firstName?.hasError('required')) {
+                <small class="text-danger">El nombre es obligatorio.</small>
+                }
+                @if (firstName?.hasError('pattern')){
+                <small class="text-danger">No se permiten caracteres especiales.</small>
+                }
+                @if (firstName?.hasError('minlength') && !firstName?.hasError('pattern')) {
+                <small class="text-danger">El nombre debe tener al menos 3 caracteres.</small>
+                }
+                @if (firstName?.hasError('maxlength')) {
+                <small class="text-danger">El nombre no debe tener más de 100 caracteres.</small>
+                }
+            </div>
+            }
+        </div>
+
+        <!-- Last Name -->
+        <div class="w-full">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Apellido(s)</label>
+            <input formControlName="lastName" name="lastName" id="lastName" type="text"
+                class="w-full bg-black/40 border border-white/10 rounded-lg py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]/50 focus:border-[#10b981] transition-all"
+                [attr.aria-required]="lastName?.invalid && (lastName?.dirty || lastName?.touched)" placeholder="Sánchez"
+                required />
+
+            @if(lastName?.invalid && (lastName?.dirty || lastName?.touched)){
+            <div>
+                @if (lastName?.hasError('required')) {
+                <small class="text-danger">Al menos un apellido es obligatorio.</small>
+                }
+                @if (lastName?.hasError('pattern')){
+                <small class="text-danger">No se permiten caracteres especiales.</small>
+                }
+                @if (lastName?.hasError('minlength') && !lastName?.hasError('pattern')) {
+                <small class="text-danger">El apellido debe tener al menos 3 caracteres.</small>
+                }
+                @if (lastName?.hasError('maxlength')) {
+                <small class="text-danger">El apellido no debe tener más de 100 caracteres.</small>
+                }
+            </div>
+            }
+        </div>
+
+        <!-- Phone Number -->
+        <div class="w-full">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Número de Teléfono</label>
+            <ngx-intl-tel-input formControlName="phone"
+                [cssClass]="'w-full bg-black/40 border border-white/10 rounded-lg py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]/50 focus:border-[#10b981] transition-all'"
+                [preferredCountries]="preferredCountries" [enableAutoCountrySelect]="true" [enablePlaceholder]="true"
+                [phoneValidation]="true" [searchCountryFlag]="true" [maxLength]="15" [separateDialCode]=true
+                [searchCountryPlaceholder]="'Buscar País'" [numberFormat]="PhoneNumberFormat.National">
+            </ngx-intl-tel-input>
+
+            @if(phone?.invalid && phone?.touched){
+            <div>
+                @if (phone?.hasError('required')) {
+                <small class="text-danger">El número de teléfono es obligatorio.</small>
+                }
+                @if (phone?.invalid && !phone?.hasError('required')) {
+                <small class="text-danger">Proporcione un número de teléfono válido.</small>
+                }
+            </div>
+            }
+        </div>
+
+        <!-- Systems -->
+        <div class="w-full">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Sistema de Interés</label>
+            <select formControlName="system" name="system" id="system"
+                class="w-full bg-black/40 border border-white/10 rounded-lg py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]/50 focus:border-[#10b981] transition-all"
+                [attr.aria-required]="system?.invalid && (system?.dirty || system?.touched)">
+                @for(item of itemsSystems; track $index){
+                <option value="{{item.id}}">{{item.name}}</option>
+                }
+            </select>
+            @if(system?.invalid && (system?.dirty || system?.touched)){
+            <div>
+                @if (system?.hasError('required')) {
+                <small class="text-danger">Debe seleccionar una de las opciones de la lista.</small>
+                }
+            </div>
+            }
+        </div>
+
+        <!-- E-mail -->
+        <div class="w-full">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Correo Electrónico</label>
+            <input formControlName="email" name="email" id="email" type="email"
+                class="w-full bg-black/40 border border-white/10 rounded-lg py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]/50 focus:border-[#10b981] transition-all"
+                [attr.aria-required]="email?.invalid && (email?.dirty || email?.touched)"
+                placeholder="nombre@ejemplo.com" required />
+
+            @if(email?.invalid && (email?.dirty || email?.touched)){
+            <div>
+                @if (email?.hasError('required')) {
+                <small class="text-danger">El correo electrónico es obligatorio.</small>
+                }
+                @if (email?.hasError('email') || email?.hasError('pattern')) {
+                <small class="text-danger">Proporcione una dirección de correo electrónico válida.</small>
+                }
+            </div>
+            }
+        </div>
+
+        <!-- Password -->
+        <div>
+            <div class="flex items-center justify-between mb-2">
+                <label class="text-sm font-medium text-gray-300">Contraseña</label>
+            </div>
+            <div class="w-full password-container">
+                <input formControlName="password" name="password" id="password"
+                    type="{{showPassword ? 'text' : 'password'}}" maxlength="15"
+                    class="w-full bg-black/40 border border-white/10 rounded-lg py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]/50 focus:border-[#10b981] transition-all"
+                    [attr.aria-required]="password?.invalid && (password?.dirty || password?.touched)"
+                    placeholder="••••••••" required />
+                <lucide-angular [name]="showPassword ? EyeOff : Eye" class="toggle-icon"
+                    (click)="togglePasswordVisibility()"></lucide-angular>
+            </div>
+            @if(password?.invalid && (password?.dirty || password?.touched)){
+            <div>
+                @if (password?.hasError('required')) {
+                <small class="text-danger">La contraseña es obligatoria.</small>
+                }
+                @if (password?.hasError('pattern')) {
+                <small class="text-danger">La contraseña debe tener al menos 8 caracteres, máximo 15 caracteres y una
+                    combinación de letras, números y símbolos (como @ $ # %).</small>
+                }
+            </div>
+            }
+        </div>
+
+        <!-- Terms and Conditions -->
+        <div class="w-full">
+            <label for="agree-to-policies" class="text-[12px] text-gray-600">
+                Al hacer clic en Registrarte, aceptas las
+                <a href="https://www.marcorp.mx/diamar/terminos-y-condiciones" target="_blank"
+                    class="font-semibold whitespace-nowrap text-indigo-600">Condiciones</a>
+                y la
+                <a href="https://www.marcorp.mx/diamar/aviso-de-privacidad" target="_blank"
+                    class="font-semibold whitespace-nowrap text-indigo-600">Política de privacidad</a>.
+                <!-- Es posible que te enviemos notificaciones por SMS, que podrás desactivar cuando quieras. -->
+            </label>
+        </div>
+
+
+        <!-- Register Button -->
+        <div class="pt-2">
+            <button type="submit" [disabled]="isSubmitting" style="cursor: pointer;"
+                class="w-full bg-[#10b981] hover:bg-[#0da271] text-black font-bold py-3.5 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_4px_15px_rgba(16,185,129,0.3)]">
+                Registrarte
+            </button>
+        </div>
+    </form>
+
+    <footer class="mt-8 text-center text-sm">
+        <p class="text-gray-400">
+            ¿Ya tienes una cuenta?
+            <button type="button" (click)="nav.goToLogin()" style="cursor: pointer;"
+                class="text-[#10b981] font-semibold hover:underline transition-all">
+                Inicia sesión
+            </button>
+        </p>
+    </footer>
+</div>
