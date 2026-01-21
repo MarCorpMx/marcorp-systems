@@ -7,14 +7,14 @@
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit($event)" class="space-y-6">
         <div class="w-full">
             <label class="block text-sm font-medium text-gray-300 mb-2">Usuario</label>
-            <input formControlName="username" name="username" id="username" type="text"
+            <input formControlName="login" name="login" id="login" type="text"
                 class="w-full bg-black/40 border border-white/10 rounded-lg py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]/50 focus:border-[#10b981] transition-all"
-                [attr.aria-required]="username?.invalid && (username?.dirty || username?.touched)"
+                [attr.aria-required]="login?.invalid && (login?.dirty || login?.touched)"
                 placeholder="E-mail o Nombre de Usuario" required />
 
-            @if(username?.invalid && (username?.dirty || username?.touched)){
+            @if(login?.invalid && (login?.dirty || login?.touched)){
             <div>
-                @if (username?.hasError('required')) {
+                @if (login?.hasError('required')) {
                 <small class="text-danger">El usuario es obligatorio.</small>
                 }
             </div>

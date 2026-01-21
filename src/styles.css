@@ -20,3 +20,39 @@ html, body {
     background: rgb(16, 185, 129);
     border-radius: 4px;
 }
+
+/*.snackbar-success {
+  --mat-sys-inverse-surface: #2e7d32;
+  --mat-sys-inverse-on-surface: white;
+}*/
+
+.snackbar-success {
+  --mat-sys-inverse-surface: #0f172a !important;
+  --mat-sys-inverse-on-surface: #10b981 !important;
+  border-left: 5px solid #10b981;
+}
+
+/*.snackbar-error {
+  --mat-sys-inverse-surface: #c62828;
+  --mat-sys-inverse-on-surface: white;
+}*/
+.snackbar-error {
+  --mat-sys-inverse-surface: #0f172a !important;
+  --mat-sys-inverse-on-surface: #ef4444 !important;
+  border-left: 5px solid #ef4444;
+}
+
+/*.snackbar-info {
+  --mat-sys-inverse-surface: #0277bd;
+  --mat-sys-inverse-on-surface: white;
+}*/
+.snackbar-info {
+  --mat-sys-inverse-surface: #0f172a !important;
+  --mat-sys-inverse-on-surface: #38bdf8 !important;
+  border-left: 5px solid #38bdf8;
+}
+
+.snackbar-warning {
+  --mat-sys-inverse-surface: #ef6c00;
+  --mat-sys-inverse-on-surface: white;
+}

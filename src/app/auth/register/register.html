@@ -8,23 +8,23 @@
         <!-- Name -->
         <div class="w-full">
             <label class="block text-sm font-medium text-gray-300 mb-2">Nombre(s)</label>
-            <input formControlName="firstName" name="firstName" id="firstName" type="text"
+            <input formControlName="first_name" name="first_name" id="first_name" type="text"
                 class="w-full bg-black/40 border border-white/10 rounded-lg py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]/50 focus:border-[#10b981] transition-all"
-                [attr.aria-required]="firstName?.invalid && (firstName?.dirty || firstName?.touched)"
+                [attr.aria-required]="first_name?.invalid && (first_name?.dirty || first_name?.touched)"
                 placeholder="Diana" required />
 
-            @if(firstName?.invalid && (firstName?.dirty || firstName?.touched)){
+            @if(first_name?.invalid && (first_name?.dirty || first_name?.touched)){
             <div>
-                @if (firstName?.hasError('required')) {
+                @if (first_name?.hasError('required')) {
                 <small class="text-danger">El nombre es obligatorio.</small>
                 }
-                @if (firstName?.hasError('pattern')){
+                @if (first_name?.hasError('pattern')){
                 <small class="text-danger">No se permiten caracteres especiales.</small>
                 }
-                @if (firstName?.hasError('minlength') && !firstName?.hasError('pattern')) {
+                @if (first_name?.hasError('minlength') && !first_name?.hasError('pattern')) {
                 <small class="text-danger">El nombre debe tener al menos 3 caracteres.</small>
                 }
-                @if (firstName?.hasError('maxlength')) {
+                @if (first_name?.hasError('maxlength')) {
                 <small class="text-danger">El nombre no debe tener más de 100 caracteres.</small>
                 }
             </div>
@@ -34,23 +34,23 @@
         <!-- Last Name -->
         <div class="w-full">
             <label class="block text-sm font-medium text-gray-300 mb-2">Apellido(s)</label>
-            <input formControlName="lastName" name="lastName" id="lastName" type="text"
+            <input formControlName="last_name" name="last_name" id="last_name" type="text"
                 class="w-full bg-black/40 border border-white/10 rounded-lg py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]/50 focus:border-[#10b981] transition-all"
-                [attr.aria-required]="lastName?.invalid && (lastName?.dirty || lastName?.touched)" placeholder="Sánchez"
+                [attr.aria-required]="last_name?.invalid && (last_name?.dirty || last_name?.touched)" placeholder="Sánchez"
                 required />
 
-            @if(lastName?.invalid && (lastName?.dirty || lastName?.touched)){
+            @if(last_name?.invalid && (last_name?.dirty || last_name?.touched)){
             <div>
-                @if (lastName?.hasError('required')) {
+                @if (last_name?.hasError('required')) {
                 <small class="text-danger">Al menos un apellido es obligatorio.</small>
                 }
-                @if (lastName?.hasError('pattern')){
+                @if (last_name?.hasError('pattern')){
                 <small class="text-danger">No se permiten caracteres especiales.</small>
                 }
-                @if (lastName?.hasError('minlength') && !lastName?.hasError('pattern')) {
+                @if (last_name?.hasError('minlength') && !last_name?.hasError('pattern')) {
                 <small class="text-danger">El apellido debe tener al menos 3 caracteres.</small>
-                }
-                @if (lastName?.hasError('maxlength')) {
+                }last_name
+                @if (last_name?.hasError('maxlength')) {
                 <small class="text-danger">El apellido no debe tener más de 100 caracteres.</small>
                 }
             </div>
@@ -82,16 +82,16 @@
         <!-- Systems -->
         <div class="w-full">
             <label class="block text-sm font-medium text-gray-300 mb-2">Sistema de Interés</label>
-            <select formControlName="system" name="system" id="system"
+            <select formControlName="subsystem_id" name="subsystem_id" id="subsystem_id"
                 class="w-full bg-black/40 border border-white/10 rounded-lg py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]/50 focus:border-[#10b981] transition-all"
-                [attr.aria-required]="system?.invalid && (system?.dirty || system?.touched)">
+                [attr.aria-required]="subsystem_id?.invalid && (subsystem_id?.dirty || subsystem_id?.touched)">
                 @for(item of itemsSystems; track $index){
                 <option value="{{item.id}}">{{item.name}}</option>
                 }
             </select>
-            @if(system?.invalid && (system?.dirty || system?.touched)){
+            @if(subsystem_id?.invalid && (subsystem_id?.dirty || subsystem_id?.touched)){
             <div>
-                @if (system?.hasError('required')) {
+                @if (subsystem_id?.hasError('required')) {
                 <small class="text-danger">Debe seleccionar una de las opciones de la lista.</small>
                 }
             </div>

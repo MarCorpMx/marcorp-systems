@@ -3,7 +3,8 @@ import { RouterModule, Router } from '@angular/router';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { LucideAngularModule, Eye, EyeOff } from 'lucide-angular';
 import { AuthNavigation } from '../services/auth-navigation';
-//import { Utils } from '../../services/utils';
+import { Notification } from '../../services/notification.service';
+import { AuthService } from '../../core/services/auth.service';
 
 
 @Component({
@@ -17,32 +18,98 @@ export class Login {
   readonly EyeOff = EyeOff;
   showPassword = false;
   isSubmitting = false;
-  itemsSystemsUser: any[] = []; 
+  itemsSystemsUser: any[] = [];
 
   //constructor(private router: Router, private _utils: Utils) { }
-  constructor(private router: Router, public nav: AuthNavigation) { }
+  constructor(
+    private router: Router,
+    public nav: AuthNavigation,
+    private notify: Notification,
+    private authService: AuthService) { }
 
   loginForm = new FormGroup({
-    username: new FormControl('diana@mail.com', [Validators.required]),
-    password: new FormControl('and011235Mrom#', [Validators.required])
+    login: new FormControl('diana@mail.com', [Validators.required]),
+    password: new FormControl('and011235Mrom@', [Validators.required])
   });
 
-  get username() {
-    return this.loginForm.get('username');
+  get login() {
+    return this.loginForm.get('login');
   }
   get password() {
     return this.loginForm.get('password');
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }
 
   onSubmit(event: Event) {
-    alert("provando ando");
+    // Previene la recarga de la página por defecto
+    event.preventDefault();
+
+    if (this.loginForm.invalid) {
+      this.notify.error("Algunos campos contienen información incorrecta o incompleta. Por favor, revísalos y vuelve a intentarlo.");
+      this.markAllAsTouched(this.loginForm);
+      return; // Detener el envío si es inválido
+    }
+
+    // Consultar los datos
+    if (this.isSubmitting) {
+      return; // Si ya se está enviando, no hacer nada
+    }
+    this.isSubmitting = true;
+
+    // Normalizamos los datos antes de enviarlos
+    const payload = {
+      login: this.loginForm.value.login ?? undefined,
+      password: this.loginForm.value.password ?? '',
+    };
+
+    // Llama al servicio 
+    this.authService.login(payload).subscribe({
+      next: (res) => {
+        console.log('La respuesta carnal: ', res);
+        console.log('mi local: ', localStorage);
+
+        this.notify.success('Acceso exitoso!!');
+
+        /*if (res.systems.length === 1) {
+          this.authService.setCurrentSystem(res.systems[0]);
+          this.authService.redirectToSystem();
+        } else {
+          this.notify.error('Falta select-system carnal');
+          this.router.navigate(['/select-system']);
+        }*/
+      },
+      error: (err) => {
+        if (err.status === 401) {
+          this.isSubmitting = false;
+          // Errores de validación de Laravel
+          let messages = err.error?.message || 'Error al iniciar sesión';
+          this.notify.error(messages);
+        } else {
+          this.notify.error('Error en el servidor, intenta más tarde');
+        }
+      }
+    });
   }
+
+  /*redirectToSystem(system: any) {
+    switch (system.subsystem_key) {
+      case 'citas':
+        this.router.navigate(['/citas']);
+        break;
+
+      case 'escolar':
+        this.router.navigate(['/escolar']);
+        break;
+
+      default:
+        this.router.navigate(['/dashboard']);
+    }
+  }*/
 
   markAllAsTouched(formGroup: FormGroup) {
     Object.keys(formGroup.controls).forEach(field => {
