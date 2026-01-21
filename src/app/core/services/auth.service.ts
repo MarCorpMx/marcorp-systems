@@ -9,7 +9,10 @@ import { Api } from './api';
 })
 
 export class AuthService {
-  constructor(private api: Api, private router: Router) { }
+  
+  constructor(
+    private api: Api, 
+    private router: Router) { }
 
   // REGISTER
   register(data: any): Observable<any> {
@@ -27,6 +30,27 @@ export class AuthService {
         this.redirectToSystem();
       })
     );
+  }
+
+  redirectToSystem() {
+    const systems = this.getSystems();
+
+    if (!systems || systems.length === 0) {
+      // No tiene sistemas
+      //this.router.navigate(['/auth/login']);
+      this.router.navigate(['/no-systems']);
+      return;
+    }
+
+    if (systems.length === 1) {
+      // Solo un sistema → entrar directo
+      this.setCurrentSystem(systems[0]);
+      this.router.navigate([`/systems/${systems[0].subsystem_key}`]);
+      return;
+    }
+
+    // Más de un sistema → seleccionar
+    this.router.navigate(['/select-system']);
   }
 
   // LOGOUT
@@ -68,26 +92,4 @@ export class AuthService {
   setCurrentSystem(system: any) {
     localStorage.setItem('current_system', JSON.stringify(system));
   }
-
-  redirectToSystem() {
-    const systems = this.getSystems();
-
-    if (!systems || systems.length === 0) {
-      // No tiene sistemas
-      this.router.navigate(['/no-systems']);
-      return;
-    }
-
-    if (systems.length === 1) {
-      // Solo un sistema → entrar directo
-      this.setCurrentSystem(systems[0]);
-      this.router.navigate([`/systems/${systems[0].subsystem_key}`]);
-      return;
-    }
-
-    // Más de un sistema → seleccionar
-    this.router.navigate(['/select-system']);
-  }
-
-
 }

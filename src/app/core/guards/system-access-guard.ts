@@ -1,5 +1,36 @@
-import { CanMatchFn } from '@angular/router';
+import { inject } from '@angular/core';
+import { CanMatchFn, Router, Route, UrlSegment } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
-export const systemAccessGuard: CanMatchFn = (route, segments) => {
+export const systemAccessGuard: CanMatchFn = (
+  route: Route,
+  segments: UrlSegment[]
+) => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+
+  const systemKey = route.data?.['systemKey'];
+  const systems = auth.getSystems();
+
+  if (!systems || systems.length === 0) {
+    router.navigate(['/select-system']);
+    return false;
+  }
+
+  const hasAccess = systems.some(
+    (s: any) => s.subsystem_key === systemKey
+  );
+
+  if (!hasAccess) {
+    router.navigate(['/select-system']);
+    return false;
+  }
+
+  // Guardar sistema actual
+  const system = systems.find(
+    (s: any) => s.subsystem_key === systemKey
+  );
+  auth.setCurrentSystem(system);
+
   return true;
 };

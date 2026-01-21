@@ -1,0 +1,23 @@
+<div class="system-container">
+    <div class="system-card">
+        <h1>Selecciona un sistema</h1>
+        <p>Elige el sistema al que deseas acceder</p>
+
+        <div class="systems-grid">
+            @for(system of systems; track $index){
+            <button class="system-item" (click)="selectSystem(system)">
+                <div class="icon">
+                    <lucide-icon [name]="getIcon(system.subsystem_key)" size="40" strokeWidth="1.6"></lucide-icon>
+                </div>
+
+                <div class="info">
+                    <h3>{{ system.subsystem_name }}</h3>
+                    <span class="badge" [class.inactive]="!system.is_paid">
+                        {{ system.is_paid ? 'Activo' : 'Demo' }}
+                    </span>
+                </div>
+            </button>
+            }
+        </div>
+    </div>
+</div>

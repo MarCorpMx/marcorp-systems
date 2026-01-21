@@ -6,7 +6,6 @@ import { AuthNavigation } from '../services/auth-navigation';
 import { Notification } from '../../services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
 
-
 @Component({
   selector: 'app-login',
   imports: [RouterModule, ReactiveFormsModule, LucideAngularModule],
@@ -20,7 +19,6 @@ export class Login {
   isSubmitting = false;
   itemsSystemsUser: any[] = [];
 
-  //constructor(private router: Router, private _utils: Utils) { }
   constructor(
     private router: Router,
     public nav: AuthNavigation,
@@ -70,18 +68,7 @@ export class Login {
     // Llama al servicio 
     this.authService.login(payload).subscribe({
       next: (res) => {
-        console.log('La respuesta carnal: ', res);
-        console.log('mi local: ', localStorage);
-
         this.notify.success('Acceso exitoso!!');
-
-        /*if (res.systems.length === 1) {
-          this.authService.setCurrentSystem(res.systems[0]);
-          this.authService.redirectToSystem();
-        } else {
-          this.notify.error('Falta select-system carnal');
-          this.router.navigate(['/select-system']);
-        }*/
       },
       error: (err) => {
         if (err.status === 401) {
@@ -95,21 +82,6 @@ export class Login {
       }
     });
   }
-
-  /*redirectToSystem(system: any) {
-    switch (system.subsystem_key) {
-      case 'citas':
-        this.router.navigate(['/citas']);
-        break;
-
-      case 'escolar':
-        this.router.navigate(['/escolar']);
-        break;
-
-      default:
-        this.router.navigate(['/dashboard']);
-    }
-  }*/
 
   markAllAsTouched(formGroup: FormGroup) {
     Object.keys(formGroup.controls).forEach(field => {
