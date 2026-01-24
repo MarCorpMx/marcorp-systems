@@ -56,3 +56,23 @@ html, body {
   --mat-sys-inverse-surface: #ef6c00;
   --mat-sys-inverse-on-surface: white;
 }
+
+/*:root {
+  --marcorp-primary: #10b981;
+  --marcorp-bg-main: #0f1615;
+  --marcorp-bg-soft: #141c1b;
+
+  --marcorp-text-main: #e5f5f1;
+  --marcorp-text-muted: #8fa3a0;
+
+  --marcorp-border: rgba(255, 255, 255, 0.12);
+}*/
+
+/* COLORES GENERALES */
+/*$marcorp-primary: #13C28B;
+$marcorp-dark: #0b0f0e;
+$marcorp-light: #e5f7f2;
+
+$citas-accent: #3fcaf7;
+$escolar-accent: #facc15;
+$inventarios-accent: #fb923c; */

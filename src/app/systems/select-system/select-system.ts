@@ -43,8 +43,8 @@ export class SelectSystem {
   ) {}
 
   ngOnInit(): void { 
-    console.log('Token desde selector de sistemas: ', localStorage.getItem('auth_token'));
     this.systems = this.auth.getSystems();
+    console.log('Los getSystems: ', this.systems);
 
     if (this.systems.length === 1) {
       this.selectSystem(this.systems[0]);

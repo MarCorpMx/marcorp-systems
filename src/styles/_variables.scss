@@ -1,0 +1,36 @@
+:root {
+  /* ======================
+     MARCORP – CORE BRAND
+  ====================== */
+
+  --marcorp-primary: #18C48F;
+  --marcorp-primary-dark: #12A576;
+  --marcorp-primary-light: #4FE3B3;
+
+  --marcorp-bg-dark: #0E1111;
+  --marcorp-bg-card: #151A1A;
+  --marcorp-bg-soft: #1E2424;
+
+  --marcorp-text-main: #EAFBF5;
+  --marcorp-text-muted: #9FBEB4;
+
+  --marcorp-border: #263131;
+
+  /* === TEXTO === */
+  --marcorp-text-main: #e5e7eb;   // texto principal (claro)
+  --marcorp-text-muted: #9ca3af;  // texto secundario
+
+  /* === SUPERFICIES === */
+  --surface: #0f172a;             // dropdowns / cards (slate-900)
+  --surface-soft: #020617;        // sidebar / fondo oscuro
+
+  /* === BORDES === */
+  --marcorp-border: rgba(255,255,255,.08);
+
+  /* === HOVER / ACTIVE === */
+  --hover: rgba(255,255,255,.08);
+  --active: rgba(16,185,129,.15);
+
+  /* === SHADOW === */
+  --shadow-soft: 0 10px 30px rgba(0,0,0,.35);
+}

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { SystemLayout } from './core/layouts/system-layout/system-layout';
 
 // Guards 
 import { authGuard } from './core/guards/auth-guard';
@@ -18,6 +19,15 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./auth/auth.routes')
         .then(m => m.AUTH_ROUTES)
+  },
+
+  // Datos de cuenta del usuario
+  {
+    path: 'account',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./account/account.routes')
+        .then(m => m.ACCOUNT_ROUTES)
   },
 
   // SELECT SYSTEM (cuando un usuario tiene varios sistemas)

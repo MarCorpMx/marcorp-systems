@@ -1,0 +1,31 @@
+<div class="system-layout">
+  <!-- SIDEBAR -->
+  <app-sidebar [open]="sidebarOpen()" (close)="closeSidebar()">
+  </app-sidebar>
+
+  <!-- OVERLAY (solo móvil) -->
+  @if(sidebarOpen()){
+  <div class="sidebar-overlay" (click)="sidebarOpen.set(false)">
+  </div>
+  }
+
+  <!-- MAIN -->
+  <div class="system-main">
+    <app-topbar (toggleMenu)="toggleSidebar()"> </app-topbar>
+    
+    
+    <main class="system-content">
+
+
+      @if(confirm.visible()){
+      <app-confirm-dialog 
+      [title]="confirm.title()" 
+      [message]="confirm.message()"
+      (confirm)="confirm.confirm()" 
+      (cancel)="confirm.close()">
+      </app-confirm-dialog>
+      }
+      <router-outlet />
+    </main>
+  </div>
+</div>

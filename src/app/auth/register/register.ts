@@ -107,8 +107,6 @@ export class Register {
     this.authService.register(this.registrationForm.value).subscribe({
       next: (res) => {
         this.notify.success('Registro exitoso');
-        //console.log(res);
-
         this.isSubmitting = false;
         this.registrationForm.reset();
         this.registrationForm.get('subsystem_id')?.setValue(this.itemsSystems[0].id);

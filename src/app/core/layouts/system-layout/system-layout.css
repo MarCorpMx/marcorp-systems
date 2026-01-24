@@ -1,0 +1,83 @@
+
+
+.system-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--marcorp-bg-dark);
+  overflow: hidden;
+
+  --topbar-height: 64px;
+}
+
+/* ===== Sidebar ===== */
+app-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: var(--topbar-height);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 900;
+}
+
+.system-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;  /* IMPORTANTE!!! para móviles */
+}
+
+/*.system-content {
+  padding: 1.5rem;
+  background: var(--marcorp-bg);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.5rem;
+}*/
+
+.system-content {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-x: hidden;
+}
+
+/* Moviles */
+@media (max-width: 768px) {
+  .system-main {
+    margin-left: 0;
+  }
+
+  .system-layout {
+    position: relative;
+  }
+
+  /* Sidebar NO ocupa espacio */
+  app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    /*
+    height: 100vh;
+    width: 260px;
+    transform: translateX(-100%);
+ */
+  }
+
+  /* Sidebar visible */
+  app-sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* El contenido usa TODO el ancho */
+  .system-main {
+    width: 100%;
+  }
+}
+
+

@@ -1,0 +1,59 @@
+<header class="topbar">
+
+
+    <button class="menu-btn" (click)="toggleMenu.emit()">
+        ☰
+    </button>
+
+    <!-- LEFT -->
+    <div class="left">
+        <h1 class="system-name">{{ system() }}</h1>
+
+        @if(breadcrumbs.length){
+        <nav class="breadcrumbs">
+            @for (bc of breadcrumbs; track $index; let last = $last) {
+            <span>
+                <span class="crumb current">{{ bc }}</span>
+            </span>
+            @if(!last){
+            <lucide-icon [name]="ChevronRight" size="14" class="separator"></lucide-icon>
+            }
+            }
+        </nav>
+        }
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+
+        <!-- USER MENU -->
+        <div class="user-menu" (click)="toggleUserMenu()">
+            <lucide-icon [name]="User" size="18"></lucide-icon>
+            <span class="username desktop-only">{{ user?.name }}</span>
+            <lucide-icon [name]="ChevronDown" size="14" class="desktop-only" />
+        </div>
+
+        <!-- DROPDOWN -->
+        @if (userMenuOpen()) {
+        <div class="user-dropdown" (mouseleave)="closeUserMenu()">
+            <button (click)="goToAccount()">
+                Mi cuenta
+            </button>
+
+            <button routerLink="/select-system">
+                Cambiar sistema
+            </button>
+
+            <hr />
+
+            <button class="danger" (click)="logout()">
+                <lucide-icon [name]="LogOut" size="16"></lucide-icon>
+                Cerrar sesión
+            </button>
+        </div>
+        }
+
+
+    </div>
+
+</header>

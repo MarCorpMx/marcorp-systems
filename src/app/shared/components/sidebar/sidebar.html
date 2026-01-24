@@ -1,0 +1,43 @@
+<aside class="sidebar" [class.open]="open">
+    <div class="sidebar-overlay" (click)="closeSidebar()"></div>
+    <!-- HEADER -->
+    <div class="sidebar-header">
+        <div class="logo">M</div>
+        <div class="system">
+            <span class="name">{{ currentSystem?.subsystem_name }}</span>
+            @if(systems.length > 1){
+            <button class="switch" (click)="switchSystem()">
+                Cambiar sistema
+            </button>
+            }
+        </div>
+    </div>
+
+    <!-- MENU -->
+    <nav class="menu">
+        @for(item of menu(); track $index){
+        @if(hasAccess(item)){
+        <a [routerLink]="item.route" routerLinkActive="active">
+            <lucide-icon [name]="item.icon" size="20"></lucide-icon>
+            <span>{{ item.label }}</span>
+        </a>
+        }
+        }
+    </nav>
+
+    <!-- FOOTER -->
+    <div class="footer desktop-only">
+        <button class="logout" (click)="logout()" appDisableWhileLoading>
+            <lucide-icon [name]="LogOut" size="18"></lucide-icon>
+            Cerrar sesión
+        </button>
+    </div>
+
+
+
+</aside>
+
+@if(open){
+<div class="overlay" (click)="close.emit()">
+</div>
+}

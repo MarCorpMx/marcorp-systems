@@ -1,0 +1,26 @@
+/* ======================
+   SISTEMA DE CITAS
+====================== */
+body[data-system="citas"] {
+    --system-primary: #1FD6A1;
+    --system-secondary: #0FB487;
+    --system-accent: #A9F3DB;
+}
+
+/* ======================
+   SISTEMA ESCOLAR
+====================== */
+body[data-system="escolar"] {
+    --system-primary: #4F8CFF;
+    --system-secondary: #2E6BE6;
+    --system-accent: #BFD4FF;
+}
+
+/* ======================
+   SISTEMA INVENTARIOS
+====================== */
+body[data-system="inventarios"] {
+    --system-primary: #FF9F43;
+    --system-secondary: #E07A1F;
+    --system-accent: #FFD8B0;
+}

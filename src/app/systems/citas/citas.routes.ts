@@ -17,6 +17,24 @@ export const CITAS_ROUTES: Routes = [
         loadComponent: () =>
           import('./pages/dashboard/dashboard')
             .then(m => m.Dashboard)
+      },
+      {
+        path: 'clientes',
+        loadComponent: () =>
+          import('./pages/clientes/clientes')
+            .then(m => m.Clientes)
+      },
+      {
+        path: 'agenda',
+        loadComponent: () =>
+          import('./pages/agenda/agenda')
+            .then(m => m.Agenda)
+      },
+      {
+        path: 'configuracion',
+        loadComponent: () =>
+          import('./pages/configuracion/configuracion')
+            .then(m => m.Configuracion)
       }
     ]
   }

@@ -1,0 +1,81 @@
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  background: linear-gradient(180deg, #0b1110, #070a0a);
+  color: var(--marcorp-text-main);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+}
+
+.sidebar-header {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+
+  .logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--system-primary, var(--marcorp-primary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #002b1f;
+    font-weight: bold;
+  }
+
+  .system {
+    display: flex;
+    flex-direction: column;
+
+    .name {
+      font-weight: 600;
+    }
+
+    .switch {
+      background: none;
+      border: none;
+      color: var(--marcorp-text-muted);
+      font-size: .75rem;
+      cursor: pointer;
+      padding: 0;
+      text-align: left;
+    }
+  }
+}
+
+.menu a {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: .7rem 1rem;
+  border-radius: 12px;
+  color: inherit;
+  text-decoration: none;
+  margin-bottom: .4rem;
+  transition: background .2s;
+}
+
+.menu a:hover,
+.menu a.active {
+  background: rgba(255, 255, 255, .08);
+  border-left: 3px solid var(--system-primary);
+}
+
+.footer {
+  margin-top: auto;
+}
+
+.logout {
+  width: 100%;
+  background: none;
+  border: 1px solid var(--marcorp-border);
+  color: inherit;
+  padding: .7rem;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  gap: .6rem;
+  justify-content: center;
+}

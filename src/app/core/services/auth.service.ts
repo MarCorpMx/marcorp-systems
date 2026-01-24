@@ -3,16 +3,19 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Api } from './api';
+import { ThemeService } from './theme.service';
 
 @Injectable({
   providedIn: 'root',
 })
 
 export class AuthService {
-  
+
   constructor(
-    private api: Api, 
-    private router: Router) { }
+    private api: Api,
+    private router: Router,
+    private theme: ThemeService
+  ) { }
 
   // REGISTER
   register(data: any): Observable<any> {
@@ -66,6 +69,8 @@ export class AuthService {
     localStorage.removeItem('user');
     localStorage.removeItem('systems');
     localStorage.removeItem('current_system');
+
+    this.theme.clearTheme();
   }
 
   // HELPERS
@@ -91,5 +96,7 @@ export class AuthService {
 
   setCurrentSystem(system: any) {
     localStorage.setItem('current_system', JSON.stringify(system));
+    this.theme.setCurrentSystem(system);
+    //document.body.setAttribute('data-system', system.subsystem_key);
   }
 }
