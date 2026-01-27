@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AccountDashboard } from './account-dashboard';
+import { Permissions } from './permissions';
 
-describe('AccountDashboard', () => {
-  let component: AccountDashboard;
-  let fixture: ComponentFixture<AccountDashboard>;
+describe('Permissions', () => {
+  let component: Permissions;
+  let fixture: ComponentFixture<Permissions>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AccountDashboard]
+      imports: [Permissions]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AccountDashboard);
+    fixture = TestBed.createComponent(Permissions);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

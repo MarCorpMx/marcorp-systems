@@ -35,9 +35,9 @@ export class Topbar {
 
   user = this.auth.getUser();
 
-  system = computed(() => {
+  organization_name = computed(() => {
     const current = this.auth.getCurrentSystem();
-    return current?.subsystem_name ?? '';
+    return current?.organization_name ?? '';
   });
 
   breadcrumbs: string[] = [];

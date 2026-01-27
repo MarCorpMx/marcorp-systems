@@ -1,0 +1,43 @@
+<div class="account-systems">
+
+  <h2>Mis sistemas</h2>
+  <p class="subtitle">
+    Administra los sistemas activos en tu cuenta
+  </p>
+
+  <div class="systems-grid">
+
+    @for (sys of availableSystems; track sys.key) {
+
+      <div class="system-card">
+
+        <div
+          class="icon"
+          [style.background]="sys.color">
+          {{ sys.name.charAt(0) }}
+        </div>
+
+        <div class="info">
+          <h3>{{ sys.name }}</h3>
+          <p>{{ sys.description }}</p>
+        </div>
+
+        @if (hasSystem(sys.key)) {
+          <span class="badge active">
+            Activo
+          </span>
+        } @else {
+          <button
+            (click)="addSystem(sys)"
+            [disabled]="loading() === sys.key">
+            {{ loading() === sys.key ? 'Agregando…' : 'Agregar sistema' }}
+          </button>
+        }
+
+      </div>
+
+    }
+
+  </div>
+
+</div>

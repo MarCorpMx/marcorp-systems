@@ -1,0 +1,127 @@
+<div class="account-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="account-sidebar" [class.open]="sidebarOpen()">
+
+        <div class="sidebar-header">
+            <div class="header-main">
+                <lucide-icon [name]="CircleUser" class="account-icon" size="18"></lucide-icon>
+                <span class="title">{{ organization_name() }}</span>
+            </div>
+
+            <button class="close-btn " (click)="sidebarOpen.set(false)" aria-label="Cerrar menú">
+                <lucide-icon [name]="X" size="20" />
+            </button>
+
+        </div>
+
+        <nav class="menu">
+            <a routerLink="profile" routerLinkActive="active" class="sidebar-item">
+                <lucide-icon [name]="User" size="16" class="sidebar-icon" />
+                <span>Perfil</span>
+            </a>
+
+            <a routerLink="security" routerLinkActive="active" class="sidebar-item">
+                <lucide-icon [name]="Shield" size="16" class="sidebar-icon" />
+                <span>Seguridad</span>
+            </a>
+
+             <a routerLink="notifications" routerLinkActive="active" class="sidebar-item">
+                <lucide-icon [name]="Bell" size="16" class="sidebar-icon" />
+                <span>Notificaciones</span>
+            </a>
+
+            <hr />
+
+            <a routerLink="organizations" routerLinkActive="active" class="sidebar-item">
+                <lucide-icon [name]="Building2" size="16" class="sidebar-icon" />
+                <span>Organizaciones</span>
+            </a>
+
+            <a routerLink="permissions" routerLinkActive="active" class="sidebar-item">
+                <lucide-icon [name]="KeyRound" size="16" class="sidebar-icon" />
+                <span>Permisos</span>
+            </a>
+
+            <hr />
+
+            <a routerLink="subscriptions" routerLinkActive="active" class="sidebar-item">
+                <lucide-icon [name]="Crown" size="16" class="sidebar-icon" />
+                <span>Suscripciones</span>
+            </a>
+
+            <a routerLink="usage" routerLinkActive="active" class="sidebar-item">
+                <lucide-icon [name]="Gauge" size="16" class="sidebar-icon" />
+                <span>Uso y límites</span>
+            </a>
+
+            <a routerLink="billing" routerLinkActive="active" class="sidebar-item">
+                <lucide-icon [name]="CreditCard" size="16" class="sidebar-icon" />
+                <span>Facturación</span>
+            </a>
+
+            <hr />
+
+            <a routerLink="team" routerLinkActive="active" class="sidebar-item">
+                <lucide-icon [name]="Users" size="16" class="sidebar-icon" />
+                <span>Equipo</span>
+            </a>
+
+
+            <hr />
+
+            <a routerLink="support" routerLinkActive="active" class="sidebar-item">
+                <lucide-icon [name]="LifeBuoy" size="16" class="sidebar-icon" />
+                <span>Soporte</span>
+            </a>
+
+            <hr />
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="sidebar-item logout" (click)="logout()">
+                <lucide-icon [name]="LogOut" size="16" />
+                <span>Cerrar sesión</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- OVERLAY (mobile) -->
+    @if(sidebarOpen()){
+    <div class="overlay" (click)="sidebarOpen.set(false)">
+    </div>
+    }
+
+    <!-- CONTENT -->
+    <div class="account-content">
+
+        <!-- TOPBAR -->
+        <header class="account-topbar">
+
+            @if(!sidebarOpen()){
+            <button class="menu-btn mobile-only" (click)="sidebarOpen.set(true)" aria-label="Abrir menú">
+                <lucide-icon [name]="Menu" size="20" />
+            </button>
+            }
+            <!--<button class="menu-btn mobile-only" (click)="sidebarOpen.set(true)">
+                ☰
+            </button>-->
+
+            <h1 class="page-title">
+                {{ pageTitle }}
+            </h1>
+        </header>
+
+        <!-- PAGE -->
+        <main class="page">
+            @if(confirm.visible()){
+            <app-confirm-dialog [title]="confirm.title()" [message]="confirm.message()" (confirm)="confirm.confirm()"
+                (cancel)="confirm.close()">
+            </app-confirm-dialog>
+            }
+            <router-outlet />
+        </main>
+
+    </div>
+
+</div>

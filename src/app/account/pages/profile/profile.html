@@ -1,1 +1,41 @@
-<p>profile works!</p>
+<div class="profile-page">
+
+  <h2>Mi perfil</h2>
+  <p class="subtitle">Administra tu información personal</p>
+
+  <div class="card">
+
+    <div class="avatar">
+      <span>{{ user()?.name?.charAt(0) }}</span>
+    </div>
+
+    <div class="form">
+
+      <div class="field">
+        <label>Nombre</label>
+        <input type="text" [(ngModel)]="user().name" />
+      </div>
+
+      <div class="field">
+        <label>Email</label>
+        <input type="email" [(ngModel)]="user().email" disabled />
+      </div>
+
+      <div class="field">
+        <label>Usuario</label>
+        <input type="text" [(ngModel)]="user().username" disabled />
+      </div>
+
+      <div class="actions">
+        <button
+          (click)="save()"
+          [disabled]="loading()">
+          {{ loading() ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

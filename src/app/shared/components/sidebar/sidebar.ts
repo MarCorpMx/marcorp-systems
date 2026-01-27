@@ -31,6 +31,7 @@ export class Sidebar {
   @Output() close = new EventEmitter<void>();
 
   menu = computed(() => {
+    console.log(this.currentSystem);
     if (!this.currentSystem) return [];
     return SYSTEM_MENUS[this.currentSystem.subsystem_key] || [];
   });
