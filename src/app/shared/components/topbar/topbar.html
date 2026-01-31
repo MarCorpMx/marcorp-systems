@@ -8,14 +8,15 @@
     <!-- LEFT -->
     <div class="left">
         <h1 class="system-name">{{ organization_name() }}</h1>
-
-        @if(breadcrumbs.length){
+        
+        @if(breadcrumbs().length){
         <nav class="breadcrumbs">
-            @for (bc of breadcrumbs; track $index; let last = $last) {
+            <!-- @for (bc of breadcrumbs; track $index; let last = $last) { -->
+             @for (crumb of breadcrumbs(); track crumb) {
             <span>
-                <span class="crumb current">{{ bc }}</span>
+                <span class="crumb current">{{ crumb }}</span>
             </span>
-            @if(!last){
+            @if(!$last){
             <lucide-icon [name]="ChevronRight" size="14" class="separator"></lucide-icon>
             }
             }
@@ -40,11 +41,11 @@
                 Mi cuenta
             </button>
 
-            <button routerLink="/select-system">
+            <button routerLink="/select-system" style="margin-bottom: 4px;" >
                 Cambiar sistema
             </button>
 
-            <hr />
+            <hr style="padding-bottom: 4px;" />
 
             <button class="danger" (click)="logout()">
                 <lucide-icon [name]="LogOut" size="16"></lucide-icon>

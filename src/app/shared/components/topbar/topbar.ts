@@ -4,6 +4,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
+import { BreadcrumbService } from '../../../core/services/breadcrumb.service';
 import {
   LucideAngularModule,
   LogOut,
@@ -28,6 +29,7 @@ export class Topbar {
   private router = inject(Router);
   private confirm = inject(ConfirmDialogService);
   private el = inject(ElementRef);
+  breadcrumbService = inject(BreadcrumbService);
 
   userMenuOpen = signal(false);
 
@@ -40,15 +42,17 @@ export class Topbar {
     return current?.organization_name ?? '';
   });
 
-  breadcrumbs: string[] = [];
+  //breadcrumbs: string[] = [];
+
+  breadcrumbs = this.breadcrumbService.breadcrumbs;
 
   constructor() {
-    this.router.events
+    /*this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
-      .subscribe(() => this.buildBreadcrumbs());
+      .subscribe(() => this.buildBreadcrumbs());*/
   }
 
-  buildBreadcrumbs() {
+  /*buildBreadcrumbs() {
     const url = this.router.url
       .split('?')[0]
       .split('/')
@@ -58,7 +62,31 @@ export class Topbar {
     this.breadcrumbs = url.slice(2).map(v =>
       v.charAt(0).toUpperCase() + v.slice(1)
     );
-  }
+  }*/
+
+
+  /*buildBreadcrumbs() {
+    const urlParts = this.router.url
+      .split('?')[0]
+      .split('/')
+      .filter(Boolean);
+
+    // Ej: ['systems', 'citas', 'dashboard']
+    const routeCrumbs = urlParts.slice(2).map(v =>
+      v.charAt(0).toUpperCase() + v.slice(1)
+    );
+
+    const currentSystem = this.auth.getCurrentSystem();
+
+    if (currentSystem?.subsystem_name) {
+      this.breadcrumbs = [
+        currentSystem.subsystem_name,
+        ...routeCrumbs
+      ];
+    } else {
+      this.breadcrumbs = routeCrumbs;
+    }
+  }*/
 
   toggleUserMenu() {
     this.userMenuOpen.update(v => !v);

@@ -1,0 +1,129 @@
+<section class="space-y-6">
+
+  <!-- ===============================
+       HEADER
+  =============================== -->
+  <div class="flex items-center justify-between">
+    <h2 class="text-xl font-semibold text-[var(--text-primary)]">
+      Equipo
+    </h2>
+
+    <button class="px-4 py-2 rounded-lg
+           bg-[var(--system-primary)]
+           text-white text-sm
+           hover:bg-[var(--system-secondary)]
+           transition">
+      + Invitar miembro
+    </button>
+  </div>
+
+  <!-- ===============================
+       SKELETON
+  =============================== -->
+  @if (loading) {
+    <div class="space-y-3 animate-pulse">
+      <div *ngFor="let _ of [1,2,3]"
+           class="bg-[var(--bg-surface)]
+                  border border-[var(--border-soft)]
+                  rounded-xl p-4 flex items-center justify-between">
+
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 rounded-full bg-[var(--border-soft)]"></div>
+          <div class="space-y-2">
+            <div class="h-4 w-32 bg-[var(--border-soft)] rounded"></div>
+            <div class="h-3 w-24 bg-[var(--border-soft)] rounded"></div>
+          </div>
+        </div>
+
+        <div class="h-6 w-20 bg-[var(--border-soft)] rounded-full"></div>
+      </div>
+    </div>
+  }
+
+  <!-- ===============================
+       EMPTY STATE
+  =============================== -->
+  @else if (!loading && members.length === 0) {
+    <div class="bg-[var(--bg-surface)]
+                border border-dashed border-[var(--border-soft)]
+                rounded-xl p-10 text-center space-y-4">
+
+      <div class="mx-auto w-12 h-12 rounded-full
+           bg-[var(--system-accent)]
+           flex items-center justify-center">
+        <lucide-icon [name]="Users"
+                     class="w-6 h-6 text-[var(--system-secondary)]">
+        </lucide-icon>
+      </div>
+
+      <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+        No hay miembros en el equipo
+      </h3>
+
+      <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+        Invita colaboradores para gestionar citas, clientes y reportes.
+      </p>
+
+      <button class="px-4 py-2 rounded-lg
+             bg-[var(--system-primary)]
+             text-white hover:bg-[var(--system-secondary)]
+             transition">
+        + Invitar primer miembro
+      </button>
+    </div>
+  }
+
+  <!-- ===============================
+       EQUIPO
+  =============================== -->
+  @else {
+    <div class="bg-[var(--bg-surface)]
+                border border-[var(--border-soft)]
+                rounded-xl divide-y divide-[var(--border-soft)]">
+
+      @for (member of members; track member.id) {
+        <div class="px-6 py-4 flex items-center justify-between
+                    hover:bg-[var(--state-hover)]
+                    transition">
+
+          <!-- INFO -->
+          <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-full
+                        bg-[var(--system-accent)]
+                        flex items-center justify-center
+                        text-[var(--system-secondary)]
+                        font-medium">
+              {{ member.name.charAt(0) }}
+            </div>
+
+            <div>
+              <p class="font-medium text-[var(--text-primary)]">
+                {{ member.name }}
+              </p>
+              <p class="text-sm text-[var(--text-secondary)]">
+                {{ member.email }}
+              </p>
+            </div>
+          </div>
+
+          <!-- ROLE + STATUS -->
+          <div class="flex items-center gap-4">
+
+            <span class="px-3 py-1 rounded-full text-sm font-medium"
+                  [ngClass]="getRoleClasses(member.role)">
+              {{ member.role }}
+            </span>
+
+            <span class="px-3 py-1 rounded-full text-sm"
+                  [ngClass]="getStatusClasses(member.status)">
+              {{ member.status }}
+            </span>
+
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
+</section>

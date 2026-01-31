@@ -7,19 +7,38 @@ import { systemAccessGuard } from './core/guards/system-access-guard';
 
 export const routes: Routes = [
   // Default -> auth
+  // ESPAÑOL (UX / Marketing)
+  
+  /*{
+    path: 'iniciar-sesion',
+    loadChildren: () =>
+      import('./auth/auth.routes').then(m => m.AUTH_ROUTES)
+  },
+  {
+    path: 'registrarse',
+    loadChildren: () =>
+      import('./auth/auth.routes').then(m => m.AUTH_ROUTES)
+  },
+  {
+    path: 'recuperar-contrasena',
+    loadChildren: () =>
+      import('./auth/auth.routes').then(m => m.AUTH_ROUTES)
+  },*/
+
+
   {
     path: '',
-    redirectTo: 'auth',
+    redirectTo: 'iniciar-sesion',
     pathMatch: 'full'
   },
-
-  // MÓDULO DE AUTENTICACIÓN (lazy) (login, register, forgot-password)
+  // AUTH (una sola vez)
   {
-    path: 'auth',
+    path: '',
     loadChildren: () =>
-      import('./auth/auth.routes')
-        .then(m => m.AUTH_ROUTES)
+      import('./auth/auth.routes').then(m => m.AUTH_ROUTES)
   },
+
+  // RUTAS PROTEGIDAS
 
   // Datos de cuenta del usuario
   {
@@ -32,7 +51,7 @@ export const routes: Routes = [
 
   // SELECT SYSTEM (cuando un usuario tiene varios sistemas)
   {
-    path: 'select-system',
+    path: 'seleccionar-sistema',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./systems/select-system/select-system')
@@ -41,7 +60,7 @@ export const routes: Routes = [
 
   // SISTEMAS (lazy + protegido [Citas, Escolar, Inventario])
   {
-    path: 'systems',
+    path: 'sistemas',
     canMatch: [authGuard],
     loadChildren: () =>
       import('./systems/systems.routes')
@@ -51,7 +70,7 @@ export const routes: Routes = [
   // RUTA NO EXISTENTE
   {
     path: '**',
-    redirectTo: 'auth'
+    redirectTo: 'iniciar-sesion'
   }
 
 

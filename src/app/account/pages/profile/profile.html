@@ -1,41 +1,108 @@
 <div class="profile-page">
 
+  <!-- HEADER -->
   <h2>Mi perfil</h2>
-  <p class="subtitle">Administra tu información personal</p>
+  <p class="subtitle">
+    Administra tu información personal
+  </p>
 
-  <div class="card">
+  <!-- ===============================
+       SKELETON
+  =============================== -->
+  @if (loading() && !user()) {
+    <div class="card animate-pulse">
+      <div class="avatar bg-[var(--marcorp-border)]"></div>
 
-    <div class="avatar">
-      <span>{{ user()?.name?.charAt(0) }}</span>
+      <div class="form space-y-4 w-full">
+        <div class="field">
+          <div class="h-3 w-20 bg-[var(--marcorp-border)] rounded mb-2"></div>
+          <div class="h-10 w-full bg-[var(--marcorp-border)] rounded"></div>
+        </div>
+
+        <div class="field">
+          <div class="h-3 w-20 bg-[var(--marcorp-border)] rounded mb-2"></div>
+          <div class="h-10 w-full bg-[var(--marcorp-border)] rounded"></div>
+        </div>
+
+        <div class="field">
+          <div class="h-3 w-24 bg-[var(--marcorp-border)] rounded mb-2"></div>
+          <div class="h-10 w-full bg-[var(--marcorp-border)] rounded"></div>
+        </div>
+
+        <div class="actions">
+          <div class="h-10 w-40 bg-[var(--marcorp-border)] rounded"></div>
+        </div>
+      </div>
     </div>
+  }
 
-    <div class="form">
-
-      <div class="field">
-        <label>Nombre</label>
-        <input type="text" [(ngModel)]="user().name" />
-      </div>
-
-      <div class="field">
-        <label>Email</label>
-        <input type="email" [(ngModel)]="user().email" disabled />
-      </div>
-
-      <div class="field">
-        <label>Usuario</label>
-        <input type="text" [(ngModel)]="user().username" disabled />
-      </div>
+  <!-- ===============================
+       EMPTY / ERROR
+  =============================== -->
+  @else if (!loading() && !user()) {
+    <div class="card text-center">
+      <p class="subtitle">
+        No se pudo cargar la información del perfil.
+      </p>
 
       <div class="actions">
-        <button
-          (click)="save()"
-          [disabled]="loading()">
-          {{ loading() ? 'Guardando...' : 'Guardar cambios' }}
+        <button (click)="reload()">
+          Reintentar
         </button>
       </div>
-
     </div>
+  }
 
-  </div>
+  <!-- ===============================
+       PROFILE FORM
+  =============================== -->
+  @else {
+    <div class="card">
+
+      <!-- AVATAR -->
+      <div class="avatar">
+        <span>
+          {{ user()!.name.charAt(0) }}
+        </span>
+      </div>
+
+      <!-- FORM -->
+      <div class="form">
+
+        <div class="field">
+          <label>Nombre</label>
+          <input
+            type="text"
+            [(ngModel)]="form.name"
+            [disabled]="saving()" />
+        </div>
+
+        <div class="field">
+          <label>Email</label>
+          <input
+            type="email"
+            [value]="user()!.email"
+            disabled />
+        </div>
+
+        <div class="field">
+          <label>Usuario</label>
+          <input
+            type="text"
+            [value]="user()!.username"
+            disabled />
+        </div>
+
+        <div class="actions">
+          <button
+            (click)="save()"
+            [disabled]="saving()">
+            {{ saving() ? 'Guardando...' : 'Guardar cambios' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
 
 </div>

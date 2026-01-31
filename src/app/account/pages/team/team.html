@@ -1,1 +1,92 @@
-<p>team works!</p>
+<section class="team-page space-y-6">
+
+  <!-- HEADER -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-xl font-semibold">
+        Equipo
+      </h2>
+      <p class="text-sm text-[var(--text-secondary)]">
+        Administra las personas que tienen acceso a tu negocio
+      </p>
+    </div>
+
+    <button class="btn-primary">
+      + Invitar miembro
+    </button>
+  </div>
+
+  <!-- ===============================
+       SKELETON
+  =============================== -->
+  @if (loading()) {
+    <div class="space-y-3 animate-pulse">
+      <div class="card h-16"></div>
+      <div class="card h-16"></div>
+      <div class="card h-16"></div>
+    </div>
+  }
+
+  <!-- ===============================
+       EMPTY STATE
+  =============================== -->
+  @else if (!hasMembers()) {
+    <div class="card empty">
+      <h3>No hay miembros en el equipo</h3>
+      <p class="muted">
+        Invita a tu equipo para que puedan acceder al sistema.
+      </p>
+
+      <button class="btn-primary">
+        Invitar primer miembro
+      </button>
+    </div>
+  }
+
+  <!-- ===============================
+       TEAM LIST
+  =============================== -->
+  @else {
+    <div class="card list">
+
+      <div class="row header">
+        <span>Usuario</span>
+        <span>Rol</span>
+        <span>Estado</span>
+        <span></span>
+      </div>
+
+      @for (member of members(); track member.id) {
+        <div class="row">
+
+          <div class="user">
+            <div class="avatar">
+              {{ member.name.charAt(0) }}
+            </div>
+
+            <div>
+              <p class="name">{{ member.name }}</p>
+              <p class="email">{{ member.email }}</p>
+            </div>
+          </div>
+
+          <span class="role">
+            {{ roleLabel(member.role) }}
+          </span>
+
+          <span class="status"
+                [ngClass]="statusClass(member.status)">
+            {{ statusLabel(member.status) }}
+          </span>
+
+          <button class="link-btn">
+            Administrar
+          </button>
+
+        </div>
+      }
+
+    </div>
+  }
+
+</section>

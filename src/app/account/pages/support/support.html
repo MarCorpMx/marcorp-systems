@@ -1,1 +1,87 @@
-<p>support works!</p>
+<section class="support-page space-y-6">
+
+  <!-- HEADER -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-xl font-semibold">
+        Soporte
+      </h2>
+      <p class="text-sm text-[var(--text-secondary)]">
+        ¿Necesitas ayuda? Crea o revisa tus solicitudes de soporte
+      </p>
+    </div>
+
+    <button class="btn-primary">
+      + Nuevo ticket
+    </button>
+  </div>
+
+  <!-- ===============================
+       SKELETON
+  =============================== -->
+  @if (loading()) {
+    <div class="space-y-3 animate-pulse">
+      <div class="card h-16"></div>
+      <div class="card h-16"></div>
+      <div class="card h-16"></div>
+    </div>
+  }
+
+  <!-- ===============================
+       EMPTY STATE
+  =============================== -->
+  @else if (!hasTickets()) {
+    <div class="card empty">
+      <h3>No tienes tickets de soporte</h3>
+      <p class="muted">
+        Cuando crees una solicitud de ayuda, aparecerá aquí.
+      </p>
+
+      <button class="btn-primary">
+        Crear primer ticket
+      </button>
+    </div>
+  }
+
+  <!-- ===============================
+       TICKETS LIST
+  =============================== -->
+  @else {
+    <div class="card list">
+
+      <div class="row header">
+        <span>Asunto</span>
+        <span>Categoría</span>
+        <span>Estado</span>
+        <span>Fecha</span>
+      </div>
+
+      @for (ticket of tickets(); track ticket.id) {
+        <div class="row">
+
+          <div class="subject">
+            <p class="title">
+              #{{ ticket.id }} — {{ ticket.subject }}
+            </p>
+          </div>
+
+          <span class="category">
+            {{ categoryLabel(ticket.category) }}
+          </span>
+
+          <span class="status"
+                [ngClass]="statusClass(ticket.status)">
+            {{ statusLabel(ticket.status) }}
+          </span>
+
+          <span class="date">
+            {{ ticket.created_at }}
+          </span>
+
+        </div>
+      }
+
+    </div>
+  }
+
+</section>

@@ -49,12 +49,12 @@ export class AuthService {
     if (systems.length === 1) {
       // Solo un sistema → entrar directo
       this.setCurrentSystem(systems[0]);
-      this.router.navigate([`/systems/${systems[0].subsystem_key}`]);
+      this.router.navigate([`/sistemas/${systems[0].subsystem_key}`]);
       return;
     }
 
     // Más de un sistema → seleccionar
-    this.router.navigate(['/select-system']);
+    this.router.navigate(['/seleccionar-sistema']);
   }
 
   // LOGOUT

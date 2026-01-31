@@ -1,1 +1,127 @@
-<p>billing works!</p>
+<section class="billing-page space-y-8">
+
+  <!-- HEADER -->
+  <div>
+    <h2 class="text-xl font-semibold">
+      Facturación
+    </h2>
+    <p class="text-sm text-[var(--text-secondary)]">
+      Administra tus pagos y facturas
+    </p>
+  </div>
+
+  <!-- ===============================
+       SKELETON
+  =============================== -->
+  @if (loading()) {
+    <div class="space-y-4 animate-pulse">
+
+      <div class="card h-28"></div>
+      <div class="card h-24"></div>
+
+      <div class="card h-40"></div>
+
+    </div>
+  }
+
+  @else {
+
+  <!-- ===============================
+       PLAN ACTUAL
+  =============================== -->
+  <div class="card plan-card">
+    <div>
+      <p class="label">Plan actual</p>
+      <h3 class="plan-name">
+        {{ currentPlan().name }}
+      </h3>
+      <p class="muted">
+        ${{ currentPlan().price }} MXN / {{ currentPlan().interval }}
+      </p>
+    </div>
+
+    <div class="plan-actions">
+      <p class="muted">
+        Próximo pago: {{ currentPlan().nextPayment }}
+      </p>
+
+      <a routerLink="/account/subscriptions"
+         class="btn-primary">
+        Cambiar plan
+      </a>
+    </div>
+  </div>
+
+  <!-- ===============================
+       MÉTODO DE PAGO
+  =============================== -->
+  <div class="card payment-card">
+    <div>
+      <p class="label">Método de pago</p>
+      <p class="method">
+        {{ paymentMethod().brand }} •••• {{ paymentMethod().last4 }}
+      </p>
+      <p class="muted">
+        Expira {{ paymentMethod().expires }}
+      </p>
+    </div>
+
+    <button class="btn-secondary">
+      Actualizar método
+    </button>
+  </div>
+
+  <!-- ===============================
+       FACTURAS
+  =============================== -->
+  <div class="card">
+    <h3 class="section-title">
+      Historial de facturas
+    </h3>
+
+    @if (!hasInvoices()) {
+      <p class="muted text-sm">
+        Aún no tienes facturas generadas.
+      </p>
+    }
+
+    @else {
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th>Factura</th>
+            <th>Fecha</th>
+            <th>Monto</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (invoice of invoices(); track invoice.id) {
+            <tr>
+              <td>{{ invoice.id }}</td>
+              <td>{{ invoice.date }}</td>
+              <td>${{ invoice.amount }} MXN</td>
+              <td>
+                <span class="status"
+                      [ngClass]="statusClass(invoice.status)">
+                  {{ statusLabel(invoice.status) }}
+                </span>
+              </td>
+              <td class="text-right">
+                <button class="link-btn">
+                  Descargar
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+  </div>
+
+  }
+
+</section>

@@ -1,2 +1,132 @@
-<p>dashboard works!</p>
-<button (click)="prueba()">Toch me</button>
+<section class="space-y-6">
+
+  <!-- ========================= -->
+  <!-- KPIs -->
+  <!-- ========================= -->
+
+  @if (loading) {
+
+    <!-- Skeleton KPIs -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      @for (i of [1,2,3,4]; track i) {
+        <div class="animate-pulse bg-[var(--bg-surface)] rounded-xl p-5 border border-[var(--border-soft)]">
+          <div class="h-4 w-24 bg-white/10 rounded"></div>
+          <div class="mt-3 h-8 w-16 bg-white/10 rounded"></div>
+        </div>
+      }
+    </div>
+
+  } @else {
+
+    <!-- KPIs reales -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+
+      <!-- Citas hoy -->
+      <div class="bg-[var(--bg-surface)] rounded-xl p-5 border border-[var(--border-soft)]">
+        <p class="text-sm text-[var(--text-secondary)]">Citas hoy</p>
+        <p class="mt-2 text-3xl font-semibold text-[var(--text-primary)]">12</p>
+      </div>
+
+      <!-- Ingresos -->
+      <div class="bg-[var(--bg-surface)] rounded-xl p-5 border border-[var(--border-soft)]">
+        <p class="text-sm text-[var(--text-secondary)]">Ingresos</p>
+        <p class="mt-2 text-3xl font-semibold text-[var(--system-primary)]">
+          $4,800
+        </p>
+      </div>
+
+      <!-- No asistieron -->
+      <div class="bg-[var(--bg-surface)] rounded-xl p-5 border border-[var(--border-soft)]">
+        <p class="text-sm text-[var(--text-secondary)]">No asistieron</p>
+        <p class="mt-2 text-3xl font-semibold text-red-400">2</p>
+      </div>
+
+      <!-- Próxima cita -->
+      <div class="bg-[var(--bg-surface)] rounded-xl p-5 border border-[var(--border-soft)]">
+        <p class="text-sm text-[var(--text-secondary)]">Siguiente cita</p>
+        <p class="mt-2 text-lg font-medium text-[var(--text-primary)]">
+          10:30 · Ana López
+        </p>
+        <p class="text-sm text-[var(--text-secondary)]">
+          Psicoterapia individual
+        </p>
+      </div>
+
+    </div>
+  }
+
+  <!-- ========================= -->
+  <!-- AGENDA DE HOY -->
+  <!-- ========================= -->
+
+  @if (!hasAppointmentsToday && !loading) {
+
+    <!-- Estado vacío -->
+    <div class="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-soft)] p-8 text-center">
+      <p class="text-lg font-medium text-[var(--text-primary)]">
+        No tienes citas programadas hoy
+      </p>
+      <p class="mt-1 text-sm text-[var(--text-secondary)]">
+        Puedes aprovechar para organizar tu agenda o agregar una nueva cita.
+      </p>
+
+      <button
+        class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg
+               bg-[var(--system-primary)] text-black font-medium
+               hover:opacity-90 transition">
+        + Nueva cita
+      </button>
+    </div>
+
+  } @else if (!loading) {
+
+    <!-- Agenda normal -->
+    <div class="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-soft)]">
+
+      <div class="px-6 py-4 border-b border-[var(--border-soft)]">
+        <h3 class="font-semibold text-[var(--text-primary)]">
+          Agenda de hoy
+        </h3>
+      </div>
+
+      <ul class="divide-y divide-[var(--border-soft)]">
+
+        <!-- Item -->
+        <li class="px-6 py-4 flex items-center justify-between hover:bg-[var(--state-hover)] transition">
+          <div>
+            <p class="font-medium text-[var(--text-primary)]">
+              10:00 · Ana López
+            </p>
+            <p class="text-sm text-[var(--text-secondary)]">
+              Psicoterapia individual
+            </p>
+          </div>
+
+          <span class="text-xs px-2 py-1 rounded-full
+                       bg-emerald-500/10 text-emerald-400">
+            Confirmada
+          </span>
+        </li>
+
+        <!-- Otro -->
+        <li class="px-6 py-4 flex items-center justify-between hover:bg-[var(--state-hover)] transition">
+          <div>
+            <p class="font-medium text-[var(--text-primary)]">
+              11:30 · Juan Pérez
+            </p>
+            <p class="text-sm text-[var(--text-secondary)]">
+              Terapia de pareja
+            </p>
+          </div>
+
+          <span class="text-xs px-2 py-1 rounded-full
+                       bg-yellow-500/10 text-yellow-400">
+            Pendiente
+          </span>
+        </li>
+
+      </ul>
+    </div>
+  }
+
+</section>

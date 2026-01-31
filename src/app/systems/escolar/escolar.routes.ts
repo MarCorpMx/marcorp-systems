@@ -16,7 +16,10 @@ export const ESCOLAR_ROUTES: Routes = [
         path: 'dashboard',
         loadComponent: () =>
           import('./pages/dashboard/dashboard')
-            .then(m => m.Dashboard)
+            .then(m => m.Dashboard),
+            data: {
+          breadcrumb: 'Dashboard'
+        },
       }
     ]
   }

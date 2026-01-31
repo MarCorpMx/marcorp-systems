@@ -1,1 +1,100 @@
-<p>permissions works!</p>
+<section class="permissions-page space-y-6">
+
+  <!-- HEADER -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-xl font-semibold">
+        Permisos
+      </h2>
+      <p class="text-sm text-[var(--text-secondary)]">
+        Controla qué puede hacer cada rol dentro de la organización
+      </p>
+    </div>
+
+    <button class="btn-primary" (click)="createRole()">
+      + Nuevo rol
+    </button>
+  </div>
+
+  <!-- ===============================
+       SKELETON
+  =============================== -->
+  @if (loading()) {
+    <div class="space-y-4 animate-pulse">
+      <div *ngFor="let _ of [1,2,3]"
+           class="bg-[var(--bg-surface)]
+                  border border-[var(--border-soft)]
+                  rounded-xl p-5 space-y-3">
+
+        <div class="h-4 w-40 bg-[var(--border-soft)] rounded"></div>
+        <div class="h-3 w-64 bg-[var(--border-soft)] rounded"></div>
+        <div class="h-3 w-full bg-[var(--border-soft)] rounded"></div>
+      </div>
+    </div>
+  }
+
+  <!-- ===============================
+       EMPTY
+  =============================== -->
+  @else if (!hasData()) {
+    <div class="bg-[var(--bg-surface)]
+                border border-dashed border-[var(--border-soft)]
+                rounded-xl p-10 text-center space-y-4">
+
+      <h3 class="text-lg font-semibold">
+        No hay roles creados
+      </h3>
+
+      <p class="text-sm text-[var(--text-secondary)]">
+        Crea roles para definir permisos dentro del sistema.
+      </p>
+
+      <button class="btn-primary" (click)="createRole()">
+        Crear rol
+      </button>
+    </div>
+  }
+
+  <!-- ===============================
+       ROLES
+  =============================== -->
+  @else {
+    <div class="space-y-5">
+      @for (role of roles(); track role.id) {
+
+        <div class="role-card
+                    bg-[var(--bg-surface)]
+                    border border-[var(--border-soft)]
+                    rounded-xl p-5 space-y-4">
+
+          <!-- Role header -->
+          <div>
+            <h3 class="font-semibold">
+              {{ role.name }}
+            </h3>
+            <p class="text-xs text-[var(--text-secondary)]">
+              {{ role.description }}
+            </p>
+          </div>
+
+          <!-- Permissions -->
+          <div class="permissions-list space-y-2">
+            @for (perm of role.permissions; track perm.key) {
+              <label class="permission-item">
+                <input
+                  type="checkbox"
+                  [checked]="perm.enabled"
+                  (change)="togglePermission(role, perm)" />
+
+                <span>{{ perm.label }}</span>
+              </label>
+            }
+          </div>
+
+        </div>
+
+      }
+    </div>
+  }
+
+</section>

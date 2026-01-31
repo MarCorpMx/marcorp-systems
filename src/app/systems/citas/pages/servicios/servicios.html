@@ -1,0 +1,135 @@
+<section class="space-y-6">
+
+  <!-- ===============================
+       HEADER
+  =============================== -->
+  <div class="flex items-center justify-between">
+    <h2 class="text-xl font-semibold text-[var(--text-primary)]">
+      Servicios
+    </h2>
+
+    <button class="inline-flex items-center gap-2
+           px-4 py-2 rounded-lg
+           bg-[var(--system-primary)]
+           text-white text-sm
+           hover:bg-[var(--system-secondary)]
+           transition">
+
+      <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
+      Nuevo servicio
+    </button>
+  </div>
+
+  <!-- ===============================
+       SKELETON
+  =============================== -->
+  @if (loading) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
+      @for (_ of [1,2,3]; track _) {
+        <div class="bg-[var(--bg-surface)]
+                    border border-[var(--border-soft)]
+                    rounded-xl p-5 space-y-4">
+          <div class="h-5 w-40 bg-[var(--border-soft)] rounded"></div>
+          <div class="h-4 w-28 bg-[var(--border-soft)] rounded"></div>
+          <div class="h-4 w-full bg-[var(--border-soft)] rounded"></div>
+          <div class="h-8 w-20 bg-[var(--border-soft)] rounded"></div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ===============================
+       EMPTY STATE
+  =============================== -->
+  @else if (!loading && services.length === 0) {
+    <div class="bg-[var(--bg-surface)]
+         border border-dashed border-[var(--border-soft)]
+         rounded-xl p-10 text-center space-y-4">
+
+      <div class="mx-auto w-12 h-12 rounded-full
+           bg-[var(--system-accent)]
+           flex items-center justify-center">
+        <lucide-icon [name]="Palette" class="w-6 h-6 text-[var(--system-secondary)]"></lucide-icon>
+      </div>
+
+      <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+        Aún no tienes servicios
+      </h3>
+
+      <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+        Crea servicios para poder agendar citas y definir duración, precio y modalidad.
+      </p>
+
+      <button class="inline-flex items-center gap-2
+             px-4 py-2 rounded-lg
+             bg-[var(--system-primary)]
+             text-white
+             hover:bg-[var(--system-secondary)]
+             transition">
+        <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
+        Crear primer servicio
+      </button>
+    </div>
+  }
+
+  <!-- ===============================
+       SERVICES GRID
+  =============================== -->
+  @else {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+      @for (service of services; track service.id) {
+        <div class="bg-[var(--bg-surface)]
+                    border border-[var(--border-soft)]
+                    rounded-xl p-5 space-y-3
+                    hover:shadow-soft transition">
+
+          <!-- Header -->
+          <div class="flex items-center justify-between">
+            <p class="font-medium text-[var(--text-primary)]">
+              {{ service.name }}
+            </p>
+
+            <span class="w-4 h-4 rounded-full"
+                  [style.background]="service.color">
+            </span>
+          </div>
+
+          <!-- Meta -->
+          <div class="space-y-1 text-sm text-[var(--text-secondary)]">
+
+            <div class="flex items-center gap-2">
+              <lucide-icon [name]="Clock" class="w-4 h-4"></lucide-icon>
+              {{ service.duration }} min
+            </div>
+
+            <div class="flex items-center gap-2">
+              <lucide-icon [name]="DollarSign" class="w-4 h-4"></lucide-icon>
+              ${{ service.price }}
+            </div>
+
+            <div class="flex items-center gap-2">
+              <lucide-icon
+                [name]="getModeIcon(service.mode)"
+                class="w-4 h-4">
+              </lucide-icon>
+
+              {{ getModeLabel(service.mode) }}
+            </div>
+
+          </div>
+
+          <!-- Actions -->
+          <div class="pt-2">
+            <button class="text-sm text-[var(--system-primary)] hover:underline">
+              Editar servicio
+            </button>
+          </div>
+
+        </div>
+      }
+
+    </div>
+  }
+
+</section>

@@ -1,0 +1,63 @@
+.notifications-page {
+  max-width: 860px;
+}
+
+h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  color: var(--marcorp-text-muted);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--marcorp-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.option-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: .75rem;
+  border-top: 1px solid var(--marcorp-border);
+}
+
+.option-row:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.info {
+  flex: 1;
+}
+
+.channels {
+  display: flex;
+  gap: .75rem;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .8rem;
+  cursor: pointer;
+}
+
+.toggle input {
+  accent-color: var(--system-primary, var(--marcorp-primary));
+}
+
+/* .actions {
+  margin-top: 1.5rem;
+} */

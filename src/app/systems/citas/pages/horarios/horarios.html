@@ -1,0 +1,151 @@
+<section class="space-y-8">
+
+  <!-- ===============================
+       HEADER
+  =============================== -->
+  <div class="flex items-center justify-between">
+    <h2 class="text-xl font-semibold text-[var(--text-primary)]">
+      Horarios
+    </h2>
+  </div>
+
+  <!-- ===============================
+       SKELETON
+  =============================== -->
+  @if (loading) {
+    <div class="space-y-4 animate-pulse">
+      @for (_ of [1,2,3]; track _) {
+        <div class="bg-[var(--bg-surface)]
+                    border border-[var(--border-soft)]
+                    rounded-xl p-6 space-y-4">
+          <div class="h-5 w-32 bg-[var(--border-soft)] rounded"></div>
+          <div class="h-4 w-full bg-[var(--border-soft)] rounded"></div>
+          <div class="h-4 w-2/3 bg-[var(--border-soft)] rounded"></div>
+        </div>
+      }
+    </div>
+  }
+
+  @else {
+
+  <!-- ===============================
+       HORARIO SEMANAL
+  =============================== -->
+  <div class="space-y-4">
+    <h3 class="font-semibold text-[var(--text-primary)]">
+      Horario semanal
+    </h3>
+
+    <div class="space-y-3">
+
+      @for (day of schedule; track day.day) {
+        <div class="bg-[var(--bg-surface)]
+                    border border-[var(--border-soft)]
+                    rounded-xl p-5 space-y-3">
+
+          <!-- Day header -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="font-medium text-[var(--text-primary)]">
+                {{ day.day }}
+              </span>
+
+              @if (!day.enabled) {
+                <span class="text-sm text-[var(--text-disabled)]">
+                  Cerrado
+                </span>
+              }
+            </div>
+
+            <button class="text-sm text-[var(--system-primary)] hover:underline">
+              Editar
+            </button>
+          </div>
+
+          <!-- Blocks -->
+          @if (day.enabled) {
+            <div class="space-y-2 text-sm">
+
+              <div class="flex items-center gap-2 text-[var(--text-secondary)]">
+                <lucide-icon [name]="Clock" class="w-4 h-4"></lucide-icon>
+                @for (block of day.blocks; track block.start) {
+                  <span>{{ block.start }} – {{ block.end }}</span>
+                }
+              </div>
+
+              <!-- Breaks -->
+              @if (day.breaks.length) {
+                <div class="flex items-center gap-2 text-[var(--text-secondary)]">
+                  <lucide-icon [name]="Coffee" class="w-4 h-4"></lucide-icon>
+                  @for (br of day.breaks; track br.start) {
+                    <span>{{ br.start }} – {{ br.end }}</span>
+                  }
+                </div>
+              }
+
+            </div>
+          }
+
+        </div>
+      }
+
+    </div>
+  </div>
+
+  <!-- ===============================
+       EXCEPCIONES
+  =============================== -->
+  <div class="space-y-4">
+    <div class="flex items-center justify-between">
+      <h3 class="font-semibold text-[var(--text-primary)]">
+        Excepciones
+      </h3>
+
+      <button class="inline-flex items-center gap-2
+             text-sm text-[var(--system-primary)]
+             hover:underline">
+        <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
+        Agregar excepción
+      </button>
+    </div>
+
+    <div class="space-y-3">
+
+      @for (ex of exceptions; track ex.date) {
+        <div class="bg-[var(--bg-surface)]
+                    border border-[var(--border-soft)]
+                    rounded-xl p-5 flex items-center justify-between">
+
+          <div class="space-y-1">
+            <p class="font-medium text-[var(--text-primary)]">
+              {{ ex.date }}
+            </p>
+
+            @if (ex.closed) {
+              <p class="text-sm text-red-400 flex items-center gap-2">
+                <lucide-icon [name]="CalendarX" class="w-4 h-4"></lucide-icon>
+                Cerrado
+              </p>
+            }
+
+            @if (!ex.closed && ex.blocks?.length) {
+              <p class="text-sm text-[var(--text-secondary)]">
+                @for (b of ex.blocks; track b.start) {
+                  {{ b.start }} – {{ b.end }}
+                }
+              </p>
+            }
+          </div>
+
+          <button class="text-sm text-[var(--system-primary)] hover:underline">
+            Editar
+          </button>
+        </div>
+      }
+
+    </div>
+  </div>
+
+  }
+
+</section>

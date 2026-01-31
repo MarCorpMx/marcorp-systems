@@ -1,1 +1,158 @@
-<p>agenda works!</p>
+<section class="space-y-6">
+
+    <!-- ===============================
+       HEADER
+  =============================== -->
+    <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold text-[var(--text-primary)]">
+            Agenda
+        </h2>
+
+        <button class="px-4 py-2 rounded-lg
+             bg-[var(--system-primary)]
+             text-white text-sm
+             hover:bg-[var(--system-secondary)]
+             transition">
+            + Nueva cita
+        </button>
+    </div>
+
+    <!-- ===============================
+       SKELETON
+  =============================== -->
+    @if (loading) {
+    <div class="bg-[var(--bg-surface)]
+                border border-[var(--border-soft)]
+                rounded-xl p-6 animate-pulse">
+
+        <div class="grid grid-cols-[64px_1fr] gap-6">
+
+            <!-- Horas -->
+            <div class="space-y-8">
+                <div class="h-4 bg-[var(--border-soft)] rounded"></div>
+                <div class="h-4 bg-[var(--border-soft)] rounded"></div>
+                <div class="h-4 bg-[var(--border-soft)] rounded"></div>
+                <div class="h-4 bg-[var(--border-soft)] rounded"></div>
+            </div>
+
+            <!-- Bloques -->
+            <div class="space-y-4">
+                <div class="h-20 bg-[var(--bg-surface-soft)] rounded-xl"></div>
+                <div class="h-20 bg-[var(--bg-surface-soft)] rounded-xl"></div>
+                <div class="h-16 bg-[var(--bg-surface-soft)] rounded-xl"></div>
+            </div>
+
+        </div>
+    </div>
+    }
+
+    <!-- ===============================
+       EMPTY STATE
+  =============================== -->
+    @else if (!loading && appointments.length === 0) {
+    <div class="bg-[var(--bg-surface)]
+             border border-dashed border-[var(--border-soft)]
+             rounded-xl p-10 text-center space-y-4">
+
+        <div class="mx-auto w-12 h-12 rounded-full
+               bg-[var(--system-accent)]
+               flex items-center justify-center
+               text-[var(--system-secondary)] text-xl">
+            <lucide-icon [name]="Calendar" class="w-6 h-6 text-[var(--system-secondary)]" class="w-6 h-6
+           text-[var(--system-secondary)]
+           group-hover:scale-110
+           transition">
+            </lucide-icon>
+        </div>
+
+        <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+            Aún no tienes citas
+        </h3>
+
+        <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+            Agenda tu primera cita para organizar tu día y reducir ausencias.
+        </p>
+
+        <button class="inline-flex items-center gap-2
+               px-4 py-2 rounded-lg
+               bg-[var(--system-primary)]
+               text-white
+               hover:bg-[var(--system-secondary)]
+               transition">
+            + Agendar primera cita
+        </button>
+    </div>
+    }
+
+    <!-- ===============================
+       AGENDA CON DATOS
+  =============================== -->
+    @else {
+
+    <div class="bg-[var(--bg-surface)]
+                border border-[var(--border-soft)]
+                rounded-xl divide-y divide-[var(--border-soft)]">
+
+        @for (item of appointments; track item.time) {
+
+        <div class="px-6 py-4 flex items-center justify-between
+           hover:bg-[var(--state-hover)]
+           transition">
+
+            <!-- INFO -->
+            <div class="space-y-1">
+                <p class="font-medium text-[var(--text-primary)]">
+                    {{ item.time }} · {{ item.client }}
+                </p>
+
+                <p class="text-sm text-[var(--text-secondary)]">
+                    {{ item.service }}
+                </p>
+
+                <!-- RECORDATORIOS -->
+                <div class="flex items-center gap-3 mt-1 text-[var(--text-secondary)]">
+
+                    @if (item.reminders?.whatsapp) {
+                    <lucide-icon [name]="MessageCircle" class="w-4 h-4" [class.text-green-400]="item.reminders?.sent"
+                        [class.opacity-50]="!item.reminders?.sent" title="Recordatorio por WhatsApp">
+                    </lucide-icon>
+                    }
+
+                    @if (item.reminders?.email) {
+                    <lucide-icon [name]="Mail" class="w-4 h-4" [class.text-blue-400]="item.reminders?.sent"
+                        [class.opacity-50]="!item.reminders?.sent" title="Recordatorio por Email">
+                    </lucide-icon>
+                    }
+
+                    <!-- Estado de envío -->
+                    @if (item.reminders && !item.reminders.sent) {
+                    <lucide-icon [name]="Clock" class="w-4 h-4 opacity-50" title="Pendiente de enviar">
+                    </lucide-icon>
+                    }
+
+                    @if (item.reminders?.sent) {
+                    <lucide-icon [name]="Check" class="w-4 h-4 text-green-400" title="Recordatorios enviados">
+                    </lucide-icon>
+                    }
+
+                </div>
+            </div>
+
+            <!-- STATUS -->
+            <span class="inline-flex items-center gap-2
+             px-3 py-1 rounded-full text-sm font-medium" [ngClass]="getStatusClasses(item.status)">
+
+                <lucide-icon [name]="getStatusIcon(item.status)" class="w-4 h-4">
+                </lucide-icon>
+
+                {{ getStatusLabel(item.status) }}
+            </span>
+
+        </div>
+
+        }
+
+    </div>
+    }
+
+</section>

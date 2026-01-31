@@ -1,0 +1,136 @@
+<section class="space-y-6">
+
+  <!-- HEADER -->
+  <div class="flex items-center justify-between">
+    <h2 class="text-xl font-semibold text-[var(--text-primary)]">
+      Reporte de Citas
+    </h2>
+
+    <button class="px-4 py-2 rounded-lg
+           border border-[var(--border-soft)]
+           text-sm hover:bg-[var(--bg-hover)]
+           transition">
+      Exportar
+    </button>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="flex flex-wrap gap-4">
+
+    <input type="date"
+           class="px-3 py-2 rounded-lg border border-[var(--border-soft)] text-sm">
+
+    <input type="date"
+           class="px-3 py-2 rounded-lg border border-[var(--border-soft)] text-sm">
+
+    <select class="px-3 py-2 rounded-lg border border-[var(--border-soft)] text-sm">
+      <option value="">Estado</option>
+      <option>Confirmada</option>
+      <option>Completada</option>
+      <option>Cancelada</option>
+      <option>No asistió</option>
+    </select>
+
+    <select class="px-3 py-2 rounded-lg border border-[var(--border-soft)] text-sm">
+      <option value="">Servicio</option>
+      <option>Terapia individual</option>
+      <option>Terapia de pareja</option>
+    </select>
+
+  </div>
+
+  <!-- ===============================
+       SKELETON TABLE
+  =============================== -->
+  @if (loading) {
+    <div class="bg-[var(--bg-surface)] border border-[var(--border-soft)]
+                rounded-xl overflow-hidden animate-pulse">
+
+      <div class="grid grid-cols-7 gap-4 p-4 border-b border-[var(--border-soft)]">
+        <div *ngFor="let _ of [1,2,3,4,5,6,7]"
+             class="h-4 bg-[var(--border-soft)] rounded"></div>
+      </div>
+
+      <div *ngFor="let _ of [1,2,3]"
+           class="grid grid-cols-7 gap-4 p-4">
+        <div *ngFor="let __ of [1,2,3,4,5,6,7]"
+             class="h-3 bg-[var(--border-soft)] rounded"></div>
+      </div>
+
+    </div>
+  }
+
+  <!-- ===============================
+       EMPTY STATE
+  =============================== -->
+  @else if (!loading && appointments.length === 0) {
+    <div class="bg-[var(--bg-surface)]
+                border border-dashed border-[var(--border-soft)]
+                rounded-xl p-10 text-center space-y-4">
+
+      <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+        No hay citas en este período
+      </h3>
+
+      <p class="text-sm text-[var(--text-secondary)]">
+        Ajusta los filtros para ver resultados.
+      </p>
+    </div>
+  }
+
+  <!-- ===============================
+       TABLE
+  =============================== -->
+  @else {
+    <div class="bg-[var(--bg-surface)]
+                border border-[var(--border-soft)]
+                rounded-xl overflow-hidden">
+
+      <table class="w-full text-sm">
+        <thead class="bg-[var(--bg-hover)] text-[var(--text-secondary)]">
+          <tr>
+            <th class="px-4 py-3 text-left">Fecha</th>
+            <th class="px-4 py-3 text-left">Hora</th>
+            <th class="px-4 py-3 text-left">Cliente</th>
+            <th class="px-4 py-3 text-left">Servicio</th>
+            <th class="px-4 py-3 text-left">Estado</th>
+            <th class="px-4 py-3 text-right">Precio</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (a of appointments; track a.id) {
+            <tr class="border-t border-[var(--border-soft)]
+                       hover:bg-[var(--bg-hover)] transition">
+              <td class="px-4 py-3">{{ a.date }}</td>
+              <td class="px-4 py-3">{{ a.time }}</td>
+              <td class="px-4 py-3">{{ a.client }}</td>
+              <td class="px-4 py-3">{{ a.service }}</td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-1 rounded-full text-xs font-medium"
+                      [ngClass]="getStatusClasses(a.status)">
+                  {{ getStatusLabel(a.status) }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-right font-medium">
+                ${{ a.price }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- FOOTER -->
+      <div class="flex justify-end p-4 border-t border-[var(--border-soft)]">
+        <p class="text-sm text-[var(--text-secondary)]">
+          Total ingresado:
+          <span class="font-semibold text-[var(--text-primary)]">
+            ${{ totalAmount }}
+          </span>
+        </p>
+      </div>
+
+    </div>
+  }
+
+</section>

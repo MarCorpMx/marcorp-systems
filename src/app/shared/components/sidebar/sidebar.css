@@ -19,7 +19,7 @@
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
-    top: var(--topbar-height); 
+    /* top: var(--topbar-height);  */
     height: calc(100vh - var(--topbar-height));
     left: 0;
     width: 260px;
@@ -55,7 +55,10 @@
 .sidebar-header {
   display: flex;
   gap: 1rem;
-  margin-bottom: 2rem;
+  
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.8rem; 
+  border-bottom: 1px solid var(--marcorp-border) !important;
 
   .logo {
     width: 40px;
@@ -135,8 +138,41 @@
   display: block;
 }
 
+
+.close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+
+  background: var(--marcorp-bg-soft);
+  color: var(--marcorp-text-muted);
+
+  border: 1px solid var(--marcorp-border);
+  cursor: pointer;
+
+  transition: all .2s ease;
+}
+
+.close-btn:hover {
+  background: rgba(24, 196, 143, 0.12); /* verde marca */
+  color: var(--marcorp-primary);
+  border-color: var(--marcorp-primary);
+}
+
+.close-btn {
+  display: none !important;
+}
+
 @media (max-width: 768px) {
   .desktop-only {
     display: none;
+  }
+
+  .close-btn {
+    display: flex !important;
   }
 }

@@ -1,48 +1,51 @@
-
-
 .system-layout {
   display: flex;
   min-height: 100vh;
   background: var(--marcorp-bg-dark);
-  overflow: hidden;
 
   --topbar-height: 64px;
-}
+} 
 
-/* ===== Sidebar ===== */
+/* ======================
+   SIDEBAR
+====================== */
 app-sidebar {
   width: 260px;
   flex-shrink: 0;
 }
 
-.sidebar-overlay {
-  position: fixed;
-  top: var(--topbar-height);
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 900;
-}
-
+/* ======================
+   MAIN
+====================== */
 .system-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0;  /* IMPORTANTE!!! para móviles */
+  height: 100vh;
+  overflow: hidden; /* evita doble scroll */
+
+  min-width: 0;
 }
 
-/*.system-content {
-  padding: 1.5rem;
-  background: var(--marcorp-bg);
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 1.5rem;
-}*/
+/* ======================
+   TOPBAR (FIJO)
+====================== */
+app-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  /* background: var(--surface); */
+}
 
+/* ======================
+   CONTENT (SCROLL)
+====================== */
 .system-content {
   flex: 1;
-  padding: 1.5rem;
-  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 1rem;
 }
+
 
 /* Moviles */
 @media (max-width: 768px) {
@@ -79,5 +82,3 @@ app-sidebar {
     width: 100%;
   }
 }
-
-

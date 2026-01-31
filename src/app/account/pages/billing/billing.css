@@ -1,0 +1,116 @@
+.billing-page {
+  max-width: 900px;
+}
+
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+.label {
+  font-size: .75rem;
+  color: var(--text-secondary);
+}
+
+.plan-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.plan-name {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.plan-actions {
+  text-align: right;
+}
+
+.payment-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.method {
+  font-weight: 500;
+}
+
+.muted {
+  color: var(--text-secondary);
+  font-size: .85rem;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .85rem;
+
+  th {
+    text-align: left;
+    color: var(--text-secondary);
+    font-weight: 500;
+    padding-bottom: .5rem;
+  }
+
+  td {
+    padding: .6rem 0;
+    border-top: 1px solid var(--border-soft);
+  }
+}
+
+.status {
+  padding: .2rem .6rem;
+  border-radius: 999px;
+  font-size: .7rem;
+  font-weight: 600;
+}
+
+.status.paid {
+  background: rgba(16,185,129,.15);
+  color: #10b981;
+}
+
+.status.pending {
+  background: rgba(245,158,11,.15);
+  color: #f59e0b;
+}
+
+.status.failed {
+  background: rgba(239,68,68,.15);
+  color: #ef4444;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--system-primary, var(--marcorp-primary));
+  font-size: .8rem;
+  cursor: pointer;
+}
+
+.btn-primary {
+  padding: .5rem 1rem;
+  border-radius: 10px;
+  background: var(--system-primary, var(--marcorp-primary));
+  color: #002b1f;
+  text-decoration: none;
+}
+
+.btn-secondary {
+  padding: .45rem .9rem;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  cursor: pointer;
+}

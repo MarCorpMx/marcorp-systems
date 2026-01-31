@@ -1,6 +1,35 @@
-
-citas-layout trabajando
-
-<main class="system-content">
+<!-- <main class="system-content">
     <router-outlet></router-outlet>
-</main>
+</main> -->
+
+<section class="citas-layout w-full h-full">
+
+  <!-- CONTENEDOR -->
+  <div class="max-w-7xl mx-auto px-4 md:px-6 py-6">
+
+    <!-- HEADER DE CONTEXTO (dinámico por página) -->
+    @if (layout.header()) {
+      <header class="mb-6">
+        <h1 class="text-xl font-semibold text-[var(--text-primary)]">
+          {{ layout.header()!.title }}
+        </h1>
+
+        @if (layout.header()!.subtitle) {
+          <p class="text-sm text-[var(--text-secondary)]">
+            {{ layout.header()!.subtitle }}
+          </p>
+        }
+      </header>
+    }
+
+    <!-- CONTENIDO -->
+    <div class="citas-content">
+      <router-outlet />
+    </div>
+
+  </div>
+
+</section>
+
+
+

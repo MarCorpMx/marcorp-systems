@@ -1,0 +1,157 @@
+<section class="space-y-8">
+
+  <!-- ===============================
+       HEADER
+  =============================== -->
+  <div class="flex items-center justify-between">
+    <h2 class="text-xl font-semibold text-[var(--text-primary)]">
+      Recordatorios
+    </h2>
+
+    <button class="inline-flex items-center gap-2
+           px-4 py-2 rounded-lg
+           bg-[var(--system-primary)]
+           text-white text-sm
+           hover:bg-[var(--system-secondary)]
+           transition">
+      <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
+      Nueva plantilla
+    </button>
+  </div>
+
+  <!-- ===============================
+       CANALES
+  =============================== -->
+  <div class="bg-[var(--bg-surface)]
+              border border-[var(--border-soft)]
+              rounded-xl p-6 space-y-4">
+
+    <h3 class="font-semibold text-[var(--text-primary)]">
+      Canales activos
+    </h3>
+
+    <div class="flex gap-4 flex-wrap">
+
+      <!-- WhatsApp -->
+      <div class="flex items-center gap-2 px-4 py-2 rounded-lg
+                  border border-[var(--border-soft)]">
+        <lucide-icon [name]="MessageCircle"
+                     class="w-5 h-5 text-green-400"></lucide-icon>
+        <span class="text-sm text-[var(--text-primary)]">WhatsApp</span>
+      </div>
+
+      <!-- Email -->
+      <div class="flex items-center gap-2 px-4 py-2 rounded-lg
+                  border border-[var(--border-soft)]">
+        <lucide-icon [name]="Mail"
+                     class="w-5 h-5 text-blue-400"></lucide-icon>
+        <span class="text-sm text-[var(--text-primary)]">Email</span>
+      </div>
+
+      <!-- SMS locked -->
+      <div class="flex items-center gap-2 px-4 py-2 rounded-lg
+                  border border-dashed border-[var(--border-soft)]
+                  feature-locked">
+        <lucide-icon [name]="Bell"
+                     class="w-5 h-5"></lucide-icon>
+        <span class="text-sm">SMS</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===============================
+       SKELETON
+  =============================== -->
+  @if (loading) {
+    <div class="space-y-4 animate-pulse">
+      @for (_ of [1,2,3]; track _) {
+        <div class="bg-[var(--bg-surface)]
+                    border border-[var(--border-soft)]
+                    rounded-xl p-5 space-y-3">
+          <div class="h-5 w-48 bg-[var(--border-soft)] rounded"></div>
+          <div class="h-4 w-32 bg-[var(--border-soft)] rounded"></div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ===============================
+       EMPTY STATE
+  =============================== -->
+  @else if (!loading && templates.length === 0) {
+    <div class="bg-[var(--bg-surface)]
+             border border-dashed border-[var(--border-soft)]
+             rounded-xl p-10 text-center space-y-4">
+
+      <lucide-icon [name]="Bell"
+                   class="w-10 h-10 mx-auto text-[var(--system-accent)]"></lucide-icon>
+
+      <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+        No tienes plantillas
+      </h3>
+
+      <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+        Crea plantillas para reducir ausencias y automatizar tu agenda.
+      </p>
+
+      <button class="px-4 py-2 rounded-lg
+             bg-[var(--system-primary)]
+             text-white hover:bg-[var(--system-secondary)] transition">
+        Crear primera plantilla
+      </button>
+    </div>
+  }
+
+  <!-- ===============================
+       PLANTILLAS
+  =============================== -->
+  @else {
+
+    <div class="space-y-4">
+
+      @for (tpl of templates; track tpl.id) {
+        <div class="bg-[var(--bg-surface)]
+                    border border-[var(--border-soft)]
+                    rounded-xl p-5 flex items-center justify-between">
+
+          <div class="space-y-1">
+            <p class="font-medium text-[var(--text-primary)]">
+              {{ tpl.name }}
+            </p>
+
+            <div class="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+              <lucide-icon [name]="getChannelIcon(tpl.channel)"
+                           class="w-4 h-4"></lucide-icon>
+              {{ getChannelLabel(tpl.channel) }}
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4">
+
+            <!-- Estado -->
+            <span class="inline-flex items-center gap-1 text-sm"
+                  [class.text-green-400]="tpl.active"
+                  [class.text-[var(--text-disabled)]]="!tpl.active">
+
+              <lucide-icon
+                [name]="tpl.active ? CheckCircle : XCircle"
+                class="w-4 h-4">
+              </lucide-icon>
+
+              {{ tpl.active ? 'Activa' : 'Inactiva' }}
+            </span>
+
+            <button class="text-sm text-[var(--system-primary)] hover:underline">
+              Editar
+            </button>
+
+          </div>
+
+        </div>
+      }
+
+    </div>
+  }
+
+</section>

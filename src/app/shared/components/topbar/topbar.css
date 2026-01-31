@@ -7,7 +7,7 @@
   align-items: center;
   padding: 0 1.5rem;
 
-  position: sticky;
+  /* position: sticky; */
   top: 0;
   z-index: 1100;
 }
@@ -186,7 +186,8 @@
   position: absolute;
   right: 1rem;
   top: 100%;
-  background: var(--surface);
+   /* background: var(--surface);  */
+   background: var(--bg-surface); 
   border-radius: 12px;
   /* box-shadow: 0 10px 30px rgba(0,0,0,.2); */
   min-width: 180px;

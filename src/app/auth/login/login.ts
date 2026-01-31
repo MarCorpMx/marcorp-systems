@@ -26,10 +26,10 @@ export class Login {
     private authService: AuthService) { }
 
   loginForm = new FormGroup({
-    /*login: new FormControl('diana@mail.com', [Validators.required]),
-    password: new FormControl('and011235Mrom@', [Validators.required])*/
-    login: new FormControl('omar_root', [Validators.required]),
-    password: new FormControl('Root@123456', [Validators.required])
+    login: new FormControl('', [Validators.required]),
+    password: new FormControl('', [Validators.required])
+    /*login: new FormControl('omar_root', [Validators.required]),
+    password: new FormControl('Root@123456', [Validators.required])*/
   });
 
   get login() {

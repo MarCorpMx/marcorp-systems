@@ -44,7 +44,7 @@ export class SelectSystem {
 
   ngOnInit(): void { 
     this.systems = this.auth.getSystems();
-    console.log('Los getSystems: ', this.systems);
+    console.log('getSystems: ', this.systems);
 
     if (this.systems.length === 1) {
       this.selectSystem(this.systems[0]);
@@ -55,7 +55,7 @@ export class SelectSystem {
     this.auth.setCurrentSystem(system);
 
     // redirección por key
-    this.router.navigate([`/systems/${system.subsystem_key}`]);
+    this.router.navigate([`/sistemas/${system.subsystem_key}`]);
   }
 
   getIcon(systemKey: string) {

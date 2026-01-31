@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import { Router, RouterOutlet  } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
+import { CitasLayoutService } from '../services/citas-layout.service';
 
 @Component({
   selector: 'app-citas-layout',
@@ -8,19 +9,16 @@ import { Router, RouterOutlet  } from '@angular/router';
   styleUrl: './citas-layout.css',
 })
 export class CitasLayout {
-  
-  ngOnInit(): void { 
-    this.restoreSystemTheme();
+  layout = inject(CitasLayoutService);
 
-    
-    console.log('Ya entranmos al sistemas de citas');
-    console.log('Token de citas: ', localStorage.getItem('auth_token'));
+  ngOnInit(): void {
+    this.restoreSystemTheme();
   }
 
   restoreSystemTheme() {
-  const system = JSON.parse(localStorage.getItem('current_system') || 'null');
-  if (system) {
-    document.body.setAttribute('data-system', system.subsystem_key);
+    const system = JSON.parse(localStorage.getItem('current_system') || 'null');
+    if (system) {
+      document.body.setAttribute('data-system', system.subsystem_key);
+    }
   }
-}
 }

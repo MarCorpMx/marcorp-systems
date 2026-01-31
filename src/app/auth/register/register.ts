@@ -14,6 +14,7 @@ import { AuthService } from '../../core/services/auth.service';
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
+
 export class Register {
   readonly Eye = Eye;
   readonly EyeOff = EyeOff;
@@ -36,14 +37,23 @@ export class Register {
     private authService: AuthService) { }
 
   registrationForm = new FormGroup({
-    first_name: new FormControl('Diana', [Validators.required, Validators.minLength(3), Validators.maxLength(100), Validators.pattern(this.pattern)]),
+    first_name: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(100), Validators.pattern(this.pattern)]),
+    last_name: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(100), Validators.pattern(this.pattern)]),
+    phone: new FormControl(undefined, [Validators.required]),
+    //phone: new FormControl('7702021345', [Validators.required]),
+    subsystem_id: new FormControl(null, [Validators.required]),
+    email: new FormControl('', [Validators.required, Validators.email, Validators.pattern('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$')]),
+    password: new FormControl('', [Validators.required, Validators.pattern(this.patternPassword)])
+  });
+
+  /*first_name: new FormControl('Diana', [Validators.required, Validators.minLength(3), Validators.maxLength(100), Validators.pattern(this.pattern)]),
     last_name: new FormControl('Islas', [Validators.required, Validators.minLength(3), Validators.maxLength(100), Validators.pattern(this.pattern)]),
     //phone: new FormControl(undefined, [Validators.required]),
     phone: new FormControl('7702021345', [Validators.required]),
     subsystem_id: new FormControl(null, [Validators.required]),
     email: new FormControl('diana@mail.com', [Validators.required, Validators.email, Validators.pattern('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$')]),
     password: new FormControl('and011235Mrom@', [Validators.required, Validators.pattern(this.patternPassword)])
-  });
+    */
 
   get first_name() {
     return this.registrationForm.get('first_name');
@@ -110,7 +120,7 @@ export class Register {
         this.isSubmitting = false;
         this.registrationForm.reset();
         this.registrationForm.get('subsystem_id')?.setValue(this.itemsSystems[0].id);
-        this.router.navigate([this.nav.goToLogin()]);
+        this.nav.goToLogin();
       },
       error: (err) => {
         if (err.status === 422) {

@@ -9,29 +9,27 @@ export const AUTH_ROUTES: Routes = [
 
     children: [
       {
-        path: 'login',
+        path: 'iniciar-sesion',
         loadComponent: () =>
-          import('./login/login')
-            .then(m => m.Login),
-        data: { leftTitle: 'Bienvenido de nuevo al núcleo central de operaciones.' }
+          import('./login/login').then(m => m.Login),
+         data: { leftTitle: 'Bienvenido de nuevo al núcleo central de operaciones.' }
       },
       {
-        path: 'register',
+        path: 'registrarse',
         loadComponent: () =>
-          import('./register/register')
-            .then(m => m.Register),
+          import('./register/register').then(m => m.Register),
         data: { leftTitle: 'Únete a la red y comienza a transformar el futuro digital.' }
       },
       {
-        path: 'forgot-password',
+        path: 'recuperar-contrasena',
         loadComponent: () =>
           import('./recover-password/recover-password')
             .then(m => m.RecoverPassword),
-        data: { leftTitle: 'Recupera tu acceso' }
+            data: { leftTitle: 'Recupera tu acceso' }
       },
       {
         path: '',
-        redirectTo: 'login',
+        redirectTo: 'iniciar-sesion',
         pathMatch: 'full'
       }
     ]

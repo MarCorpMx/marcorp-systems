@@ -1,1 +1,127 @@
-<p>security works!</p>
+<div class="security-page space-y-6">
+
+  <!-- HEADER -->
+  <div>
+    <h2>Seguridad</h2>
+    <p class="subtitle">
+      Administra el acceso y la seguridad de tu cuenta
+    </p>
+  </div>
+
+  <!-- ===============================
+       SKELETON
+  =============================== -->
+  @if (loading()) {
+    <div class="space-y-4 animate-pulse">
+
+      <div class="card space-y-4">
+        <div class="h-5 w-48 bg-[var(--marcorp-border)] rounded"></div>
+
+        <div class="space-y-3">
+          <div class="h-10 w-full bg-[var(--marcorp-border)] rounded"></div>
+          <div class="h-10 w-full bg-[var(--marcorp-border)] rounded"></div>
+          <div class="h-10 w-full bg-[var(--marcorp-border)] rounded"></div>
+        </div>
+
+        <div class="h-10 w-40 bg-[var(--marcorp-border)] rounded"></div>
+      </div>
+
+      <div class="card space-y-3">
+        <div class="h-5 w-40 bg-[var(--marcorp-border)] rounded"></div>
+        <div class="h-16 w-full bg-[var(--marcorp-border)] rounded"></div>
+      </div>
+
+    </div>
+  }
+
+  <!-- ===============================
+       CONTENT
+  =============================== -->
+  @else {
+
+    <!-- ===============================
+         CAMBIAR CONTRASEÑA
+    =============================== -->
+    <div class="card space-y-4">
+
+      <h3>Cambiar contraseña</h3>
+
+      <div class="field">
+        <label>Contraseña actual</label>
+        <input
+          type="password"
+          [(ngModel)]="form.currentPassword"
+          [disabled]="saving()" />
+      </div>
+
+      <div class="field">
+        <label>Nueva contraseña</label>
+        <input
+          type="password"
+          [(ngModel)]="form.newPassword"
+          [disabled]="saving()" />
+      </div>
+
+      <div class="field">
+        <label>Confirmar nueva contraseña</label>
+        <input
+          type="password"
+          [(ngModel)]="form.confirmPassword"
+          [disabled]="saving()" />
+      </div>
+
+      <div class="actions">
+        <button
+          (click)="changePassword()"
+          [disabled]="saving()">
+          {{ saving() ? 'Guardando...' : 'Actualizar contraseña' }}
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ===============================
+         SESIONES ACTIVAS
+    =============================== -->
+    <div class="card space-y-4">
+
+      <h3>Sesiones activas</h3>
+
+      @if (sessions.length === 0) {
+        <p class="subtitle">
+          No hay sesiones activas registradas.
+        </p>
+      }
+
+      @else {
+        <div class="sessions space-y-3">
+
+          @for (session of sessions; track session.id) {
+            <div class="session-item">
+
+              <div>
+                <p class="font-medium">
+                  {{ session.device }}
+                </p>
+                <p class="text-sm text-muted">
+                  {{ session.location }} · {{ session.lastActive }}
+                </p>
+              </div>
+
+              <button
+                class="danger"
+                (click)="revokeSession(session.id)">
+                Cerrar
+              </button>
+
+            </div>
+          }
+
+        </div>
+      }
+
+    </div>
+
+  }
+
+</div>

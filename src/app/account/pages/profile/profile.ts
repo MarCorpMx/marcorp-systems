@@ -1,7 +1,14 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../../core/services/auth.service';
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  username: string;
+}
+
 
 @Component({
   selector: 'app-profile',
@@ -9,23 +16,62 @@ import { AuthService } from '../../../core/services/auth.service';
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })
-export class Profile {
-  user = signal<any>(null);
-  loading = signal(false);
 
-  constructor(private auth: AuthService) {
-    this.user.set(this.auth.getUser());
+export class Profile implements OnInit {
+  // Estados
+  loading = signal(true);
+  saving = signal(false);
+
+  // Data
+  user = signal<User | null>(null);
+
+  // Form (editable)
+  form = {
+    name: ''
+  };
+
+  ngOnInit() {
+    this.loadProfile();
+  }
+
+  loadProfile() {
+    this.loading.set(true);
+
+    // Simulación API
+    setTimeout(() => {
+      const data: User = {
+        id: 1,
+        name: 'Diana Gómez',
+        email: 'diana@marcorp.mx',
+        username: 'diana'
+      };
+
+      this.user.set(data);
+      this.form.name = data.name;
+
+      this.loading.set(false);
+    }, 1200);
   }
 
   save() {
-    this.loading.set(true);
+    if (!this.user()) return;
 
-    // aquí luego irá la API real
+    this.saving.set(true);
+
+    // Simulación save API
     setTimeout(() => {
-      localStorage.setItem('user', JSON.stringify(this.user()));
-      this.loading.set(false);
-      alert('Perfil actualizado de broma, falta la api man');
-    }, 800);
+      this.user.update(u => ({
+        ...u!,
+        name: this.form.name
+      }));
+
+      this.saving.set(false);
+    }, 1000);
   }
+
+  reload() {
+    this.loadProfile();
+  }
+
 
 }

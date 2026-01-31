@@ -1,1 +1,97 @@
-<p>notifications works!</p>
+<div class="notifications-page space-y-6">
+
+  <!-- HEADER -->
+  <div>
+    <h2>Notificaciones</h2>
+    <p class="subtitle">
+      Decide cómo y cuándo recibir notificaciones
+    </p>
+  </div>
+
+  <!-- ===============================
+       SKELETON
+  =============================== -->
+  @if (loading()) {
+  <div class="space-y-4 animate-pulse">
+
+    @for (_ of [1,2,3]; track _) {
+    <div class="card space-y-3">
+      <div class="h-4 w-48 bg-[var(--marcorp-border)] rounded"></div>
+      <div class="h-10 w-full bg-[var(--marcorp-border)] rounded"></div>
+    </div>
+    }
+
+  </div>
+  }
+
+  <!-- ===============================
+       CONTENT
+  =============================== -->
+  @else {
+
+  <div class="space-y-4">
+
+    @for (group of notificationGroups; track group.id) {
+
+    <div class="card space-y-4">
+
+      <div>
+        <h3>{{ group.title }}</h3>
+        <p class="subtitle">
+          {{ group.description }}
+        </p>
+      </div>
+
+      <div class="options">
+
+        @for (option of group.options; track option.key) {
+        <div class="option-row">
+
+          <div class="info">
+            <p class="font-medium">{{ option.label }}</p>
+            <p class="text-sm text-muted">
+              {{ option.description }}
+            </p>
+          </div>
+
+          <div class="channels">
+
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="option.email" />
+              <span>Email</span>
+            </label>
+
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="option.whatsapp" />
+              <span>WhatsApp</span>
+            </label>
+
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="option.system" />
+              <span>Sistema</span>
+            </label>
+
+          </div>
+
+        </div>
+        }
+
+      </div>
+
+    </div>
+
+    }
+
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+      <span *ngIf="!saving()">Guardar preferencias</span>
+      <span *ngIf="saving()">Guardando…</span>
+    </button>
+  </div>
+
+  }
+
+</div>

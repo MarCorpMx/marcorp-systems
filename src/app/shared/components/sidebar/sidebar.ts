@@ -1,7 +1,7 @@
-import { Component, computed, EventEmitter, inject, Input, Output } from '@angular/core';
+import { Component, computed, EventEmitter, inject, Input, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { LucideAngularModule, LogOut  } from 'lucide-angular';
+import { LucideAngularModule, LogOut, X } from 'lucide-angular';
 
 import { AuthService } from '../../../core/services/auth.service';
 import { ThemeService } from '../../../core/services/theme.service';
@@ -18,10 +18,12 @@ import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 
 export class Sidebar {
   readonly LogOut = LogOut;
+  readonly X = X;
   private auth = inject(AuthService);
   private theme = inject(ThemeService);
   private router = inject(Router);
   private confirm = inject(ConfirmDialogService);
+  sidebarOpen = signal(false);
 
   user = this.auth.getUser();
   systems = this.auth.getSystems();
@@ -31,7 +33,7 @@ export class Sidebar {
   @Output() close = new EventEmitter<void>();
 
   menu = computed(() => {
-    console.log(this.currentSystem);
+    //console.log('curren ',this.currentSystem);
     if (!this.currentSystem) return [];
     return SYSTEM_MENUS[this.currentSystem.subsystem_key] || [];
   });
@@ -48,7 +50,7 @@ export class Sidebar {
   }
 
   switchSystem() {
-    this.router.navigate(['/select-system']);
+    this.router.navigate(['/seleccionar-sistema']);
   }
 
 
@@ -58,7 +60,7 @@ export class Sidebar {
       '¿Seguro que deseas cerrar tu sesión?',
       () => {
         this.auth.logout().subscribe(() => {
-          this.router.navigate(['/auth/login']);
+          this.router.navigate(['/iniciar-sesion']);
         });
       }
     );

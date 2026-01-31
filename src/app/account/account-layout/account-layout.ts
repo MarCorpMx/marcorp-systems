@@ -1,12 +1,12 @@
-import { Component, signal, inject, HostListener, computed  } from '@angular/core';
-import { Router, RouterOutlet, RouterModule, NavigationEnd, ActivatedRoute  } from '@angular/router';
+import { Component, signal, inject, HostListener, computed } from '@angular/core';
+import { Router, RouterOutlet, RouterModule, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs';
 import { ConfirmDialogService } from '../../shared/services/confirm-dialog.service';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { AuthService } from '../../core/services/auth.service';
-import { 
-  LucideAngularModule, 
+import {
+  LucideAngularModule,
   CircleUser,
   User,
   Shield,
@@ -19,9 +19,19 @@ import {
   Bell,
   LifeBuoy,
   LogOut,
-  Menu, 
-  X 
+  Menu,
+  X,
+  ArrowLeft
 } from 'lucide-angular';
+
+interface AccountMenuItem {
+  label: string;
+  icon: any;
+  route?: string;
+  section?: 'account' | 'org' | 'billing' | 'support';
+  danger?: boolean;
+  action?: () => void;
+}
 
 @Component({
   selector: 'app-account-layout',
@@ -44,11 +54,13 @@ export class AccountLayout {
   readonly LogOut = LogOut;
   readonly Menu = Menu;
   readonly X = X;
+  readonly ArrowLeft = ArrowLeft;
 
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   //private confirm = inject(ConfirmDialogService);
   private auth = inject(AuthService);
+
 
   pageTitle = 'Cuenta';
   sidebarOpen = signal(false);
@@ -68,9 +80,21 @@ export class AccountLayout {
   }
 
   @HostListener('document:keydown.escape')
-closeOnEsc() {
-  this.sidebarOpen.set(false);
-}
+  closeOnEsc() {
+    this.sidebarOpen.set(false);
+  }
+
+  goBackToSystem() {
+    const lastSystem = localStorage.getItem('last_system_route');
+
+    this.router.navigateByUrl('/sistemas/citas/dashboard');
+    /*if (lastSystem) {
+      //this.router.navigateByUrl(lastSystem);
+      this.router.navigateByUrl('/sistemas/citas/dashboard');
+    } else {
+      this.router.navigateByUrl('/sistemas');
+    }*/
+  }
 
   logout() {
     this.confirm.open(

@@ -12,7 +12,6 @@
             <button class="close-btn " (click)="sidebarOpen.set(false)" aria-label="Cerrar menú">
                 <lucide-icon [name]="X" size="20" />
             </button>
-
         </div>
 
         <nav class="menu">
@@ -26,7 +25,7 @@
                 <span>Seguridad</span>
             </a>
 
-             <a routerLink="notifications" routerLinkActive="active" class="sidebar-item">
+            <a routerLink="notifications" routerLinkActive="active" class="sidebar-item">
                 <lucide-icon [name]="Bell" size="16" class="sidebar-icon" />
                 <span>Notificaciones</span>
             </a>
@@ -106,6 +105,12 @@
             <!--<button class="menu-btn mobile-only" (click)="sidebarOpen.set(true)">
                 ☰
             </button>-->
+
+            <button class="back-btn" (click)="goBackToSystem()" aria-label="Volver al sistema">
+
+                <lucide-icon [name]="ArrowLeft" size="18" />
+                <span class="label">Volver</span>
+            </button>
 
             <h1 class="page-title">
                 {{ pageTitle }}

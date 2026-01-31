@@ -1,6 +1,14 @@
-import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../../core/services/auth.service';
+import { Component, signal, computed } from '@angular/core';
+
+interface Plan {
+  id: number;
+  name: string;
+  price: string;
+  description: string;
+  features: string[];
+  current?: boolean;
+}
 
 @Component({
   selector: 'app-subscriptions',
@@ -9,56 +17,61 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrl: './subscriptions.css',
 })
 export class Subscriptions {
-  systems = signal<any[]>([]);
-  loading = signal<string | null>(null);
+  loading = signal(true);
 
-  constructor(private auth: AuthService) {
-    this.systems.set(this.auth.getSystems());
-  }
+  plans = signal<Plan[]>([]);
 
-  availableSystems = [
-    {
-      key: 'citas',
-      name: 'Sistema de Citas',
-      description: 'Agenda, clientes y gestión de citas',
-      color: '#10b981'
-    },
-    {
-      key: 'escolar',
-      name: 'Sistema Escolar',
-      description: 'Alumnos, clases, calificaciones',
-      color: '#6366f1'
-    },
-    {
-      key: 'inventarios',
-      name: 'Inventarios',
-      description: 'Control de stock y movimientos',
-      color: '#f59e0b'
-    }
-  ]
+  hasPlan = computed(() => this.plans().length > 0);
 
-  hasSystem(key: string): boolean {
-    return this.systems().some(s => s.subsystem_key === key);
-  }
-
-  addSystem(system: any) {
-    this.loading.set(system.key);
-
-    // 🔜 luego aquí irá la API real
+  constructor() {
+    // Simulación API
     setTimeout(() => {
-      this.systems.update(s => [
-        ...s,
+      this.plans.set([
         {
-          subsystem_key: system.key,
-          subsystem_name: system.name,
-          is_paid: false,
-          roles: ['user']
+          id: 1,
+          name: 'Starter',
+          price: '$0',
+          description: 'Ideal para comenzar',
+          features: [
+            '1 organización',
+            '50 citas al mes',
+            'Soporte básico'
+          ]
+        },
+        {
+          id: 2,
+          name: 'Pro',
+          price: '$299 MXN / mes',
+          description: 'Para negocios en crecimiento',
+          features: [
+            'Organizaciones ilimitadas',
+            'Citas ilimitadas',
+            'Recordatorios automáticos',
+            'Soporte prioritario'
+          ],
+          current: true
+        },
+        {
+          id: 3,
+          name: 'Business',
+          price: '$699 MXN / mes',
+          description: 'Operación completa',
+          features: [
+            'Todo en Pro',
+            'Equipo avanzado',
+            'Reportes',
+            'Soporte dedicado'
+          ]
         }
       ]);
 
-      localStorage.setItem('systems', JSON.stringify(this.systems()));
-      this.loading.set(null);
-    }, 900);
+      this.loading.set(false);
+    }, 1200);
   }
+
+  upgrade(plan: Plan) {
+    console.log('Cambiar a plan:', plan.name);
+  }
+  
 
 }

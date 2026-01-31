@@ -1,0 +1,82 @@
+.security-page {
+  max-width: 720px;
+}
+
+h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  color: var(--marcorp-text-muted);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--marcorp-border);
+  border-radius: 16px;
+  padding: 2rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.field label {
+  font-size: .75rem;
+  color: var(--marcorp-text-muted);
+  margin-bottom: .3rem;
+}
+
+.field input {
+  padding: .6rem .7rem;
+  border-radius: 10px;
+  border: 1px solid var(--marcorp-border);
+  background: var(--background);
+}
+
+.actions {
+  margin-top: 1rem;
+}
+
+button {
+  background: var(--system-primary, var(--marcorp-primary));
+  color: #002b1f;
+  border: none;
+  padding: .6rem 1.2rem;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+button.danger {
+  background: transparent;
+  color: #ef4444;
+  padding: .4rem .6rem;
+}
+
+button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.sessions {
+  display: flex;
+  flex-direction: column;
+}
+
+.session-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .75rem 0;
+  border-bottom: 1px solid var(--marcorp-border);
+}
+
+.session-item:last-child {
+  border-bottom: none;
+}
+
+.text-muted {
+  color: var(--marcorp-text-muted);
+}

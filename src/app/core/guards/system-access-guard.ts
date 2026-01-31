@@ -13,7 +13,7 @@ export const systemAccessGuard: CanMatchFn = (
   const systems = auth.getSystems();
 
   if (!systems || systems.length === 0) {
-    router.navigate(['/select-system']);
+    router.navigate(['/seleccionar-sistema']);
     return false;
   }
 
@@ -22,7 +22,7 @@ export const systemAccessGuard: CanMatchFn = (
   );
 
   if (!hasAccess) {
-    router.navigate(['/select-system']);
+    router.navigate(['/seleccionar-sistema']);
     return false;
   }
 

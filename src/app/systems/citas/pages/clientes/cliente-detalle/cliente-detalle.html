@@ -1,0 +1,138 @@
+<section class="space-y-6">
+
+  <!-- ===============================
+     SKELETON
+  =============================== -->
+  @if (loading) {
+    <div class="bg-[var(--bg-surface)] p-6 rounded-xl animate-pulse space-y-4">
+      <div class="h-6 w-40 bg-[var(--border-soft)] rounded"></div>
+      <div class="h-4 w-64 bg-[var(--border-soft)] rounded"></div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
+        <div class="h-40 bg-[var(--bg-surface-soft)] rounded-xl"></div>
+        <div class="h-40 bg-[var(--bg-surface-soft)] rounded-xl"></div>
+        <div class="h-40 bg-[var(--bg-surface-soft)] rounded-xl"></div>
+      </div>
+    </div>
+  }
+
+  @else {
+
+  <!-- ===============================
+     PERFIL
+  =============================== -->
+  <div class="bg-[var(--bg-surface)]
+              border border-[var(--border-soft)]
+              rounded-xl p-6 space-y-4">
+
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-full bg-[var(--system-accent)]
+                  flex items-center justify-center
+                  text-[var(--system-secondary)]">
+        <lucide-icon [name]="User" class="w-6 h-6"></lucide-icon>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-semibold text-[var(--text-primary)]">
+          {{ client.name }}
+        </h2>
+        <p class="text-sm text-green-400">Activo</p>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-6 text-sm text-[var(--text-secondary)]">
+      <span class="flex items-center gap-2">
+        <lucide-icon [name]="Phone" class="w-4 h-4"></lucide-icon>
+        {{ client.phone }}
+      </span>
+      <span class="flex items-center gap-2">
+        <lucide-icon [name]="Mail" class="w-4 h-4"></lucide-icon>
+        {{ client.email }}
+      </span>
+    </div>
+
+    <div class="flex gap-2 flex-wrap">
+      @for (tag of client.tags; track tag) {
+        <span class="px-2 py-1 text-xs rounded-full
+                     bg-[var(--system-accent)]
+                     text-[var(--system-secondary)]">
+          {{ tag }}
+        </span>
+      }
+    </div>
+  </div>
+
+  <!-- ===============================
+     HISTORIAL + NOTAS
+  =============================== -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- HISTORIAL -->
+    <div class="bg-[var(--bg-surface)]
+                border border-[var(--border-soft)]
+                rounded-xl p-6 space-y-4">
+
+      <h3 class="font-semibold text-[var(--text-primary)] flex items-center gap-2">
+        <lucide-icon [name]="Calendar" class="w-5 h-5"></lucide-icon>
+        Historial de citas
+      </h3>
+
+      @if (history.length === 0) {
+        <p class="text-sm text-[var(--text-secondary)]">
+          No hay citas registradas.
+        </p>
+      }
+
+      @else {
+        <ul class="space-y-3">
+          @for (item of history; track item.date) {
+            <li class="flex justify-between text-sm">
+              <span>
+                {{ item.date }} · {{ item.service }}
+              </span>
+              <span [class]="getStatusClasses(item.status)">
+                {{ item.status | titlecase }}
+              </span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <!-- NOTAS -->
+    <div class="bg-[var(--bg-surface)]
+                border border-[var(--border-soft)]
+                rounded-xl p-6 space-y-4">
+
+      <h3 class="font-semibold text-[var(--text-primary)] flex items-center gap-2">
+        <lucide-icon [name]="FileText" class="w-5 h-5"></lucide-icon>
+        Notas
+      </h3>
+
+      @if (notes.length === 0) {
+        <p class="text-sm text-[var(--text-secondary)]">
+          No hay notas aún.
+        </p>
+      }
+
+      @else {
+        <ul class="space-y-3">
+          @for (note of notes; track note.date) {
+            <li class="text-sm">
+              <p class="text-[var(--text-secondary)]">{{ note.date }}</p>
+              <p class="text-[var(--text-primary)]">
+                {{ note.content }}
+              </p>
+            </li>
+          }
+        </ul>
+      }
+
+      <button class="mt-2 text-sm text-[var(--system-primary)] hover:underline">
+        + Agregar nota
+      </button>
+    </div>
+
+  </div>
+
+  }
+</section>

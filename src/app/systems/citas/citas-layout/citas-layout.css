@@ -1,0 +1,19 @@
+.citas-layout {
+  background: var(--bg-app);
+  min-height: 100%;
+}
+
+.citas-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.citas-muted {
+  color: var(--text-secondary);
+}
+
+.citas-accent {
+  color: var(--system-primary);
+}

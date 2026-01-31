@@ -23,55 +23,55 @@ export const SYSTEM_MENUS: Record<string, any[]> = {
     {
       label: 'Dashboard',
       icon: LayoutDashboard,
-      route: '/systems/citas/dashboard',
+      route: '/sistemas/citas/dashboard',
       roles: ['root', 'admin', 'manager', 'user', 'owner']
     },
     {
       label: 'Agenda',
       icon: Calendar,
-      route: '/systems/citas/agenda',
+      route: '/sistemas/citas/agenda',
       roles: ['root', 'admin', 'manager', 'owner']
     },
     {
       label: 'Clientes',
       icon: UserRound,
-      route: '/systems/citas/clientes',
+      route: '/sistemas/citas/clientes',
       roles: ['root', 'admin', 'owner']
     },
     {
       label: 'Servicios',
       icon: Briefcase,
-      route: '/systems/citas/clientes',
+      route: '/sistemas/citas/servicios',
       roles: ['root', 'admin', 'owner']
     },
     {
       label: 'Horarios',
       icon: Clock,
-      route: '/systems/citas/clientes',
+      route: '/sistemas/citas/horarios',
       roles: ['root', 'admin', 'owner']
     },
     {
       label: 'Recordatorios',
       icon: Bell,
-      route: '/systems/citas/clientes',
+      route: '/sistemas/citas/recordatorios',
       roles: ['root', 'admin', 'owner']
     },
     {
       label: 'Reportes',
       icon: BarChart,
-      route: '/systems/citas/clientes',
+      route: '/sistemas/citas/reportes',
       roles: ['root', 'admin', 'owner']
     },
     {
       label: 'Equipo',
       icon: UsersRound,
-      route: '/systems/citas/clientes',
+      route: '/sistemas/citas/equipo',
       roles: ['root', 'admin', 'owner']
     },
     {
       label: 'Configuración',
       icon: Settings,
-      route: '/systems/citas/configuracion',
+      route: '/sistemas/citas/configuracion',
       roles: ['root', 'admin', 'owner']
     }
   ],
@@ -80,7 +80,7 @@ export const SYSTEM_MENUS: Record<string, any[]> = {
     {
       label: 'Dashboard',
       icon: GraduationCap,
-      route: '/systems/escolar/dashboard',
+      route: '/sistemas/escolar/dashboard',
       roles: ['root', 'admin', 'teacher', 'owner']
     },
     {

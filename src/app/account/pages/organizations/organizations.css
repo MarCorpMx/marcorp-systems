@@ -1,0 +1,16 @@
+.organizations-page {
+  max-width: 1100px;
+}
+
+.org-card {
+  position: relative;
+}
+
+.badge-active {
+  background: var(--system-primary, var(--marcorp-primary));
+  color: #002b1f;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-weight: 600;
+}

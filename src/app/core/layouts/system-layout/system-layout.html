@@ -11,11 +11,10 @@
 
   <!-- MAIN -->
   <div class="system-main">
+  
     <app-topbar (toggleMenu)="toggleSidebar()"> </app-topbar>
     
-    
     <main class="system-content">
-
 
       @if(confirm.visible()){
       <app-confirm-dialog 

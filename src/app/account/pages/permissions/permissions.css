@@ -1,0 +1,23 @@
+.permissions-page {
+  max-width: 900px;
+}
+
+.permission-item {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  font-size: .85rem;
+  color: var(--text-primary);
+
+  input {
+    accent-color: var(--system-primary, var(--marcorp-primary));
+  }
+}
+
+.role-card {
+  transition: box-shadow .2s ease;
+}
+
+.role-card:hover {
+  box-shadow: var(--shadow-soft);
+}

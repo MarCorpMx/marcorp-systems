@@ -1,43 +1,89 @@
-<div class="account-systems">
+<section class="subscriptions-page space-y-6">
 
-  <h2>Mis sistemas</h2>
-  <p class="subtitle">
-    Administra los sistemas activos en tu cuenta
-  </p>
-
-  <div class="systems-grid">
-
-    @for (sys of availableSystems; track sys.key) {
-
-      <div class="system-card">
-
-        <div
-          class="icon"
-          [style.background]="sys.color">
-          {{ sys.name.charAt(0) }}
-        </div>
-
-        <div class="info">
-          <h3>{{ sys.name }}</h3>
-          <p>{{ sys.description }}</p>
-        </div>
-
-        @if (hasSystem(sys.key)) {
-          <span class="badge active">
-            Activo
-          </span>
-        } @else {
-          <button
-            (click)="addSystem(sys)"
-            [disabled]="loading() === sys.key">
-            {{ loading() === sys.key ? 'Agregando…' : 'Agregar sistema' }}
-          </button>
-        }
-
-      </div>
-
-    }
-
+  <!-- HEADER -->
+  <div>
+    <h2 class="text-xl font-semibold">
+      Suscripciones
+    </h2>
+    <p class="text-sm text-[var(--text-secondary)]">
+      Administra tu plan y accede a más funcionalidades
+    </p>
   </div>
 
-</div>
+  <!-- ===============================
+       SKELETON
+  =============================== -->
+  @if (loading()) {
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 animate-pulse">
+      <div *ngFor="let _ of [1,2,3]"
+           class="bg-[var(--bg-surface)]
+                  border border-[var(--border-soft)]
+                  rounded-xl p-6 space-y-4">
+        <div class="h-4 w-24 bg-[var(--border-soft)] rounded"></div>
+        <div class="h-6 w-32 bg-[var(--border-soft)] rounded"></div>
+        <div class="h-3 w-full bg-[var(--border-soft)] rounded"></div>
+        <div class="h-3 w-3/4 bg-[var(--border-soft)] rounded"></div>
+      </div>
+    </div>
+  }
+
+  <!-- ===============================
+       EMPTY
+  =============================== -->
+  @else if (!hasPlan()) {
+    <div class="bg-[var(--bg-surface)]
+                border border-dashed border-[var(--border-soft)]
+                rounded-xl p-10 text-center space-y-4">
+
+      <h3 class="text-lg font-semibold">
+        No tienes un plan activo
+      </h3>
+
+      <p class="text-sm text-[var(--text-secondary)]">
+        Elige un plan para comenzar a usar el sistema.
+      </p>
+    </div>
+  }
+
+  <!-- ===============================
+       PLANS
+  =============================== -->
+  @else {
+    <div class="plans-grid">
+      @for (plan of plans(); track plan.id) {
+
+        <div class="plan-card"
+             [class.current]="plan.current">
+
+          <div class="plan-header">
+            <h3>{{ plan.name }}</h3>
+            <span class="price">{{ plan.price }}</span>
+            <p class="description">{{ plan.description }}</p>
+          </div>
+
+          <ul class="features">
+            @for (feature of plan.features; track feature) {
+              <li>✓ {{ feature }}</li>
+            }
+          </ul>
+
+          <div class="actions">
+            @if (plan.current) {
+              <span class="current-badge">
+                Plan actual
+              </span>
+            } @else {
+              <button class="btn-primary"
+                      (click)="upgrade(plan)">
+                Elegir plan
+              </button>
+            }
+          </div>
+
+        </div>
+
+      }
+    </div>
+  }
+
+</section>

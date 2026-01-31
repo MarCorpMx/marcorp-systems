@@ -1,4 +1,4 @@
-<aside class="sidebar" [class.open]="open">
+<aside class="sidebar" [class.open]="open" >
     <div class="sidebar-overlay" (click)="closeSidebar()"></div>
     <!-- HEADER -->
     <div class="sidebar-header">
@@ -11,6 +11,11 @@
             </button>
             }
         </div>
+
+        <button class="close-btn " (click)="closeSidebar()" aria-label="Cerrar menú">
+            <lucide-icon [name]="X" size="20" />
+        </button>
+
     </div>
 
     <!-- MENU -->

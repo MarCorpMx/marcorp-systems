@@ -5,11 +5,13 @@ html, body {
   margin: 0;
   font-family: 'Inter', sans-serif;
   background-color: #f5f1f1;
+  /* font-size: 80%; */
+  font-size: 14px;
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
+    width: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -76,3 +78,5 @@ $marcorp-light: #e5f7f2;
 $citas-accent: #3fcaf7;
 $escolar-accent: #facc15;
 $inventarios-accent: #fb923c; */
+
+

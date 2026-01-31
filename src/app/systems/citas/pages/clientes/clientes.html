@@ -1,1 +1,109 @@
-<p>clientes works!</p>
+<section class="space-y-6">
+
+  <!-- HEADER -->
+  <div class="flex items-center justify-between">
+    <h2 class="text-xl font-semibold text-[var(--text-primary)]">
+      Clientes
+    </h2>
+
+    <button class="px-4 py-2 rounded-lg
+           bg-[var(--system-primary)]
+           text-white text-sm
+           hover:bg-[var(--system-secondary)]
+           transition">
+      + Nuevo cliente
+    </button>
+  </div>
+
+  <!-- ===============================
+       SKELETON
+  =============================== -->
+  @if (loading) {
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
+    <div *ngFor="let _ of [1,2,3]"
+      class="bg-[var(--bg-surface)] rounded-xl p-6 space-y-3 border border-[var(--border-soft)]">
+      <div class="h-6 w-32 bg-[var(--border-soft)] rounded"></div>
+      <div class="h-4 w-24 bg-[var(--border-soft)] rounded"></div>
+      <div class="h-4 w-full bg-[var(--border-soft)] rounded"></div>
+    </div>
+  </div>
+  }
+
+  <!-- ===============================
+       EMPTY STATE
+  =============================== -->
+  @else if (!loading && clients.length === 0) {
+  <div class="bg-[var(--bg-surface)]
+             border border-dashed border-[var(--border-soft)]
+             rounded-xl p-10 text-center space-y-4">
+
+    <div class="mx-auto w-12 h-12 rounded-full
+           bg-[var(--system-accent)]
+           flex items-center justify-center
+           text-[var(--system-secondary)] text-xl">
+      <lucide-icon [name]="UserCheck" class="w-6 h-6 text-[var(--system-secondary)]"></lucide-icon>
+    </div>
+
+    <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+      No tienes clientes
+    </h3>
+
+    <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+      Agrega tu primer cliente para comenzar a registrar citas y notas.
+    </p>
+
+    <button class="inline-flex items-center gap-2
+             px-4 py-2 rounded-lg
+             bg-[var(--system-primary)]
+             text-white
+             hover:bg-[var(--system-secondary)]
+             transition">
+      + Agregar cliente
+    </button>
+  </div>
+  }
+
+  <!-- ===============================
+       CLIENTES CON DATOS
+  =============================== -->
+  @else {
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    @for (client of clients; track client.id) {
+    <div
+      class="bg-[var(--bg-surface)] rounded-xl p-4 border border-[var(--border-soft)] space-y-2 hover:shadow-soft transition cursor-pointer"
+      [routerLink]="['/sistemas/citas/clientes', client.id]">
+
+      <div class="flex items-center justify-between">
+        <p class="font-medium text-[var(--text-primary)]">{{ client.name }}</p>
+        <span class="px-2 py-1 text-sm rounded-full font-medium" [ngClass]="getStatusClasses(client.status)">
+          {{ client.status | titlecase }}
+        </span>
+      </div>
+
+      <p class="text-sm text-[var(--text-secondary)]">
+        Última cita: {{ client.lastAppointment }}
+      </p>
+
+      <div class="flex items-center gap-2 flex-wrap mt-2">
+        <span *ngFor="let tag of client.tags"
+          class="bg-[var(--system-accent)] text-[var(--system-secondary)] px-2 py-0.5 rounded-full text-xs">
+          {{ tag }}
+        </span>
+      </div>
+
+      <div class="mt-3 flex items-center justify-between">
+        <p class="text-sm text-[var(--text-secondary)]">
+          Notas: {{ client.notesCount }}
+        </p>
+
+        <span class="text-sm text-[var(--system-primary)] font-medium">
+          Ver perfil →
+        </span>
+      </div>
+
+    </div>
+    }
+  </div>
+  }
+
+</section>
