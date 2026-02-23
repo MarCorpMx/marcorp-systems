@@ -1,13 +1,44 @@
+import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, signal, computed } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+
+import { AuthService } from '../../../core/services/auth.service';
+import { SubscriptionService } from '../../../core/services/subscription.service';
+
+
+interface Feature {
+  key: string;
+  name: string;
+  enabled: boolean;
+  limit: number | null;
+}
 
 interface Plan {
   id: number;
+  key:string;
   name: string;
   price: string;
   description: string;
-  features: string[];
+  features: Feature[];
+  highlight?: string;
   current?: boolean;
+}
+
+interface PlanView {
+  key: string;
+  name: string;
+  price: number;
+  description: string;
+
+  features: {
+    key: string;
+    name: string;
+    enabled: boolean;
+    limit: number | null;
+  }[];
+
+  isCurrent: boolean;
+  highlight?: boolean;
 }
 
 @Component({
@@ -16,16 +47,22 @@ interface Plan {
   templateUrl: './subscriptions.html',
   styleUrl: './subscriptions.css',
 })
+
 export class Subscriptions {
-  loading = signal(true);
+  private auth = inject(AuthService);
+  private subscriptionsApi = inject(SubscriptionService);
+
+  currentSystem = this.auth.getCurrentSystem();
+  currentPlanKey = signal<string | null>(null);
 
   plans = signal<Plan[]>([]);
-
+  loading = signal(false);
   hasPlan = computed(() => this.plans().length > 0);
+
 
   constructor() {
     // Simulación API
-    setTimeout(() => {
+    /*setTimeout(() => {
       this.plans.set([
         {
           id: 1,
@@ -66,12 +103,55 @@ export class Subscriptions {
       ]);
 
       this.loading.set(false);
-    }, 1200);
+    }, 1200);*/
+  }
+
+  ngOnInit() {
+    this.loadPlans();
+    /*console.log('Plan:', this.currentPlanKey);
+    console.log('ID Organización:', this.organizationId);
+    console.log('Subsystem:', this.subsystemKey);*/
+  }
+
+  async loadPlans() {
+    this.loading.set(true);
+
+    const { organization_id, subsystem } = this.currentSystem;
+
+    const [current, plans] = await Promise.all([
+      firstValueFrom(
+        this.subscriptionsApi.getCurrentPlan(organization_id, subsystem.key)
+      ),
+      firstValueFrom(
+        this.subscriptionsApi.getPlans(subsystem.key)
+      )
+    ]);
+
+
+    this.currentPlanKey.set(current.plan.key);
+
+    this.plans.set(
+      plans.map(plan => ({
+        ...plan,
+        current: plan.key === current.plan.key,
+        highlight: plan.key === 'basic', // Plan recomendado
+        features: plan.features ?? []
+      }))
+    );
+
+    console.log(plans);
+    //console.log(JSON.stringify(plan));
+
+    this.loading.set(false);
   }
 
   upgrade(plan: Plan) {
     console.log('Cambiar a plan:', plan.name);
   }
-  
+
+  goToUpgrade() {
+
+  }
+
 
 }

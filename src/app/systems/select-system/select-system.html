@@ -5,7 +5,58 @@
 
         <div class="systems-grid">
             @for(system of systems; track $index){
+
+                <!-- {{system.subsystem.key}} -->
+
+                
+                <!-- <pre>{{ system | json }}</pre> -->
+                
+                <!-- <pre>{{system.is_paid}}</pre> -->
+
+                <!--system = {
+  "organization_id": 1,
+  "organization_name": "Organización Demo",
+  "subsystem_id": 1,
+  "subsystem_key": "citas",
+  "subsystem_name": "Sistema de Citas",
+  "is_paid": false,
+  "roles": "owner"
+            } 
+
+            {
+  "organization_id": 1,
+  "organization_name": "Organización Demo",
+  "subsystem": {
+    "id": 1,
+    "key": "citas",
+    "name": "Sistema de Citas"
+  },
+  "plan": null,
+  "status": "active",
+  "is_paid": false,
+  "role": "owner"
+}
+  
+  system.subsystem_key = citas | escolar | inventarios
+  system.subsystem_name = Sistema de Citas | Sistema Escolar | Sistema de Inventarios
+  system.is_paid = false | true
+
+            -->
+            
             <button class="system-item" (click)="selectSystem(system)">
+                <div class="icon">
+                    <lucide-icon [name]="getIcon(system.subsystem.key)" size="40" strokeWidth="1.6"></lucide-icon>
+                </div>
+
+                <div class="info">
+                    <h3>{{ system.subsystem.name }}</h3>
+                    <span class="badge" [class.inactive]="!system.is_paid">
+                        {{ system.is_paid ? 'Activo' : 'Demo' }}
+                    </span>
+                </div>
+            </button>
+
+            <!--<button class="system-item" (click)="selectSystem(system)">
                 <div class="icon">
                     <lucide-icon [name]="getIcon(system.subsystem_key)" size="40" strokeWidth="1.6"></lucide-icon>
                 </div>
@@ -16,7 +67,8 @@
                         {{ system.is_paid ? 'Activo' : 'Demo' }}
                     </span>
                 </div>
-            </button>
+            </button>-->
+
             }
         </div>
     </div>

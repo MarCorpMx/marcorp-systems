@@ -128,8 +128,6 @@ export const CITAS_ROUTES: Routes = [
         ]
       },
 
-
-
       {
         path: 'equipo',
         loadComponent: () =>
@@ -139,7 +137,36 @@ export const CITAS_ROUTES: Routes = [
           breadcrumb: 'Equipo'
         }
       },
+
       {
+        path: 'configuracion',
+        data: { breadcrumb: 'Configuración' },
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./pages/configuracion/configuracion')
+                .then(m => m.Configuracion)
+          },
+          {
+            path: 'perfil',
+            loadComponent: () =>
+              import('./pages/configuracion/perfil/perfil')
+                .then(m => m.Perfil),
+            data: { breadcrumb: 'Perfil del negocio' }
+          },
+          {
+            path: 'agenda',
+            loadComponent: () =>
+              import('./pages/configuracion/agenda/agenda')
+                .then(m => m.Agenda),
+            data: { breadcrumb: 'Preferencias de agenda' }
+          }
+        ]
+      },
+
+
+      /*{
         path: 'configuracion',
         loadComponent: () =>
           import('./pages/configuracion/configuracion')
@@ -147,7 +174,7 @@ export const CITAS_ROUTES: Routes = [
         data: {
           breadcrumb: 'Configuración'
         }
-      }
+      }*/
     ]
   }
 ];

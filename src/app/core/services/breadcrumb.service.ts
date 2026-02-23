@@ -36,7 +36,7 @@ export class BreadcrumbService {
       }
     }
 
-    const systemName = this.auth.getCurrentSystem()?.subsystem_name ?? 'Sistema';
+    const systemName = this.auth.getCurrentSystem()?.subsystem.name ?? 'Sistema';
 
     this._breadcrumbs.set([
       systemName,

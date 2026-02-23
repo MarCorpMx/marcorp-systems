@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+
 import {
   Calendar,
   GraduationCap,
@@ -44,7 +45,8 @@ export class SelectSystem {
 
   ngOnInit(): void { 
     this.systems = this.auth.getSystems();
-    console.log('getSystems: ', this.systems);
+
+    //console.log(this.systems);
 
     if (this.systems.length === 1) {
       this.selectSystem(this.systems[0]);
@@ -52,10 +54,20 @@ export class SelectSystem {
   }
 
   selectSystem(system: any) {
+    // system -> los datos propios del sistema elegido
+    // system.subsystem_key -> citas | escolar | inventarios
+
     this.auth.setCurrentSystem(system);
 
+    //console.log(`/sistemas/${system.subsystem.key}`);
+
+    //this.router.navigate(['/sistemas/citas']);
+
+    //return;
+
     // redirección por key
-    this.router.navigate([`/sistemas/${system.subsystem_key}`]);
+    //this.router.navigate([`/sistemas/${system.subsystem_key}`]);
+    this.router.navigate([`/sistemas/${system.subsystem.key}`]);
   }
 
   getIcon(systemKey: string) {

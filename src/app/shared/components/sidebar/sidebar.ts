@@ -35,7 +35,7 @@ export class Sidebar {
   menu = computed(() => {
     //console.log('curren ',this.currentSystem);
     if (!this.currentSystem) return [];
-    return SYSTEM_MENUS[this.currentSystem.subsystem_key] || [];
+    return SYSTEM_MENUS[this.currentSystem.subsystem.key] || [];
   });
 
   closeSidebar() {
@@ -45,7 +45,7 @@ export class Sidebar {
   hasAccess(item: any): boolean {
     if (!item.roles) return true;
     return item.roles.some((r: string) =>
-      this.currentSystem.roles?.includes(r)
+      this.currentSystem.role?.includes(r)
     );
   }
 

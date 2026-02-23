@@ -16,78 +16,75 @@
        SKELETON
   =============================== -->
   @if (loading) {
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
-      <div *ngFor="let _ of [1,2,3,4,5]"
-           class="bg-[var(--bg-surface)]
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
+    <div *ngFor="let _ of [1,2,3,4,5]" class="bg-[var(--bg-surface)]
                   border border-[var(--border-soft)]
                   rounded-xl p-6 space-y-3">
-        <div class="h-6 w-32 bg-[var(--border-soft)] rounded"></div>
-        <div class="h-4 w-full bg-[var(--border-soft)] rounded"></div>
-        <div class="h-4 w-3/4 bg-[var(--border-soft)] rounded"></div>
-      </div>
+      <div class="h-6 w-32 bg-[var(--border-soft)] rounded"></div>
+      <div class="h-4 w-full bg-[var(--border-soft)] rounded"></div>
+      <div class="h-4 w-3/4 bg-[var(--border-soft)] rounded"></div>
     </div>
+  </div>
   }
 
   <!-- ===============================
        EMPTY STATE
   =============================== -->
   @else if (!loading && sections.length === 0) {
-    <div class="bg-[var(--bg-surface)]
+  <div class="bg-[var(--bg-surface)]
                 border border-dashed border-[var(--border-soft)]
                 rounded-xl p-10 text-center space-y-4">
 
-      <h3 class="text-lg font-semibold text-[var(--text-primary)]">
-        Sin configuraciones disponibles
-      </h3>
+    <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+      Sin configuraciones disponibles
+    </h3>
 
-      <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
-        Aún no hay opciones configurables en este sistema.
-      </p>
-    </div>
+    <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+      Aún no hay opciones configurables en este sistema.
+    </p>
+  </div>
   }
 
   <!-- ===============================
        CONFIG SECTIONS
   =============================== -->
   @else {
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
-      @for (section of sections; track section.id) {
-        <div class="bg-[var(--bg-surface)]
+    @for (section of sections; track section.id) {
+    <div class="bg-[var(--bg-surface)]
                     border border-[var(--border-soft)]
                     rounded-xl p-6
                     hover:shadow-soft transition
-                    flex flex-col justify-between">
+                    flex flex-col justify-between" [class.opacity-50]="isLocked(section)">
 
-          <div class="space-y-3">
-            <div class="w-10 h-10 rounded-lg
+      <div class="space-y-3">
+        <div class="w-10 h-10 rounded-lg
                         bg-[var(--system-accent)]
                         flex items-center justify-center">
-              <lucide-icon
-                [name]="section.icon"
-                class="w-5 h-5 text-[var(--system-secondary)]">
-              </lucide-icon>
-            </div>
-
-            <h3 class="font-semibold text-[var(--text-primary)]">
-              {{ section.title }}
-            </h3>
-
-            <p class="text-sm text-[var(--text-secondary)]">
-              {{ section.description }}
-            </p>
-          </div>
-
-          <button class="mt-4 text-sm
-                         text-[var(--system-primary)]
-                         hover:underline self-start">
-            Configurar →
-          </button>
-
+          <lucide-icon [name]="section.icon" class="w-5 h-5 text-[var(--system-secondary)]">
+          </lucide-icon>
         </div>
-      }
+
+        <h3 class="font-semibold text-[var(--text-primary)]">
+          {{ section.title }}
+        </h3>
+
+        <p class="text-sm text-[var(--text-secondary)]">
+          {{ section.description }}
+        </p>
+      </div>
+      
+      <button (click)="!isLocked(section) && goTo(section)" class="mt-4 text-sm self-start"
+        [class.text-gray-400]="isLocked(section)" [class.text-[var(--system-primary)]]="!isLocked(section)"
+        [class.hover:underline]="!isLocked(section)" [class.cursor-pointer]="!isLocked(section)">
+        {{ isLocked(section) ? 'Disponible en plan superior' : 'Configurar →' }}
+      </button>
 
     </div>
+    }
+
+  </div>
   }
 
 </section>

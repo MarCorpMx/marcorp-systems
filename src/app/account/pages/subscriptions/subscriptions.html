@@ -1,89 +1,148 @@
-<section class="subscriptions-page space-y-6">
-
-  <!-- HEADER -->
-  <div>
-    <h2 class="text-xl font-semibold">
-      Suscripciones
-    </h2>
-    <p class="text-sm text-[var(--text-secondary)]">
-      Administra tu plan y accede a más funcionalidades
-    </p>
-  </div>
+<section class="subscriptions-page space-y-8">
 
   <!-- ===============================
-       SKELETON
+       HEADER
+  =============================== -->
+  <header class="space-y-1">
+    <h1 class="text-2xl font-semibold tracking-tight">
+      Planes y suscripciones
+    </h1>
+
+    <p class="text-sm text-[var(--text-secondary)] max-w-xl">
+      Administra el plan de este subsistema y controla los límites de uso de tu organización.
+    </p>
+  </header>
+
+  <!-- ===============================
+       SKELETON LOADING
   =============================== -->
   @if (loading()) {
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 animate-pulse">
-      <div *ngFor="let _ of [1,2,3]"
-           class="bg-[var(--bg-surface)]
-                  border border-[var(--border-soft)]
-                  rounded-xl p-6 space-y-4">
-        <div class="h-4 w-24 bg-[var(--border-soft)] rounded"></div>
-        <div class="h-6 w-32 bg-[var(--border-soft)] rounded"></div>
+  <div class="plans-grid animate-pulse" aria-busy="true">
+
+    @for (s of [1, 2, 3]; track s) {
+    <div class="plan-card">
+
+      <div class="h-4 w-24 bg-[var(--border-soft)] rounded"></div>
+      <div class="h-8 w-36 bg-[var(--border-soft)] rounded"></div>
+
+      <div class="space-y-2 mt-2">
         <div class="h-3 w-full bg-[var(--border-soft)] rounded"></div>
-        <div class="h-3 w-3/4 bg-[var(--border-soft)] rounded"></div>
+        <div class="h-3 w-5/6 bg-[var(--border-soft)] rounded"></div>
       </div>
+
+      <ul class="features space-y-2 mt-4">
+        <li class="h-3 w-full bg-[var(--border-soft)] rounded"></li>
+        <li class="h-3 w-4/5 bg-[var(--border-soft)] rounded"></li>
+        <li class="h-3 w-3/5 bg-[var(--border-soft)] rounded"></li>
+      </ul>
+
+      <div class="h-9 w-full bg-[var(--border-soft)] rounded mt-auto"></div>
     </div>
+    }
+
+  </div>
   }
 
   <!-- ===============================
-       EMPTY
+       EMPTY STATE (NO PLAN ACTIVE)
   =============================== -->
   @else if (!hasPlan()) {
-    <div class="bg-[var(--bg-surface)]
-                border border-dashed border-[var(--border-soft)]
-                rounded-xl p-10 text-center space-y-4">
+  <div class="bg-[var(--bg-surface)]
+           border border-dashed border-[var(--border-soft)]
+           rounded-2xl p-10 text-center space-y-4">
+    <h3 class="text-lg font-semibold">
+      No hay un plan activo
+    </h3>
 
-      <h3 class="text-lg font-semibold">
-        No tienes un plan activo
-      </h3>
+    <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+      Activa un plan para comenzar a usar este subsistema y desbloquear sus funcionalidades.
+    </p>
 
-      <p class="text-sm text-[var(--text-secondary)]">
-        Elige un plan para comenzar a usar el sistema.
-      </p>
-    </div>
+    <button class="btn-primary">
+      Ver planes disponibles
+    </button>
+  </div>
   }
 
   <!-- ===============================
        PLANS
   =============================== -->
   @else {
-    <div class="plans-grid">
-      @for (plan of plans(); track plan.id) {
+  <div class="plans-grid">
 
-        <div class="plan-card"
-             [class.current]="plan.current">
+    @for (plan of plans(); track $index) {
+    <article class="plan-card" [class.current]="plan.current" [class.highlight]="plan.highlight"
+      aria-selected="{{ plan.current }}">
 
-          <div class="plan-header">
-            <h3>{{ plan.name }}</h3>
-            <span class="price">{{ plan.price }}</span>
-            <p class="description">{{ plan.description }}</p>
-          </div>
+      <!-- Current badge -->
+      @if (plan.current) {
+      <span class="current-badge">
+        Plan actual
+      </span>
+      }
 
-          <ul class="features">
-            @for (feature of plan.features; track feature) {
-              <li>✓ {{ feature }}</li>
-            }
-          </ul>
+      @if (plan.highlight) {
+      <span class="popular-badge">
+        Recomendado
+      </span>
+      }
 
-          <div class="actions">
-            @if (plan.current) {
-              <span class="current-badge">
-                Plan actual
-              </span>
-            } @else {
-              <button class="btn-primary"
-                      (click)="upgrade(plan)">
-                Elegir plan
-              </button>
-            }
-          </div>
 
+
+      <!-- Header -->
+      <div class="plan-header space-y-1">
+        <h3 class="text-base font-semibold">
+          {{ plan.name }}
+        </h3>
+
+        <div class="price">
+          {{ plan.price }}
+          <span class="price-period">/ mes</span>
         </div>
 
-      }
-    </div>
+        <p class="description">
+          {{ plan.description }}
+        </p>
+      </div>
+
+      <!-- Features -->
+      <ul class="features">
+        @for (feature of plan.features; track $index) {
+        <li class="feature-item" [class.disabled]="!feature.enabled">
+          <span class="icon">
+            {{ feature.enabled ? '✓' : '✕' }}
+          </span>
+
+          <span class="name">
+            {{ feature.name }}
+          </span>
+
+          @if (feature.limit !== null) {
+          <span class="limit">
+            hasta {{ feature.limit }}
+          </span>
+          }
+        </li>
+        }
+      </ul>
+
+      <!-- Actions -->
+      <div class="actions">
+        @if (plan.current) {
+        <button class="btn-secondary w-full" disabled>
+          Plan activo
+        </button>
+        } @else {
+        <button class="btn-primary w-full" (click)="upgrade(plan)">
+          Cambiar a este plan
+        </button>
+        }
+      </div>
+
+    </article>
+    }
+
+  </div>
   }
 
 </section>

@@ -19,7 +19,7 @@ export class ThemeService {
    */
   setCurrentSystem(system: any) {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(system));
-    this.applySystemTheme(system.subsystem_key);
+    this.applySystemTheme(system.subsystem.key);
   }
 
   /**
@@ -35,8 +35,8 @@ export class ThemeService {
   restoreThemeFromStorage() {
     const system = this.getCurrentSystem();
 
-    if (system?.subsystem_key) {
-      this.applySystemTheme(system.subsystem_key);
+    if (system?.subsystem.key) {
+      this.applySystemTheme(system.subsystem.key);
     } else {
       this.clearTheme();
     }

@@ -26,10 +26,11 @@ export class AuthService {
   login(data: { email?: string; username?: string; login?: string; password: string }) {
     return this.api.post<any>('auth/login', data).pipe(
       tap(res => {
-        console.log(res);
         localStorage.setItem('auth_token', res.token);
         localStorage.setItem('user', JSON.stringify(res.user));
         localStorage.setItem('systems', JSON.stringify(res.systems));
+
+        console.log(JSON.stringify(res.systems));
 
         this.redirectToSystem();
       })
@@ -49,7 +50,7 @@ export class AuthService {
     if (systems.length === 1) {
       // Solo un sistema → entrar directo
       this.setCurrentSystem(systems[0]);
-      this.router.navigate([`/sistemas/${systems[0].subsystem_key}`]);
+      this.router.navigate([`/sistemas/${systems[0].subsystem.key}`]);
       return;
     }
 

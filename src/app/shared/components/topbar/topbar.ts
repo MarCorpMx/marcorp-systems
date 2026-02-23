@@ -46,47 +46,7 @@ export class Topbar {
 
   breadcrumbs = this.breadcrumbService.breadcrumbs;
 
-  constructor() {
-    /*this.router.events
-      .pipe(filter(e => e instanceof NavigationEnd))
-      .subscribe(() => this.buildBreadcrumbs());*/
-  }
-
-  /*buildBreadcrumbs() {
-    const url = this.router.url
-      .split('?')[0]
-      .split('/')
-      .filter(Boolean);
-
-    // /systems/citas/dashboard → ["Citas", "Dashboard"]
-    this.breadcrumbs = url.slice(2).map(v =>
-      v.charAt(0).toUpperCase() + v.slice(1)
-    );
-  }*/
-
-
-  /*buildBreadcrumbs() {
-    const urlParts = this.router.url
-      .split('?')[0]
-      .split('/')
-      .filter(Boolean);
-
-    // Ej: ['systems', 'citas', 'dashboard']
-    const routeCrumbs = urlParts.slice(2).map(v =>
-      v.charAt(0).toUpperCase() + v.slice(1)
-    );
-
-    const currentSystem = this.auth.getCurrentSystem();
-
-    if (currentSystem?.subsystem_name) {
-      this.breadcrumbs = [
-        currentSystem.subsystem_name,
-        ...routeCrumbs
-      ];
-    } else {
-      this.breadcrumbs = routeCrumbs;
-    }
-  }*/
+  constructor() {}
 
   toggleUserMenu() {
     this.userMenuOpen.update(v => !v);

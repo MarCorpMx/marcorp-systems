@@ -4,7 +4,7 @@
     <div class="sidebar-header">
         <div class="logo">M</div>
         <div class="system">
-            <span class="name">{{ currentSystem?.subsystem_name }}</span>
+            <span class="name">{{ currentSystem?.subsystem.name }}</span>
             @if(systems.length > 1){
             <button class="switch" (click)="switchSystem()">
                 Cambiar sistema

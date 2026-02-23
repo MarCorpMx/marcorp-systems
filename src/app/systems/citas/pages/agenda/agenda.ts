@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../../core/services/auth.service';
 import {
   LucideAngularModule,
   Calendar,
@@ -44,6 +45,8 @@ export class Agenda implements OnInit {
   readonly Check = Check;
   readonly MessageCircle = MessageCircle;
   readonly Mail = Mail;
+
+  private auth = inject(AuthService);
 
   loading = true;
   tieneDatos = true;
@@ -124,6 +127,10 @@ export class Agenda implements OnInit {
   }
 
   ngOnInit() {
+
+    console.log(this.auth.getCurrentSystem());
+    console.log(this.auth.getSystems());
+
     // 🔥 Simulación de carga
     setTimeout(() => {
       this.loading = false;

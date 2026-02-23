@@ -1,70 +1,280 @@
+/* =====================================================
+   SUBSCRIPTIONS – SAAS PREMIUM UI
+===================================================== */
+
+/* Page container */
 .subscriptions-page {
-  max-width: 1000px;
+  max-width: 1100px;
+  margin: 0 auto;
 }
+
+/* =====================================================
+   GRID
+===================================================== */
 
 .plans-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.2rem;
+  gap: 1.75rem;
 }
+
+/* =====================================================
+   PLAN CARD
+===================================================== */
 
 .plan-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-soft);
-  border-radius: 16px;
-  padding: 1.5rem;
+  border-radius: 20px;
+  padding: 1.75rem;
+
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  transition: transform .2s ease, box-shadow .2s ease;
+  gap: 1.2rem;
+
+  position: relative;
+
+  transition:
+    transform .25s ease,
+    box-shadow .25s ease,
+    border-color .25s ease;
 }
 
 .plan-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-soft);
 }
 
+/* =====================================================
+   CURRENT PLAN
+===================================================== */
+
 .plan-card.current {
   border-color: var(--system-primary, var(--marcorp-primary));
+  box-shadow:
+    0 0 0 1px color-mix(
+      in srgb,
+      var(--system-primary, var(--marcorp-primary)) 40%,
+      transparent
+    ),
+    var(--shadow-soft);
 }
 
-.plan-header h3 {
+/* Badge */
+.current-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+
+  padding: .4rem .85rem;
+  border-radius: 999px;
+
+  font-size: .7rem;
   font-weight: 600;
-  font-size: 1.1rem;
-}
+  letter-spacing: .03em;
 
-.price {
-  font-size: 1.4rem;
-  font-weight: 700;
+  background:
+    color-mix(
+      in srgb,
+      var(--system-primary, var(--marcorp-primary)) 15%,
+      transparent
+    );
+
   color: var(--system-primary, var(--marcorp-primary));
 }
+
+/* =====================================================
+   PLAN HEADER
+===================================================== */
+
+.plan-header h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+/* =====================================================
+   PRICE
+===================================================== */
+
+.price {
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--system-primary, var(--marcorp-primary));
+}
+
+.price-period {
+  font-size: .8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-left: .25rem;
+}
+
+/* =====================================================
+   DESCRIPTION
+===================================================== */
 
 .description {
   font-size: .85rem;
   color: var(--text-secondary);
+  line-height: 1.45;
 }
+
+/* =====================================================
+   FEATURES
+===================================================== */
 
 .features {
   list-style: none;
   padding: 0;
-  margin: 0;
-  font-size: .85rem;
+  margin: .5rem 0;
 
-  li {
-    margin-bottom: .3rem;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+
+  font-size: .85rem;
 }
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+
+  color: var(--text-secondary);
+}
+
+.feature-item .icon {
+  font-size: .7rem;
+  font-weight: 700;
+  line-height: 1;
+
+  color: var(--system-primary, var(--marcorp-primary));
+}
+
+/* Disabled feature */
+.feature-item.disabled {
+  opacity: .45;
+}
+
+.feature-item.disabled .icon {
+  color: var(--text-secondary);
+}
+
+/* Limit (up to X) */
+.feature-item .limit {
+  font-size: .75rem;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+/* =====================================================
+   ACTIONS
+===================================================== */
 
 .actions {
   margin-top: auto;
+  padding-top: 1rem;
 }
 
-.current-badge {
-  display: inline-block;
-  padding: .4rem .8rem;
-  border-radius: 999px;
-  font-size: .75rem;
-  font-weight: 600;
-  background: rgba(16,185,129,.15);
-  color: var(--system-primary, var(--marcorp-primary));
+.actions button {
+  width: 100%;
+  font-size: .85rem;
 }
+
+/* Disabled button (current plan) */
+.actions button:disabled {
+  opacity: .6;
+  cursor: default;
+}
+
+/* =====================================================
+   MICRO INTERACTIONS
+===================================================== */
+
+.plan-card:hover .price {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+/* =====================================================
+   POPULAR / RECOMMENDED PLAN
+===================================================== */
+
+.plan-card.highlight {
+  border-color: var(--system-primary, var(--marcorp-primary));
+  transform: translateY(-6px);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.15),
+    0 0 0 2px color-mix(
+      in srgb,
+      var(--system-primary, var(--marcorp-primary)) 35%,
+      transparent
+    );
+}
+
+/* Badge */
+.popular-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+
+  padding: .45rem .9rem;
+  border-radius: 999px;
+
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+
+  background: linear-gradient(
+    135deg,
+    var(--system-primary, var(--marcorp-primary)),
+    color-mix(
+      in srgb,
+      var(--system-primary, var(--marcorp-primary)) 70%,
+      black
+    )
+  );
+
+  color: white;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+/* Hover stays stronger */
+.plan-card.highlight:hover {
+  transform: translateY(-8px) scale(1.01);
+}
+
+/* Button emphasis */
+.plan-card.highlight .actions button:not(:disabled) {
+  background: var(--system-primary, var(--marcorp-primary));
+  color: white;
+  border-color: transparent;
+}
+
+.plan-card.highlight .actions button:not(:disabled):hover {
+  filter: brightness(1.05);
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 640px) {
+  .plans-grid {
+    gap: 1.25rem;
+  }
+
+  .plan-card {
+    padding: 1.4rem;
+  }
+
+  .price {
+    font-size: 1.5rem;
+  }
+}
+
+

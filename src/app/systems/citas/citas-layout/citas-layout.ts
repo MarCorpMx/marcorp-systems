@@ -18,7 +18,7 @@ export class CitasLayout {
   restoreSystemTheme() {
     const system = JSON.parse(localStorage.getItem('current_system') || 'null');
     if (system) {
-      document.body.setAttribute('data-system', system.subsystem_key);
+      document.body.setAttribute('data-system', system.subsystem.key);
     }
   }
 }

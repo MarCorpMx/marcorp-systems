@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import {
   LucideAngularModule,
   Building2,
@@ -14,6 +15,8 @@ interface ConfigSection {
   title: string;
   description: string;
   icon: any;
+  route: string;
+  requiredPlan?: string; // opcional para control por plan
 }
 
 @Component({
@@ -31,37 +34,46 @@ export class Configuracion implements OnInit {
   readonly Sliders = Sliders;
 
   loading = true;
+  currentPlanKey = 'basic'; // esto luego vendrá del backend - rombi
+
+  constructor(private router: Router) { }
 
   sections: ConfigSection[] = [
     {
       id: 1,
-      title: 'Consultorio',
-      description: 'Nombre, dirección, datos de contacto y branding.',
-      icon: this.Building2
+      title: 'Perfil del negocio',
+      description: 'Nombre comercial, dirección, contacto y branding.',
+      icon: this.Building2,
+      route: '/sistemas/citas/configuracion/perfil'
     },
     {
       id: 2,
-      title: 'Horarios generales',
-      description: 'Días laborales, duración de citas y descansos.',
-      icon: this.Clock
+      title: 'Preferencias de agenda',
+      description: 'Duración por defecto, tiempos de descanso y reglas.',
+      icon: this.Clock,
+      route: '/sistemas/citas/configuracion/agenda'
     },
     {
       id: 3,
       title: 'Notificaciones',
-      description: 'Recordatorios automáticos y avisos del sistema.',
-      icon: this.Bell
+      description: 'Canales, plantillas y comportamiento de recordatorios.',
+      icon: this.Bell,
+      route: '/citas/configuracion/notificaciones'
     },
     {
       id: 4,
-      title: 'Facturación',
-      description: 'Pagos, ingresos y comprobantes.',
-      icon: this.CreditCard
+      title: 'Pagos y facturación',
+      description: 'Métodos de pago y configuración fiscal.',
+      icon: this.CreditCard,
+      route: '/citas/configuracion/pagos',
+      requiredPlan: 'pro'
     },
     {
       id: 5,
-      title: 'Sistema',
-      description: 'Opciones avanzadas y comportamiento del sistema.',
-      icon: this.Sliders
+      title: 'Avanzado',
+      description: 'Integraciones, seguridad y opciones técnicas.',
+      icon: this.Sliders,
+      route: '/citas/configuracion/avanzado'
     }
   ];
 
@@ -73,6 +85,21 @@ export class Configuracion implements OnInit {
       // this.sections = [];
 
     }, 1200);
+  }
+
+  isLocked(section: ConfigSection): boolean {
+    if (!section.requiredPlan) return false;
+
+    const hierarchy = ['free', 'basic', 'pro', 'premium', 'founder_lifetime'];
+
+    return (
+      hierarchy.indexOf(this.currentPlanKey) <
+      hierarchy.indexOf(section.requiredPlan)
+    );
+  }
+
+  goTo(section: ConfigSection) {
+    this.router.navigateByUrl(section.route);
   }
 
 }

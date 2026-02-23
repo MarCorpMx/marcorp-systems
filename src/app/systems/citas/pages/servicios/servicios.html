@@ -1,19 +1,20 @@
-<section class="space-y-6">
+<section class="relative space-y-6">
 
   <!-- ===============================
        HEADER
   =============================== -->
-  <div class="flex items-center justify-between">
+  <!-- <div class="flex items-center justify-between"> -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <h2 class="text-xl font-semibold text-[var(--text-primary)]">
       Servicios
     </h2>
 
-    <button class="inline-flex items-center gap-2
+    <button (click)="openCreate()" class="inline-flex items-center gap-2
            px-4 py-2 rounded-lg
            bg-[var(--system-primary)]
            text-white text-sm
            hover:bg-[var(--system-secondary)]
-           transition">
+           transition cursor-pointer">
 
       <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
       Nuevo servicio
@@ -24,112 +25,278 @@
        SKELETON
   =============================== -->
   @if (loading) {
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
-      @for (_ of [1,2,3]; track _) {
-        <div class="bg-[var(--bg-surface)]
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
+    @for (_ of [1,2,3]; track _) {
+    <div class="bg-[var(--bg-surface)]
                     border border-[var(--border-soft)]
                     rounded-xl p-5 space-y-4">
-          <div class="h-5 w-40 bg-[var(--border-soft)] rounded"></div>
-          <div class="h-4 w-28 bg-[var(--border-soft)] rounded"></div>
-          <div class="h-4 w-full bg-[var(--border-soft)] rounded"></div>
-          <div class="h-8 w-20 bg-[var(--border-soft)] rounded"></div>
-        </div>
-      }
+      <div class="h-5 w-40 bg-[var(--border-soft)] rounded"></div>
+      <div class="h-4 w-28 bg-[var(--border-soft)] rounded"></div>
+      <div class="h-4 w-full bg-[var(--border-soft)] rounded"></div>
+      <div class="h-8 w-20 bg-[var(--border-soft)] rounded"></div>
     </div>
+    }
+  </div>
   }
 
   <!-- ===============================
        EMPTY STATE
   =============================== -->
   @else if (!loading && services.length === 0) {
-    <div class="bg-[var(--bg-surface)]
+  <div class="bg-[var(--bg-surface)]
          border border-dashed border-[var(--border-soft)]
          rounded-xl p-10 text-center space-y-4">
 
-      <div class="mx-auto w-12 h-12 rounded-full
+    <div class="mx-auto w-12 h-12 rounded-full
            bg-[var(--system-accent)]
            flex items-center justify-center">
-        <lucide-icon [name]="Palette" class="w-6 h-6 text-[var(--system-secondary)]"></lucide-icon>
-      </div>
+      <lucide-icon [name]="Palette" class="w-6 h-6 text-[var(--system-secondary)]"></lucide-icon>
+    </div>
 
-      <h3 class="text-lg font-semibold text-[var(--text-primary)]">
-        Aún no tienes servicios
-      </h3>
+    <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+      Aún no tienes servicios
+    </h3>
 
-      <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
-        Crea servicios para poder agendar citas y definir duración, precio y modalidad.
-      </p>
+    <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+      Crea servicios para poder agendar citas y definir duración, precio y modalidad.
+    </p>
 
-      <button class="inline-flex items-center gap-2
+    <button (click)="openCreate()" class="inline-flex items-center gap-2
              px-4 py-2 rounded-lg
              bg-[var(--system-primary)]
              text-white
              hover:bg-[var(--system-secondary)]
-             transition">
-        <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
-        Crear primer servicio
-      </button>
-    </div>
+             transition cursor-pointer">
+      <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
+      Crear primer servicio
+    </button>
+  </div>
   }
 
   <!-- ===============================
        SERVICES GRID
   =============================== -->
   @else {
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
-      @for (service of services; track service.id) {
-        <div class="bg-[var(--bg-surface)]
+    @for (service of services; track service.id) {
+    <div class="bg-[var(--bg-surface)]
                     border border-[var(--border-soft)]
                     rounded-xl p-5 space-y-3
                     hover:shadow-soft transition">
 
-          <!-- Header -->
-          <div class="flex items-center justify-between">
-            <p class="font-medium text-[var(--text-primary)]">
-              {{ service.name }}
-            </p>
+      <!-- Header -->
+      <div class="flex items-center justify-between">
+        <p class="font-medium text-[var(--text-primary)]">
+          {{ service.name }}
+        </p>
 
-            <span class="w-4 h-4 rounded-full"
-                  [style.background]="service.color">
-            </span>
-          </div>
+        <span class="w-4 h-4 rounded-full" [style.background]="service.color">
+        </span>
+      </div>
 
-          <!-- Meta -->
-          <div class="space-y-1 text-sm text-[var(--text-secondary)]">
+      <!-- Meta -->
+      <div class="space-y-1 text-sm text-[var(--text-secondary)]">
 
-            <div class="flex items-center gap-2">
-              <lucide-icon [name]="Clock" class="w-4 h-4"></lucide-icon>
-              {{ service.duration }} min
-            </div>
-
-            <div class="flex items-center gap-2">
-              <lucide-icon [name]="DollarSign" class="w-4 h-4"></lucide-icon>
-              ${{ service.price }}
-            </div>
-
-            <div class="flex items-center gap-2">
-              <lucide-icon
-                [name]="getModeIcon(service.mode)"
-                class="w-4 h-4">
-              </lucide-icon>
-
-              {{ getModeLabel(service.mode) }}
-            </div>
-
-          </div>
-
-          <!-- Actions -->
-          <div class="pt-2">
-            <button class="text-sm text-[var(--system-primary)] hover:underline">
-              Editar servicio
-            </button>
-          </div>
-
+        <div class="flex items-center gap-2">
+          <lucide-icon [name]="Clock" class="w-4 h-4"></lucide-icon>
+          {{ service.duration_minutes }} min
         </div>
-      }
+
+        <div class="flex items-center gap-2">
+          <lucide-icon [name]="DollarSign" class="w-4 h-4"></lucide-icon>
+          ${{ service.price }}
+        </div>
+
+        <div class="flex items-center gap-2">
+          <lucide-icon [name]="getModeIcon(service.mode)" class="w-4 h-4">
+          </lucide-icon>
+
+          {{ getModeLabel(service.mode) }}
+        </div>
+
+      </div>
+
+      <!-- Actions -->
+      <div class="pt-3 flex items-center justify-between">
+
+        <!-- Edit -->
+        <button (click)="openEdit(service)" class="text-sm font-medium
+           text-[var(--system-primary)]
+           hover:text-[var(--system-secondary)]
+           transition cursor-pointer">
+          Editar
+        </button>
+
+        <!-- Delete -->
+        <button (click)="delete(service)" class="text-sm font-medium
+           text-red-500
+           hover:text-red-600
+           transition cursor-pointer">
+          Eliminar
+        </button>
+
+      </div>
 
     </div>
+    }
+
+  </div>
+  }
+
+
+  @if (showModal) {
+  <div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64 
+            z-50 flex items-center justify-center p-4">
+
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeModal()">
+    </div>
+
+    <!-- Modal -->
+    <div class="relative w-full max-w-md
+                bg-[var(--bg-surface)]
+                border border-[var(--border-soft)]
+                rounded-2xl shadow-xl
+                p-6 space-y-6
+                animate-in fade-in zoom-in-95 duration-200">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+          {{ editingService ? 'Editar servicio' : 'Nuevo servicio' }}
+        </h3>
+
+        <button (click)="closeModal()"
+          class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
+
+        <!-- Nombre -->
+        <div class="space-y-1">
+          <label class="text-sm text-[var(--text-secondary)]">
+            Nombre del servicio
+          </label>
+          <input type="text" formControlName="name" class="w-full px-3 py-2 rounded-lg
+                   bg-[var(--bg-base)]
+                   border border-[var(--border-soft)]
+                   focus:outline-none
+                   focus:ring-2
+                   focus:ring-[var(--system-primary)]
+                   text-[var(--text-primary)]" />
+        </div>
+
+        <!-- Duración -->
+        <div class="space-y-1">
+          <label class="text-sm text-[var(--text-secondary)]">
+            Duración (minutos)
+          </label>
+          <input type="number" formControlName="duration_minutes" class="w-full px-3 py-2 rounded-lg
+                   bg-[var(--bg-base)]
+                   border border-[var(--border-soft)]
+                   focus:outline-none
+                   focus:ring-2
+                   focus:ring-[var(--system-primary)]
+                   text-[var(--text-primary)]" />
+        </div>
+
+        <!-- Precio -->
+        <div class="space-y-1">
+          <label class="text-sm text-[var(--text-secondary)]">
+            Precio
+          </label>
+          <input type="number" formControlName="price" class="w-full px-3 py-2 rounded-lg
+                   bg-[var(--bg-base)]
+                   border border-[var(--border-soft)]
+                   focus:outline-none
+                   focus:ring-2
+                   focus:ring-[var(--system-primary)]
+                   text-[var(--text-primary)]" />
+        </div>
+
+        <!-- Modalidad -->
+        <div class="space-y-2">
+          <label class="text-sm text-[var(--text-secondary)]">
+            Modalidad
+          </label>
+
+          <div class="grid grid-cols-3 gap-2">
+
+            <!-- Online -->
+            <button type="button" (click)="form.patchValue({ mode: 'online' })"
+              [class.bg-[var(--system-primary)]]="form.value.mode === 'online'"
+              [class.text-white]="form.value.mode === 'online'" class="flex items-center justify-center gap-2
+             px-3 py-2 rounded-lg
+             border border-[var(--border-soft)]
+             text-sm
+             hover:bg-[var(--bg-base)]
+             transition cursor-pointer">
+
+              <lucide-icon [name]="Video" class="w-4 h-4"></lucide-icon>
+              Online
+            </button>
+
+            <!-- Presencial -->
+            <button type="button" (click)="form.patchValue({ mode: 'presential' })"
+              [class.bg-[var(--system-primary)]]="form.value.mode === 'presential'"
+              [class.text-white]="form.value.mode === 'presential'" class="flex items-center justify-center gap-2
+             px-3 py-2 rounded-lg
+             border border-[var(--border-soft)]
+             text-sm
+             hover:bg-[var(--bg-base)]
+             transition cursor-pointer">
+
+              <lucide-icon [name]="MapPin" class="w-4 h-4"></lucide-icon>
+              Presencial
+            </button>
+
+            <!-- Híbrido -->
+            <button type="button" (click)="form.patchValue({ mode: 'hybrid' })"
+              [class.bg-[var(--system-primary)]]="form.value.mode === 'hybrid'"
+              [class.text-white]="form.value.mode === 'hybrid'" class="flex items-center justify-center gap-2
+             px-3 py-2 rounded-lg
+             border border-[var(--border-soft)]
+             text-sm
+             hover:bg-[var(--bg-base)]
+             transition cursor-pointer">
+
+              <lucide-icon [name]="Video" class="w-4 h-4"></lucide-icon>
+              Híbrido
+            </button>
+
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end gap-3 pt-4">
+
+          <button type="button" (click)="closeModal()" class="px-4 py-2 rounded-lg
+                         border border-[var(--border-soft)]
+                         text-[var(--text-secondary)]
+                         hover:bg-[var(--bg-base)]
+                         transition cursor-pointer">
+            Cancelar
+          </button>
+
+          <button type="submit" [disabled]="form.invalid" class="px-4 py-2 rounded-lg
+                         bg-[var(--system-primary)]
+                         text-white
+                         hover:bg-[var(--system-secondary)]
+                         disabled:opacity-50
+                         transition cursor-pointer">
+            {{ editingService ? 'Actualizar' : 'Guardar' }}
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+  </div>
   }
 
 </section>

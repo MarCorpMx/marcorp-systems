@@ -12,6 +12,7 @@ import { AuthService } from '../../core/services/auth.service';
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
+
 export class Login {
   readonly Eye = Eye;
   readonly EyeOff = EyeOff;
@@ -26,10 +27,10 @@ export class Login {
     private authService: AuthService) { }
 
   loginForm = new FormGroup({
-    login: new FormControl('', [Validators.required]),
-    password: new FormControl('', [Validators.required])
-    /*login: new FormControl('omar_root', [Validators.required]),
-    password: new FormControl('Root@123456', [Validators.required])*/
+    //login: new FormControl('', [Validators.required]),
+    //password: new FormControl('', [Validators.required])
+    login: new FormControl('michell_admin', [Validators.required]),
+    password: new FormControl('Admin@123456', [Validators.required])
   });
 
   get login() {
@@ -70,7 +71,7 @@ export class Login {
     // Llama al servicio 
     this.authService.login(payload).subscribe({
       next: (res) => {
-        this.notify.success('Acceso exitoso!!');
+        this.notify.success('Acceso concedido!!!');
       },
       error: (err) => {
         if (err.status === 401) {

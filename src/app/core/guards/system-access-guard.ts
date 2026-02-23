@@ -17,8 +17,9 @@ export const systemAccessGuard: CanMatchFn = (
     return false;
   }
 
+
   const hasAccess = systems.some(
-    (s: any) => s.subsystem_key === systemKey
+    (s: any) => s.subsystem.key === systemKey
   );
 
   if (!hasAccess) {
@@ -27,9 +28,14 @@ export const systemAccessGuard: CanMatchFn = (
   }
 
   // Guardar sistema actual
-  const system = systems.find(
+  /*const system = systems.find(
     (s: any) => s.subsystem_key === systemKey
+  );*/
+
+  const system = systems.find(
+    (s: any) => s.subsystem.key=== systemKey
   );
+
   auth.setCurrentSystem(system);
 
   return true;

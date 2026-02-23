@@ -59,6 +59,22 @@ html, body {
   --mat-sys-inverse-on-surface: white;
 }
 
+
+
+
+.input-primary {
+  @apply w-full mt-1 px-4 py-2 rounded-xl transition;
+  background: var(--bg-surface-soft);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+}
+
+.input-primary:focus {
+  outline: none;
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 2px var(--state-focus);
+}
+
 /*:root {
   --marcorp-primary: #10b981;
   --marcorp-bg-main: #0f1615;

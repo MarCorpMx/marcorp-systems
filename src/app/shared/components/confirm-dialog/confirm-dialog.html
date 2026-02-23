@@ -6,11 +6,11 @@
 
   <div class="actions">
     <button class="btn cancel" (click)="cancel.emit()">
-      Cancelar
+      {{ confirmDialog.btnCancelText() }}
     </button>
 
     <button class="btn confirm" (click)="confirm.emit()">
-      Cerrar sesión
+      {{ confirmDialog.btnConfirmText() }}
     </button>
   </div>
 </div>

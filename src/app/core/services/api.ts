@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 @Injectable({
   providedIn: 'root',
 })
+
 export class Api {
   private readonly API_URL = environment.apiUrl;
 

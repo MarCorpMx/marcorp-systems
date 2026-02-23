@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 @Injectable({
   providedIn: 'root',
 })
+
 export class Notification {
   constructor(private snackBar: MatSnackBar) { }
 

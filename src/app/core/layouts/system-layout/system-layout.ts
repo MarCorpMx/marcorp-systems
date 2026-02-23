@@ -41,6 +41,6 @@ export class SystemLayout {
     }
 
     // aplica el tema del sistema
-    this.theme.applySystemTheme(this.currentSystem.subsystem_key);
+    this.theme.applySystemTheme(this.currentSystem.subsystem.key);
   }
 }

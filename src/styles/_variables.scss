@@ -1,85 +1,130 @@
 :root {
-  /* ======================
+   /* ======================
      MARCORP – CORE BRAND
   ====================== */
 
-  --brand-primary: #18C48F;
-  --brand-primary-dark: #12A576;
-  --brand-primary-light: #4FE3B3;
+   --brand-primary: #18C48F;
+   --brand-primary-dark: #12A576;
+   --brand-primary-light: #4FE3B3;
 
-  --marcorp-primary: #18C48F;
-  --marcorp-primary-dark: #12A576;
-  --marcorp-primary-light: #4FE3B3;
+   --marcorp-primary: #18C48F;
+   --marcorp-primary-dark: #12A576;
+   --marcorp-primary-light: #4FE3B3;
 
-  --marcorp-bg-dark: #0E1111;
-  --marcorp-bg-card: #151A1A;
-  --marcorp-bg-soft: #1E2424;
+   --marcorp-bg-dark: #0E1111;
+   --marcorp-bg-card: #151A1A;
+   --marcorp-bg-soft: #1E2424;
 
-  //--marcorp-border: #263131;
+   //--marcorp-border: #263131;
 
-  /* === TEXTO === */
-  --marcorp-text-main: #e5e7eb; // texto principal (claro)
-  --marcorp-text-muted: #9ca3af; // texto secundario
+   /* === TEXTO === */
+   --marcorp-text-main: #e5e7eb; // texto principal (claro)
+   --marcorp-text-muted: #9ca3af; // texto secundario
 
-  /* === SUPERFICIES === */
-  --surface: #0f172a; // dropdowns / cards (slate-900)
-  --surface-soft: #020617; // sidebar / fondo oscuro
+   /* === SUPERFICIES === */
+   --surface: #0f172a; // dropdowns / cards (slate-900)
+   --surface-soft: #020617; // sidebar / fondo oscuro
 
-  /* === BORDES === */
-  --marcorp-border: rgba(255, 255, 255, .08);
+   /* === BORDES === */
+   --marcorp-border: rgba(255, 255, 255, .08);
 
-  /* === HOVER / ACTIVE === */
-  --hover: rgba(255, 255, 255, .08);
-  --active: rgba(16, 185, 129, .15);
+   /* === HOVER / ACTIVE === */
+   --hover: rgba(255, 255, 255, .08);
+   --active: rgba(16, 185, 129, .15);
 
-  /* === SHADOW === */
-  --shadow-soft: 0 10px 30px rgba(0, 0, 0, .35);
+   /* === SHADOW === */
+   --shadow-soft: 0 10px 30px rgba(0, 0, 0, .35);
+
+   /* ======================
+   MARCORP UTILITIES
+====================== */
+
+   .bg-surface {
+      background-color: var(--bg-surface);
+   }
+
+   .bg-surface-soft {
+      background-color: var(--bg-surface-soft);
+   }
+
+   .text-primary {
+      color: var(--text-primary);
+   }
+
+   .text-secondary {
+      color: var(--text-secondary);
+   }
+
+   .border-default {
+      border: 1px solid var(--border-default);
+   }
+
+   .input-dark {
+      background-color: var(--bg-surface-soft);
+      color: var(--text-primary);
+      border: 1px solid var(--border-default);
+   }
+
+   .input-dark:focus {
+      outline: none;
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 2px var(--state-focus);
+   }
+
+   .btn-primary {
+      background-color: var(--brand-primary);
+      color: #0E1111;
+   }
+
+   .btn-primary:hover {
+      background-color: var(--brand-primary-dark);
+   }
 
 
-  /**************************************************************************/
-  /* VERIFICAR ESTOS TEMAS */
-  
-  /* ======================
+   /**************************************************************************/
+   /* VERIFICAR ESTOS TEMAS */
+
+   /* ======================
    THEME – DARK
   ====================== */
 
-  --bg-app: #0E1111;
-  /* fondo general */
-  --bg-surface: #151A1A;
-  /* cards */
-  --bg-surface-soft: #1E2424;
-  /* sidebar / panels */
+   --bg-app: #0E1111;
+   /* fondo general */
+   --bg-surface: #151A1A;
+   /* cards */
+   --bg-surface-soft: #1E2424;
+   /* sidebar / panels */
 
-  /* ======================
+   /* ======================
    TEXT
 ====================== */
 
---text-primary: #EAFBF5;
---text-secondary: #9FBEB4;
---text-disabled: #6B8F82;
+   --text-primary: #EAFBF5;
+   --text-secondary: #9FBEB4;
+   --text-disabled: #6B8F82;
 
-/* ======================
+   /* ======================
    BORDERS
 ====================== */
 
---border-default: #263131;
---border-soft: rgba(255,255,255,.08);
+   --border-default: #263131;
+   --border-soft: rgba(255, 255, 255, .08);
 
-/* ======================
+   /* ======================
    STATES
 ====================== */
 
---state-hover: rgba(255,255,255,.08);
---state-active: rgba(24,196,143,.15);
---state-focus: rgba(24,196,143,.35);
+   --state-hover: rgba(255, 255, 255, .08);
+   --state-active: rgba(24, 196, 143, .15);
+   --state-focus: rgba(24, 196, 143, .35);
 
-/* ======================
+   /* ======================
    SHADOWS
 ====================== */
 
---shadow-soft: 0 10px 30px rgba(0,0,0,.35);
+   --shadow-soft: 0 10px 30px rgba(0, 0, 0, .35);
 
-/*
+   /*
 
 4️⃣ ¿Dónde usar cada color? (esto evita caos)
 🟢 Verde (brand-primary)
