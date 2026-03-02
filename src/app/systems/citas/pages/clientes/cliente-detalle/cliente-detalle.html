@@ -4,15 +4,15 @@
      SKELETON
   =============================== -->
   @if (loading) {
-    <div class="bg-[var(--bg-surface)] p-6 rounded-xl animate-pulse space-y-4">
-      <div class="h-6 w-40 bg-[var(--border-soft)] rounded"></div>
-      <div class="h-4 w-64 bg-[var(--border-soft)] rounded"></div>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
-        <div class="h-40 bg-[var(--bg-surface-soft)] rounded-xl"></div>
-        <div class="h-40 bg-[var(--bg-surface-soft)] rounded-xl"></div>
-        <div class="h-40 bg-[var(--bg-surface-soft)] rounded-xl"></div>
-      </div>
+  <div class="bg-[var(--bg-surface)] p-6 rounded-xl animate-pulse space-y-4">
+    <div class="h-6 w-40 bg-[var(--border-soft)] rounded"></div>
+    <div class="h-4 w-64 bg-[var(--border-soft)] rounded"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
+      <div class="h-40 bg-[var(--bg-surface-soft)] rounded-xl"></div>
+      <div class="h-40 bg-[var(--bg-surface-soft)] rounded-xl"></div>
+      <div class="h-40 bg-[var(--bg-surface-soft)] rounded-xl"></div>
     </div>
+  </div>
   }
 
   @else {
@@ -33,7 +33,7 @@
 
       <div>
         <h2 class="text-xl font-semibold text-[var(--text-primary)]">
-          {{ client.name }}
+          {{ client?.name }}
         </h2>
         <p class="text-sm text-green-400">Activo</p>
       </div>
@@ -42,22 +42,23 @@
     <div class="flex flex-wrap gap-6 text-sm text-[var(--text-secondary)]">
       <span class="flex items-center gap-2">
         <lucide-icon [name]="Phone" class="w-4 h-4"></lucide-icon>
-        {{ client.phone }}
+        {{ client?.phone | appPhone }}
       </span>
       <span class="flex items-center gap-2">
         <lucide-icon [name]="Mail" class="w-4 h-4"></lucide-icon>
-        {{ client.email }}
+        {{ client?.email }}
       </span>
     </div>
 
     <div class="flex gap-2 flex-wrap">
-      @for (tag of client.tags; track tag) {
+      <!-- rombi -> Verificar la cuetion de los tags -->
+      <!--@for (tag of client.tags; track tag) {
         <span class="px-2 py-1 text-xs rounded-full
                      bg-[var(--system-accent)]
                      text-[var(--system-secondary)]">
           {{ tag }}
         </span>
-      }
+      }-->
     </div>
   </div>
 
@@ -66,7 +67,7 @@
   =============================== -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-    <!-- HISTORIAL -->
+    <!-- HISTORIAL --> <!-- rombi - se necesita implementar “Ver historial completo” -->
     <div class="bg-[var(--bg-surface)]
                 border border-[var(--border-soft)]
                 rounded-xl p-6 space-y-4">
@@ -77,24 +78,31 @@
       </h3>
 
       @if (history.length === 0) {
-        <p class="text-sm text-[var(--text-secondary)]">
-          No hay citas registradas.
-        </p>
+      <p class="text-sm text-[var(--text-secondary)]">
+        No hay citas registradas.
+      </p>
       }
 
       @else {
-        <ul class="space-y-3">
-          @for (item of history; track item.date) {
-            <li class="flex justify-between text-sm">
-              <span>
-                {{ item.date }} · {{ item.service }}
-              </span>
-              <span [class]="getStatusClasses(item.status)">
-                {{ item.status | titlecase }}
-              </span>
-            </li>
-          }
-        </ul>
+      <ul class="space-y-3">
+        @for (item of history; track item.date) {
+        <li class="flex justify-between text-sm">
+          <span>
+            {{ item.date | appDate:'datetimeCaps' }} - {{ item.service }}
+          </span>
+
+
+          <span class="px-2 py-1 text-xs rounded-full font-medium" *ngIf="statusConfig[item.status] as config"
+            [ngClass]="config.class">
+            {{ config.label }}
+          </span>
+
+          <!--<span [class]="getStatusClasses(item.status)">
+            {{ item.status | titlecase }}
+          </span>-->
+        </li>
+        }
+      </ul>
       }
     </div>
 
@@ -109,25 +117,37 @@
       </h3>
 
       @if (notes.length === 0) {
-        <p class="text-sm text-[var(--text-secondary)]">
-          No hay notas aún.
-        </p>
+      <p class="text-sm text-[var(--text-secondary)]">
+        No hay notas aún.
+      </p>
       }
 
       @else {
-        <ul class="space-y-3">
-          @for (note of notes; track note.date) {
-            <li class="text-sm">
-              <p class="text-[var(--text-secondary)]">{{ note.date }}</p>
-              <p class="text-[var(--text-primary)]">
-                {{ note.content }}
-              </p>
-            </li>
-          }
-        </ul>
+      <ul class="space-y-3">
+        @for (note of notes; track note.date) {
+        <li class="text-sm space-y-1 pb-4 border-b border-[var(--border-soft)] last:border-none">
+
+          <!-- Fecha -->
+          <p class="text-xs text-[var(--text-secondary)]">
+            {{ note.date | appDate:'short' }}
+          </p>
+
+          <!-- Título -->
+          <p class="font-semibold text-[var(--text-primary)]">
+            {{ note.title }}
+          </p>
+
+          <!-- Contenido -->
+          <p class="text-[var(--text-secondary)] leading-relaxed">
+            {{ note.content }}
+          </p>
+
+        </li>
+        }
+      </ul>
       }
 
-      <button class="mt-2 text-sm text-[var(--system-primary)] hover:underline">
+      <button class="mt-2 text-sm text-[var(--system-primary)] hover:underline cursor-pointer">
         + Agregar nota
       </button>
     </div>

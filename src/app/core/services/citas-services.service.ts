@@ -31,14 +31,6 @@ export class CitasServicesService {
     return this.api.get<ServiceModel>(`${this.endpoint}/${id}`);
   }
 
-  /*create(payload: Partial<ServiceModel>): Observable<ServiceModel> {
-    return this.api.post<ServiceModel>(this.endpoint, payload);
-  }
-
-  update(id: number, payload: Partial<ServiceModel>): Observable<ServiceModel> {
-    return this.api.put<ServiceModel>(`${this.endpoint}/${id}`, payload);
-  }*/
-
   create(data: CreateServiceDto) {
     return this.api.post<ServiceModel>(this.endpoint, data);
   }

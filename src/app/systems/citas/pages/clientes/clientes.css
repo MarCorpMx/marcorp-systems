@@ -1,0 +1,15 @@
+/* Fuerza que ngx-intl-tel-input ocupe todo el ancho */
+:host ::ng-deep ngx-intl-tel-input,
+:host ::ng-deep .iti {
+  width: 100%;
+}
+
+/*
+:host ::ng-deep .iti input {
+  width: 100%;
+  background: var(--bg-base);
+  border: 1px solid var(--border-soft);
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  color: var(--text-primary);
+}*/

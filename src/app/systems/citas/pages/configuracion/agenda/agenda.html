@@ -1,163 +1,366 @@
-<!-- ========================= -->
-<!-- 🔄 SKELETON LOADING -->
-<!-- ========================= -->
-<div *ngIf="loading" class="space-y-6 animate-pulse">
+<!-- <section class="relative space-y-8 max-w-5xl mx-auto"> -->
+<!-- <section class="relative space-y-8 max-w-5xl mx-auto pb-40"> -->
+<section class="relative space-y-8 max-w-5xl mx-auto" [class.pb-40]="hasChanges">
 
-  <div class="bg-surface p-6 rounded-2xl shadow-soft space-y-4 border-default">
-    <div class="h-6 w-1/3 bg-surface-soft rounded"></div>
-    <div class="h-10 bg-surface-soft rounded"></div>
-    <div class="h-10 bg-surface-soft rounded"></div>
-  </div>
-
-  <div class="bg-surface p-6 rounded-2xl shadow-soft space-y-4 border-default">
-    <div class="h-6 w-1/4 bg-surface-soft rounded"></div>
-    <div class="space-y-3">
-      <div class="h-10 bg-surface-soft rounded"
-           *ngFor="let i of [1,2,3,4,5]"></div>
-    </div>
-  </div>
-
-</div>
-
-
-<!-- ========================= -->
-<!-- 🗓 FORMULARIO -->
-<!-- ========================= -->
-<form *ngIf="!loading"
-      [formGroup]="form"
-      (ngSubmit)="save()"
-      class="space-y-8">
-
-  <!-- ========================= -->
-  <!-- ⚙️ Configuración general -->
-  <!-- ========================= -->
-  <div class="bg-surface p-6 rounded-2xl shadow-soft border-default space-y-6">
-
-    <h2 class="text-lg font-semibold text-primary">
-      Configuración General
-    </h2>
-
-    <div class="grid md:grid-cols-2 gap-6">
-
-      <div>
-        <label class="block text-sm font-medium text-secondary mb-1">
-          Duración de cita (minutos)
-        </label>
-        <input type="number"
-               formControlName="default_appointment_duration"
-               class="w-full input-dark px-3 py-2 rounded-lg" />
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-secondary mb-1">
-          Descanso entre citas (minutos)
-        </label>
-        <input type="number"
-               formControlName="break_between_appointments"
-               class="w-full input-dark px-3 py-2 rounded-lg" />
-      </div>
-
-    </div>
+  <!-- ================= HEADER ================= -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
 
     <div>
-      <label class="block text-sm font-medium text-secondary mb-1">
-        Reglas internas
-      </label>
-      <textarea rows="3"
-                formControlName="rules"
-                class="w-full input-dark px-3 py-2 rounded-lg">
-      </textarea>
+      <h2 class="text-2xl font-semibold text-[var(--text-primary)]">
+        Configuración de agenda
+      </h2>
+
+      <p class="text-sm text-[var(--text-secondary)] mt-1">
+        Personaliza disponibilidad, reservas y reglas del consultorio.
+      </p>
     </div>
 
+    <div class="flex items-center gap-3">
+
+      <label class="text-xs text-[var(--text-secondary)]">
+        Profesional
+      </label>
+
+      <select [(ngModel)]="selectedProfessionalId" (change)="loadAgenda()" class="px-4 py-2 rounded-xl
+                     bg-[var(--bg-surface)]
+                     border border-[var(--border-soft)]
+                     text-sm text-[var(--text-primary)]
+                     focus:ring-2 focus:ring-[var(--system-primary)]
+                     transition">
+
+        @for (p of professionals; track p.id) {
+        <option [value]="p.id">{{ p.name }}</option>
+        }
+
+      </select>
+
+    </div>
   </div>
 
+  @if (loading) {
 
-  <!-- ========================= -->
-  <!-- 🕒 Horarios -->
-  <!-- ========================= -->
-  <div class="bg-surface p-6 rounded-2xl shadow-soft border-default">
+  <div class="space-y-6 animate-pulse">
+    @for (_ of [1,2,3]; track _) {
+    <div class="h-40 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-soft)]"></div>
+    }
+  </div>
 
-    <h2 class="text-lg font-semibold text-primary mb-6">
-      Horarios de Trabajo
-    </h2>
+  }
 
-    <div formGroupName="working_hours" class="space-y-4">
+  @else {
 
-      <div *ngFor="let day of daysOfWeek"
-           [formGroupName]="day"
-           class="grid grid-cols-3 gap-4 items-center">
+  <div class="space-y-8">
 
-        <div class="font-medium text-primary">
-          {{ day }}
+    <!-- ================= PREFERENCIAS ================= -->
+    <div class="bg-[var(--bg-surface)]
+                border border-[var(--border-soft)]
+                rounded-2xl p-8 space-y-6 shadow-sm">
+
+      <div>
+        <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+          Preferencias generales
+        </h3>
+        <p class="text-xs text-[var(--text-secondary)] mt-1">
+          Reglas que definen cómo funcionan las reservas.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div class="space-y-1">
+          <label class="text-xs text-[var(--text-secondary)]">
+            Duración por cita (min)
+          </label>
+          <input type="number" [(ngModel)]="settings.appointment_duration" (ngModelChange)="detectChanges()" class="w-full px-4 py-2 rounded-xl
+                        bg-[var(--bg-base)]
+                        border border-[var(--border-soft)]
+                        focus:ring-2 focus:ring-[var(--system-primary)]">
         </div>
 
-        <input type="time"
-               formControlName="start"
-               class="input-dark rounded-lg px-3 py-2 w-full" />
+        <div class="space-y-1">
+          <label class="text-xs text-[var(--text-secondary)]">
+            Descanso entre citas (min)
+          </label>
+          <input type="number" [(ngModel)]="settings.break_between_appointments" (ngModelChange)="detectChanges()"
+            class="w-full px-4 py-2 rounded-xl
+                        bg-[var(--bg-base)]
+                        border border-[var(--border-soft)]
+                        focus:ring-2 focus:ring-[var(--system-primary)]">
+        </div>
 
-        <input type="time"
-               formControlName="end"
-               class="input-dark rounded-lg px-3 py-2 w-full" />
+        <div class="space-y-1">
+          <label class="text-xs text-[var(--text-secondary)]">
+            Anticipación mínima (horas)
+          </label>
+          <input type="number" [(ngModel)]="settings.minimum_notice_hours" (ngModelChange)="detectChanges()" class="w-full px-4 py-2 rounded-xl
+                        bg-[var(--bg-base)]
+                        border border-[var(--border-soft)]">
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-xs text-[var(--text-secondary)]">
+            Límite de cancelación (horas)
+          </label>
+          <input type="number" [(ngModel)]="settings.cancellation_limit_hours" (ngModelChange)="detectChanges()" class="w-full px-4 py-2 rounded-xl
+                        bg-[var(--bg-base)]
+                        border border-[var(--border-soft)]">
+        </div>
+
+      </div>
+
+      <div class="flex flex-wrap gap-8 pt-4 border-t border-[var(--border-soft)]">
+
+        <label class="flex items-center gap-3 text-sm text-[var(--text-primary)] cursor-pointer">
+          <input type="checkbox" [(ngModel)]="settings.allow_online_booking" (ngModelChange)="detectChanges()" class="w-4 h-4">
+          Permitir reservas online
+        </label>
+
+        <label class="flex items-center gap-3 text-sm text-[var(--text-primary)] cursor-pointer">
+          <input type="checkbox" [(ngModel)]="settings.allow_cancellation" (ngModelChange)="detectChanges()" class="w-4 h-4">
+          Permitir cancelaciones
+        </label>
+
       </div>
 
     </div>
 
-  </div>
+    <!-- ================= HORARIO ================= -->
+    <div class="bg-[var(--bg-surface)]
+                border border-[var(--border-soft)]
+                rounded-2xl p-8 space-y-6 shadow-sm">
 
+      <div>
+        <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+          Horario de atención
+        </h3>
+        <p class="text-xs text-[var(--text-secondary)] mt-1">
+          Activa únicamente los días disponibles.
+        </p>
+      </div>
 
-  <!-- ========================= -->
-  <!-- 🎉 Días festivos -->
-  <!-- ========================= -->
-  <div class="bg-surface p-6 rounded-2xl shadow-soft border-default space-y-6">
+      <div class="space-y-4">
 
-    <h2 class="text-lg font-semibold text-primary">
-      Días no laborables
-    </h2>
+        @for (day of weekDays; track day.value) {
 
-    <div class="space-y-3">
-      <div *ngFor="let h of holidays.controls; let i = index"
-           class="flex items-center gap-3">
+        <div class="rounded-xl border
+                    border-[var(--border-soft)]
+                    transition
+                    p-5
+                    space-y-4
+                    bg-[var(--bg-base)]">
 
-        <input type="date"
-               [formControl]="h"
-               class="input-dark rounded-lg px-3 py-2" />
+          <!-- Top -->
+          <div class="flex items-center justify-between">
 
-        <button type="button"
-                (click)="removeHoliday(i)"
-                class="text-secondary hover:text-primary transition text-sm">
-          Eliminar
+            <div class="flex items-center gap-3">
+              <input type="checkbox" [(ngModel)]="day.active" (ngModelChange)="detectChanges()" class="w-4 h-4">
+              <span class="font-medium text-[var(--text-primary)]">
+                {{ day.label }}
+              </span>
+            </div>
+
+            @if (day.active) {
+            <span class="text-xs text-green-500">
+              Activo
+            </span>
+            }
+            @else {
+            <span class="text-xs text-[var(--text-secondary)]">
+              Inactivo
+            </span>
+            }
+
+          </div>
+
+          <!-- Horas -->
+          @if (day.active) {
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <div class="space-y-1">
+              <label class="text-xs text-[var(--text-secondary)]">
+                Hora inicio
+              </label>
+              <input type="time" [(ngModel)]="day.start" (ngModelChange)="detectChanges()" class="w-full px-4 py-2 rounded-xl
+                            bg-[var(--bg-surface)]
+                            border border-[var(--border-soft)]">
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-xs text-[var(--text-secondary)]">
+                Hora fin
+              </label>
+              <input type="time" [(ngModel)]="day.end" (ngModelChange)="detectChanges()" class="w-full px-4 py-2 rounded-xl
+                            bg-[var(--bg-surface)]
+                            border border-[var(--border-soft)]">
+            </div>
+
+          </div>
+          }
+
+        </div>
+
+        }
+
+      </div>
+
+    </div>
+
+    <!-- ================= DIAS NO LABORABLES ================= -->
+    <div class="bg-[var(--bg-surface)]
+                border border-[var(--border-soft)]
+                rounded-2xl p-8 space-y-6 shadow-sm">
+
+      <div class="flex items-center justify-between">
+
+        <div>
+          <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+            Días no laborables
+          </h3>
+          <p class="text-xs text-[var(--text-secondary)] mt-1">
+            Vacaciones o eventos especiales.
+          </p>
+        </div>
+
+        <button (click)="openAddNonWorkingDay(); detectChanges()"  class="px-4 py-2 rounded-xl
+                       bg-[var(--system-primary)]
+                       text-white text-sm
+                       hover:opacity-90 transition cursor-pointer">
+          Agregar
         </button>
 
       </div>
+
+      @if (nonWorkingDays.length === 0) {
+
+      <div class="border border-dashed border-[var(--border-soft)]
+                    rounded-xl p-10 text-center">
+        <p class="text-sm text-[var(--text-secondary)]">
+          No hay días bloqueados.
+        </p>
+      </div>
+
+      }
+
+      @else {
+
+      <div class="space-y-3">
+
+        @for (day of nonWorkingDays; track day.id) {
+
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between
+                      gap-4
+                      bg-[var(--bg-base)]
+                      border border-[var(--border-soft)]
+                      rounded-xl p-4">
+
+          <div>
+            <div class="flex flex-col sm:flex-row gap-3 w-full">
+
+              <input type="date" [(ngModel)]="day.date" (ngModelChange)="detectChanges()" class="px-3 py-2 rounded-xl
+           bg-[var(--bg-surface)]
+           border border-[var(--border-soft)]
+           text-sm w-full sm:w-auto">
+
+              <input type="text" [(ngModel)]="day.reason" (ngModelChange)="detectChanges()" placeholder="Motivo" class="px-3 py-2 rounded-xl
+           bg-[var(--bg-surface)]
+           border border-[var(--border-soft)]
+           text-sm w-full">
+
+            </div>
+          </div>
+
+          <button (click)="deleteNonWorking(day); detectChanges()" (ngModelChange)="detectChanges()" class="text-sm text-red-500 hover:underline cursor-pointer">
+            Eliminar
+          </button>
+
+        </div>
+
+        }
+
+      </div>
+
+      }
+
     </div>
 
-    <div class="flex gap-3 items-center">
-      <input #newHoliday
-             type="date"
-             class="input-dark rounded-lg px-3 py-2" />
+  </div>
+  }
 
-      <button type="button"
-              (click)="addHoliday(newHoliday.value); newHoliday.value=''"
-              class="bg-surface-soft hover:bg-[var(--state-hover)] text-primary px-4 py-2 rounded-lg text-sm transition">
-        Agregar
-      </button>
+</section>
+
+<!-- ===============================
+     STICKY SAVE BAR
+=============================== -->
+
+<!-- <div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64 
+              z-50 flex items-center justify-center p-4"> -->
+
+<div class="fixed bottom-0 inset-x-0 
+            sm:left-72 sm:right-0
+            z-50
+            transition-all duration-300 ease-out" [class.translate-y-full]="!hasChanges"
+  [class.opacity-0]="!hasChanges" [class.opacity-100]="hasChanges">
+
+  <div class="max-w-5xl mx-auto px-4 pb-4">
+
+    <div class="rounded-2xl
+                border border-[var(--border-soft)]
+                bg-[var(--bg-surface)]
+                shadow-2xl
+                px-6 py-4
+                flex flex-col sm:flex-row
+                items-center justify-between gap-4">
+
+      <!-- Info -->
+      <div class="flex items-center gap-3">
+
+        <div class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
+
+        <span class="text-sm font-medium text-[var(--text-primary)]">
+          Tienes cambios sin guardar
+        </span>
+
+        <span class="text-xs text-[var(--text-secondary)] hidden sm:inline">
+          Guarda para aplicar la configuración.
+        </span>
+
+      </div>
+
+      <!-- Botones -->
+      <div class="flex items-center gap-3 w-full sm:w-auto">
+
+        <button (click)="discardChanges()" class="w-full sm:w-auto px-4 py-2 rounded-xl
+                 border border-[var(--border-soft)]
+                 text-sm font-medium
+                 text-[var(--text-secondary)]
+                 hover:bg-[var(--bg-base)]
+                 transition cursor-pointer">
+
+          Cancelar
+        </button>
+
+        <button (click)="saveAgenda()" [disabled]="saving" class="w-full sm:w-auto px-6 py-2 rounded-xl
+                 text-sm font-semibold
+                 bg-[var(--system-primary)]
+                 text-white
+                 hover:brightness-110
+                 active:scale-[0.98]
+                 disabled:opacity-50
+                 transition-all cursor-pointer">
+
+          @if (saving) {
+          Guardando...
+          }
+          @else {
+          Guardar cambios
+          }
+
+        </button>
+
+      </div>
+
     </div>
 
   </div>
 
-
-  <!-- ========================= -->
-  <!-- 💾 Botón Guardar -->
-  <!-- ========================= -->
-  <div class="flex justify-end">
-    <button type="submit"
-            [disabled]="saving"
-            class="btn-primary px-6 py-2 rounded-xl transition disabled:opacity-50 shadow-soft">
-
-      <span *ngIf="!saving">Guardar cambios</span>
-      <span *ngIf="saving">Guardando...</span>
-
-    </button>
-  </div>
-
-</form>
+</div>

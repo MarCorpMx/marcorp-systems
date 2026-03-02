@@ -7,12 +7,13 @@ import {
   MapPin,
   Video,
   Palette,
-  HelpCircle
+  HelpCircle,
+  ChevronUp, ChevronDown, Briefcase
 } from 'lucide-angular';
 import { CitasServicesService } from '../../../../core/services/citas-services.service';
 import { ServiceModel, ServiceMode } from '../../../../core/models/service.model';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
 import { Notification } from '../../../../services/notification.service';
 import { ConfirmDialogService } from '../../../../shared/services/confirm-dialog.service';
 
@@ -31,11 +32,15 @@ export class Servicios implements OnInit {
   readonly Video = Video;
   readonly Palette = Palette;
   readonly HelpCircle = HelpCircle;
+  readonly ChevronUp = ChevronUp;
+  readonly ChevronDown = ChevronDown;
+  readonly Briefcase = Briefcase;
 
   form!: FormGroup;
   loading = true;
   services: ServiceModel[] = [];
   error = false;
+  expandedIndex: number | null = 0;
 
   confirm = inject(ConfirmDialogService);
   constructor(
@@ -52,12 +57,58 @@ export class Servicios implements OnInit {
     this.loadServices();
   }
 
+  toggleVariant(index: number) {
+    this.expandedIndex =
+      this.expandedIndex === index ? null : index;
+  }
+
+  get variants(): FormArray {
+    return this.form.get('variants') as FormArray;
+  }
+
+  addVariant(data?: any) {
+    this.variants.push(this.fb.group({
+      id: [data?.id ?? null],
+      name: [data?.name ?? 'Sesión individual', Validators.required],
+      duration_minutes: [data?.duration_minutes ?? 60, Validators.required],
+      price: [data?.price ?? 0, Validators.required],
+      max_capacity: [data?.max_capacity ?? 1, Validators.required],
+      mode: [data?.mode ?? 'presential', Validators.required],
+      includes_material: [data?.includes_material ?? false],
+      active: [data?.active ?? true],
+    }));
+  }
+
+  private resetVariants(): void {
+    while (this.variants.length !== 0) {
+      this.variants.removeAt(0);
+    }
+  }
+
+  removeVariant(index: number) {
+    this.variants.removeAt(index);
+  }
+
+  getMinPrice(service: ServiceModel): number {
+    if (!service.variants?.length) return 0;
+    return Math.min(...service.variants.map(v => v.price));
+  }
+
+  getMinDuration(service: ServiceModel): number {
+    if (!service.variants?.length) return 0;
+    return Math.min(...service.variants.map(v => v.duration_minutes));
+  }
+
+  getModes(service: ServiceModel): ServiceMode[] {
+    if (!service.variants?.length) return [];
+    return [...new Set(service.variants.map(v => v.mode))];
+  }
+
   initForm() {
     this.form = this.fb.group({
       name: ['', Validators.required],
-      duration_minutes: [30, Validators.required],
-      price: [0, Validators.required],
-      mode: ['online', Validators.required],
+      description: [''],
+      variants: this.fb.array([])
     });
   }
 
@@ -67,8 +118,8 @@ export class Servicios implements OnInit {
 
     this.servicesApi.getAll().subscribe({
       next: (res) => {
-
-        this.services = res.map((service: ServiceModel) => {
+        this.services = res;
+        /*this.services = res.map((service: ServiceModel) => {
           const mainVariant = service.variants?.[0];
 
           return {
@@ -77,7 +128,7 @@ export class Servicios implements OnInit {
             price: mainVariant?.price,
             mode: mainVariant?.mode,
           };
-        });
+        });*/
 
         this.loading = false;
       },
@@ -90,66 +141,59 @@ export class Servicios implements OnInit {
 
   openCreate() {
     this.editingService = null;
+
     this.form.reset({
       name: '',
-      duration_minutes: 60,
-      price: 0,
-      mode: 'presential',
+      description: ''
     });
+
+    this.resetVariants();
+    this.addVariant(); // solo UNA
+
+    this.expandedIndex = 0;
     this.showModal = true;
   }
 
-  openEdit(service: any) {
+  openEdit(service: ServiceModel) {
     this.editingService = service;
+
     this.form.patchValue({
       name: service.name,
-      duration_minutes: service.duration_minutes,
-      price: service.price,
-      mode: service.mode,
+      description: service.description
     });
 
+    this.resetVariants();
+
+    service.variants?.forEach(v => {
+      this.addVariant(v);
+    });
+
+    this.expandedIndex = 0;
     this.showModal = true;
   }
 
   save() {
     if (this.form.invalid) return;
 
-    const formValue = this.form.value;
-
     const payload = {
-      name: formValue.name,
-      active: true,
-      variants: [
-        {
-          name: 'Principal',
-          duration_minutes: formValue.duration_minutes,
-          price: formValue.price,
-          max_capacity: 1,
-          mode: formValue.mode,
-          includes_material: false,
-          active: true,
-        }
-      ]
+      ...this.form.value,
+      active: true
     };
 
     if (this.editingService) {
-
       this.servicesApi.update(this.editingService.id, payload)
         .subscribe(() => {
+          this.notify.success('Servicio actualizado correctamente');
           this.loadServices();
           this.closeModal();
-          this.notify.success('Servicio actualizado correctamente');
         });
-
     } else {
-
       this.servicesApi.create(payload)
         .subscribe(() => {
+          this.notify.success('Servicio creado correctamente');
           this.loadServices();
           this.closeModal();
-          this.notify.success('Servicio creado correctamente');
         });
-
     }
   }
 
@@ -169,6 +213,8 @@ export class Servicios implements OnInit {
 
   closeModal() {
     this.showModal = false;
+    this.form.reset();
+    this.resetVariants();
   }
 
   getModeLabel(mode?: ServiceMode) {

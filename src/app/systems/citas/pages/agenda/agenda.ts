@@ -51,10 +51,10 @@ export class Agenda implements OnInit {
   loading = true;
   tieneDatos = true;
 
-  
+
   appointments: Appointment[] = [
     {
-      time: '10:00',
+      time: '10:01',
       client: 'Ana López',
       service: 'Psicoterapia individual',
       status: 'confirmada',
@@ -99,6 +99,42 @@ export class Agenda implements OnInit {
     }
   ];
 
+  ngOnInit() {
+    console.log("gatito malo");
+    console.log(this.auth.getCurrentSystem());
+    console.log(this.auth.getSystems());
+
+    // Simulación de carga
+    setTimeout(() => {
+      this.loading = false;
+
+      // CAMBIA esto para probar estados
+
+      // EMPTY
+      //this.appointments = [];
+
+      // DATA
+      if (this.tieneDatos) {
+        /*this.appointments = [
+          {
+            time: '10:00',
+            client: 'Ana López',
+            service: 'Psicoterapia individual',
+            status: 'confirmada'
+          },
+          {
+            time: '11:30',
+            client: 'Juan Pérez',
+            service: 'Terapia de pareja',
+            status: 'pendiente'
+          }
+        ];*/
+      }
+
+    }, 1200);
+  }
+
+
   getStatusIcon(status: string) {
     return {
       confirmada: this.CheckCircle,
@@ -126,39 +162,5 @@ export class Agenda implements OnInit {
     }[status];
   }
 
-  ngOnInit() {
-
-    console.log(this.auth.getCurrentSystem());
-    console.log(this.auth.getSystems());
-
-    // 🔥 Simulación de carga
-    setTimeout(() => {
-      this.loading = false;
-
-      // 👉 CAMBIA esto para probar estados
-
-      // EMPTY
-      //this.appointments = [];
-
-      // DATA
-      if (this.tieneDatos) {
-        /*this.appointments = [
-          {
-            time: '10:00',
-            client: 'Ana López',
-            service: 'Psicoterapia individual',
-            status: 'confirmada'
-          },
-          {
-            time: '11:30',
-            client: 'Juan Pérez',
-            service: 'Terapia de pareja',
-            status: 'pendiente'
-          }
-        ];*/
-      }
-
-    }, 1200);
-  }
 
 }

@@ -3,7 +3,6 @@
   <!-- ===============================
        HEADER
   =============================== -->
-  <!-- <div class="flex items-center justify-between"> -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <h2 class="text-xl font-semibold text-[var(--text-primary)]">
       Servicios
@@ -50,7 +49,7 @@
     <div class="mx-auto w-12 h-12 rounded-full
            bg-[var(--system-accent)]
            flex items-center justify-center">
-      <lucide-icon [name]="Palette" class="w-6 h-6 text-[var(--system-secondary)]"></lucide-icon>
+      <lucide-icon [name]="Briefcase" class="w-6 h-6 text-[var(--system-secondary)]"></lucide-icon>
     </div>
 
     <h3 class="text-lg font-semibold text-[var(--text-primary)]">
@@ -91,35 +90,96 @@
           {{ service.name }}
         </p>
 
-        <span class="w-4 h-4 rounded-full" [style.background]="service.color">
+        <!-- <span class="w-4 h-4 rounded-full" [style.background]="service.color">
+        </span> -->
+
+        <span class="w-4 h-4 rounded-full bg-[var(--system-primary)]" >
         </span>
+        
       </div>
 
       <!-- Meta -->
-      <div class="space-y-1 text-sm text-[var(--text-secondary)]">
+      <div class="space-y-2 text-sm text-[var(--text-secondary)]">
 
+        <!-- Modalidades count -->
+        <div class="flex items-center justify-between text-xs">
+          <span>
+            {{ service.variants.length }} modalidad(es)
+          </span>
+
+          <button (click)="toggleVariant($index)"
+            class="flex items-center gap-1 text-[var(--system-primary)] hover:underline cursor-pointer">
+
+            <lucide-icon [name]="expandedIndex === $index ? ChevronUp : ChevronDown" class="w-4 h-4">
+            </lucide-icon>
+
+            Ver
+          </button>
+        </div>
+
+        <!-- Duración mínima -->
         <div class="flex items-center gap-2">
           <lucide-icon [name]="Clock" class="w-4 h-4"></lucide-icon>
-          {{ service.duration_minutes }} min
+          Desde {{ getMinDuration(service) }} min
         </div>
 
+        <!-- Precio mínimo -->
         <div class="flex items-center gap-2">
           <lucide-icon [name]="DollarSign" class="w-4 h-4"></lucide-icon>
-          ${{ service.price }}
-        </div>
-
-        <div class="flex items-center gap-2">
-          <lucide-icon [name]="getModeIcon(service.mode)" class="w-4 h-4">
-          </lucide-icon>
-
-          {{ getModeLabel(service.mode) }}
+          Desde ${{ getMinPrice(service) }}
         </div>
 
       </div>
 
+      @if (expandedIndex === $index) {
+
+      <div class="mt-3 space-y-2 border-t border-[var(--border-soft)] pt-3">
+
+        @for (variant of service.variants; track variant.id) {
+
+        <div class="p-3 rounded-lg bg-[var(--bg-base)] text-xs space-y-1">
+
+          <div class="flex justify-between font-medium text-[var(--text-primary)]">
+            <span>{{ variant.name }}</span>
+            <span>${{ variant.price }}</span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[var(--text-secondary)]">
+
+            <div class="flex items-center gap-1">
+              <lucide-icon [name]="Clock" class="w-3 h-3"></lucide-icon>
+              {{ variant.duration_minutes }} min
+            </div>
+
+            <div class="flex items-center gap-1">
+              <lucide-icon [name]="getModeIcon(variant.mode)" class="w-3 h-3"></lucide-icon>
+              {{ getModeLabel(variant.mode) }}
+            </div>
+
+            @if (variant.max_capacity > 1) {
+            <span class="px-2 py-0.5 rounded-md bg-[var(--bg-surface)]">
+              Cap: {{ variant.max_capacity }}
+            </span>
+            }
+
+            @if (variant.includes_material) {
+            <span class="px-2 py-0.5 rounded-md bg-[var(--bg-surface)]">
+              Incluye material
+            </span>
+            }
+
+          </div>
+
+        </div>
+
+        }
+
+      </div>
+
+      }
+
       <!-- Actions -->
       <div class="pt-3 flex items-center justify-between">
-
         <!-- Edit -->
         <button (click)="openEdit(service)" class="text-sm font-medium
            text-[var(--system-primary)]
@@ -147,22 +207,23 @@
 
   @if (showModal) {
   <div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64 
-            z-50 flex items-center justify-center p-4">
+              z-50 flex items-center justify-center p-4">
 
     <!-- Overlay -->
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeModal()">
     </div>
 
     <!-- Modal -->
-    <div class="relative w-full max-w-md
+    <div class="relative w-full max-w-2xl
                 bg-[var(--bg-surface)]
                 border border-[var(--border-soft)]
                 rounded-2xl shadow-xl
-                p-6 space-y-6
-                animate-in fade-in zoom-in-95 duration-200">
+                flex flex-col
+                max-h-[90vh]">
 
       <!-- Header -->
-      <div class="flex items-center justify-between">
+      <div class="p-6 border-b border-[var(--border-soft)]
+                  flex items-center justify-between shrink-0">
         <h3 class="text-lg font-semibold text-[var(--text-primary)]">
           {{ editingService ? 'Editar servicio' : 'Nuevo servicio' }}
         </h3>
@@ -173,121 +234,225 @@
         </button>
       </div>
 
-      <!-- Form -->
-      <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
+      <!-- FORM -->
+      <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col flex-1 min-h-0">
 
-        <!-- Nombre -->
-        <div class="space-y-1">
-          <label class="text-sm text-[var(--text-secondary)]">
-            Nombre del servicio
-          </label>
-          <input type="text" formControlName="name" class="w-full px-3 py-2 rounded-lg
+        <!-- SCROLLABLE BODY -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-4">
+
+          <!-- Nombre del Servicio -->
+          <div class="space-y-1">
+            <label class="text-sm text-[var(--text-secondary)]">
+              Nombre del servicio
+            </label>
+            <input type="text" formControlName="name" class="w-full px-3 py-2 rounded-lg
                    bg-[var(--bg-base)]
                    border border-[var(--border-soft)]
                    focus:outline-none
                    focus:ring-2
                    focus:ring-[var(--system-primary)]
                    text-[var(--text-primary)]" />
-        </div>
-
-        <!-- Duración -->
-        <div class="space-y-1">
-          <label class="text-sm text-[var(--text-secondary)]">
-            Duración (minutos)
-          </label>
-          <input type="number" formControlName="duration_minutes" class="w-full px-3 py-2 rounded-lg
-                   bg-[var(--bg-base)]
-                   border border-[var(--border-soft)]
-                   focus:outline-none
-                   focus:ring-2
-                   focus:ring-[var(--system-primary)]
-                   text-[var(--text-primary)]" />
-        </div>
-
-        <!-- Precio -->
-        <div class="space-y-1">
-          <label class="text-sm text-[var(--text-secondary)]">
-            Precio
-          </label>
-          <input type="number" formControlName="price" class="w-full px-3 py-2 rounded-lg
-                   bg-[var(--bg-base)]
-                   border border-[var(--border-soft)]
-                   focus:outline-none
-                   focus:ring-2
-                   focus:ring-[var(--system-primary)]
-                   text-[var(--text-primary)]" />
-        </div>
-
-        <!-- Modalidad -->
-        <div class="space-y-2">
-          <label class="text-sm text-[var(--text-secondary)]">
-            Modalidad
-          </label>
-
-          <div class="grid grid-cols-3 gap-2">
-
-            <!-- Online -->
-            <button type="button" (click)="form.patchValue({ mode: 'online' })"
-              [class.bg-[var(--system-primary)]]="form.value.mode === 'online'"
-              [class.text-white]="form.value.mode === 'online'" class="flex items-center justify-center gap-2
-             px-3 py-2 rounded-lg
-             border border-[var(--border-soft)]
-             text-sm
-             hover:bg-[var(--bg-base)]
-             transition cursor-pointer">
-
-              <lucide-icon [name]="Video" class="w-4 h-4"></lucide-icon>
-              Online
-            </button>
-
-            <!-- Presencial -->
-            <button type="button" (click)="form.patchValue({ mode: 'presential' })"
-              [class.bg-[var(--system-primary)]]="form.value.mode === 'presential'"
-              [class.text-white]="form.value.mode === 'presential'" class="flex items-center justify-center gap-2
-             px-3 py-2 rounded-lg
-             border border-[var(--border-soft)]
-             text-sm
-             hover:bg-[var(--bg-base)]
-             transition cursor-pointer">
-
-              <lucide-icon [name]="MapPin" class="w-4 h-4"></lucide-icon>
-              Presencial
-            </button>
-
-            <!-- Híbrido -->
-            <button type="button" (click)="form.patchValue({ mode: 'hybrid' })"
-              [class.bg-[var(--system-primary)]]="form.value.mode === 'hybrid'"
-              [class.text-white]="form.value.mode === 'hybrid'" class="flex items-center justify-center gap-2
-             px-3 py-2 rounded-lg
-             border border-[var(--border-soft)]
-             text-sm
-             hover:bg-[var(--bg-base)]
-             transition cursor-pointer">
-
-              <lucide-icon [name]="Video" class="w-4 h-4"></lucide-icon>
-              Híbrido
-            </button>
-
           </div>
-        </div>
 
-        <!-- Actions -->
-        <div class="flex justify-end gap-3 pt-4">
+          <!-- Descripción -->
+          <div class="space-y-1">
+            <label class="text-sm text-[var(--text-secondary)]">
+              Descripción
+            </label>
+
+            <textarea rows="3" formControlName="description" class="w-full px-3 py-2 rounded-lg
+           bg-[var(--bg-base)]
+           border border-[var(--border-soft)]
+           focus:outline-none
+           focus:ring-2
+           focus:ring-[var(--system-primary)]
+           text-[var(--text-primary)]
+           resize-none">
+          </textarea>
+          </div>
+
+          <!-- VARIANTS -->
+          <div formArrayName="variants" class="space-y-4">
+            <!-- Header -->
+            <div class="flex items-center justify-between">
+              <label class="text-sm text-[var(--text-secondary)]">
+                Modalidades
+              </label>
+
+              <button type="button" (click)="addVariant()"
+                class="text-sm text-[var(--system-primary)] hover:underline cursor-pointer">
+                + Agregar modalidad
+              </button>
+            </div>
+
+            @for (variant of variants.controls; track $index; let i = $index) {
+
+            <div [formGroupName]="i" class="rounded-xl border border-[var(--border-soft)]
+              bg-[var(--bg-base)] overflow-hidden">
+
+              <!-- Accordion Header -->
+              <button type="button" (click)="toggleVariant(i)" class="w-full flex items-center justify-between
+                   px-4 py-3 text-left">
+
+                <div>
+                  <p class="text-sm font-medium text-[var(--text-primary)]">
+                    {{ variant.value.name || 'Nueva modalidad' }}
+                  </p>
+
+                  <p class="text-xs text-[var(--text-secondary)]">
+                    {{ variant.value.duration_minutes }} min ·
+                    ${{ variant.value.price }} ·
+                    {{ getModeLabel(variant.value.mode) }}
+                  </p>
+                </div>
+
+                <lucide-icon [name]="expandedIndex === i ? ChevronUp : ChevronDown" class="w-4 h-4 cursor-pointer">
+                </lucide-icon>
+
+              </button>
+
+              <!-- Accordion Body -->
+              @if (expandedIndex === i) {
+
+              <div class="p-4 border-t border-[var(--border-soft)] space-y-4">
+
+                <!-- Nombre -->
+                <input type="text" formControlName="name" placeholder="Nombre modalidad"
+                  class="w-full px-3 py-2 rounded-lg border border-[var(--border-soft)]">
+
+                <!-- Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                  <!-- Duración -->
+                  <div>
+                    <label class="text-xs text-[var(--text-secondary)]">
+                      Duración
+                    </label>
+                    <input type="number" formControlName="duration_minutes"
+                      class="w-full px-3 py-2 rounded-lg border border-[var(--border-soft)]">
+                  </div>
+
+                  <!-- Precio -->
+                  <div>
+                    <label class="text-xs text-[var(--text-secondary)]">
+                      Precio
+                    </label>
+                    <input type="number" formControlName="price"
+                      class="w-full px-3 py-2 rounded-lg border border-[var(--border-soft)]">
+                  </div>
+
+                  <!-- Capacidad -->
+                  <div>
+                    <label class="text-xs text-[var(--text-secondary)]">
+                      Capacidad máxima
+                    </label>
+                    <input type="number" formControlName="max_capacity"
+                      class="w-full px-3 py-2 rounded-lg border border-[var(--border-soft)]">
+                  </div>
+
+                  <!-- Incluye material -->
+                  <div class="flex items-center gap-2 pt-6">
+                    <input type="checkbox" formControlName="includes_material">
+                    <span class="text-xs text-[var(--text-secondary)]">
+                      Incluye material
+                    </span>
+                  </div>
+
+                </div>
+
+                <!-- MODE SELECTOR VISUAL -->
+                <div class="space-y-2">
+                  <label class="text-xs text-[var(--text-secondary)]">
+                    Modalidad
+                  </label>
+
+                  <div class="grid grid-cols-3 gap-2">
+
+                    <!-- Online -->
+                    <button type="button" (click)="variant.patchValue({ mode: 'online' })"
+                      [class.bg-[var(--system-primary)]]="variant.value.mode === 'online'"
+                      [class.text-white]="variant.value.mode === 'online'" class="flex items-center justify-center gap-2
+                         px-3 py-2 rounded-lg
+                         border border-[var(--border-soft)]
+                         text-xs transition cursor-pointer">
+
+                      <lucide-icon [name]="Video" class="w-4 h-4"></lucide-icon>
+                      Online
+                    </button>
+
+                    <!-- Presencial -->
+                    <button type="button" (click)="variant.patchValue({ mode: 'presential' })"
+                      [class.bg-[var(--system-primary)]]="variant.value.mode === 'presential'"
+                      [class.text-white]="variant.value.mode === 'presential'" class="flex items-center justify-center gap-2
+                         px-3 py-2 rounded-lg
+                         border border-[var(--border-soft)]
+                         text-xs transition cursor-pointer">
+
+                      <lucide-icon [name]="MapPin" class="w-4 h-4"></lucide-icon>
+                      Presencial
+                    </button>
+
+                    <!-- Híbrido -->
+                    <button type="button" (click)="variant.patchValue({ mode: 'hybrid' })"
+                      [class.bg-[var(--system-primary)]]="variant.value.mode === 'hybrid'"
+                      [class.text-white]="variant.value.mode === 'hybrid'" class="flex items-center justify-center gap-2
+                         px-3 py-2 rounded-lg
+                         border border-[var(--border-soft)]
+                         text-xs transition cursor-pointer">
+
+                      <lucide-icon [name]="Video" class="w-4 h-4"></lucide-icon>
+                      Híbrido
+                    </button>
+
+                  </div>
+                </div>
+
+                <!-- Eliminar -->
+                @if (variants.length > 1) {
+                <button type="button" (click)="removeVariant(i)"
+                  class="text-xs text-red-500 hover:underline cursor-pointer">
+                  Eliminar modalidad
+                </button>
+                }
+
+              </div>
+
+              }
+
+            </div>
+
+            }
+
+          </div> <!-- FIN VARIANTS -->
+
+        </div> <!-- FIN SCROLLABLE BODY -->
+
+        <!-- FOOTER -->
+        <div class="p-6 border-t border-[var(--border-soft)]
+                    flex justify-end gap-3 shrink-0">
 
           <button type="button" (click)="closeModal()" class="px-4 py-2 rounded-lg
                          border border-[var(--border-soft)]
                          text-[var(--text-secondary)]
-                         hover:bg-[var(--bg-base)]
-                         transition cursor-pointer">
+                         hover:bg-[var(--bg-base)] cursor-pointer">
             Cancelar
           </button>
 
           <button type="submit" [disabled]="form.invalid" class="px-4 py-2 rounded-lg
-                         bg-[var(--system-primary)]
-                         text-white
-                         hover:bg-[var(--system-secondary)]
-                         disabled:opacity-50
-                         transition cursor-pointer">
+         bg-[var(--system-primary)]
+         text-white
+         transition-all duration-150 ease-out
+         hover:bg-[var(--system-secondary)]
+         active:scale-95
+         focus:outline-none
+         focus:ring-2
+         focus:ring-[var(--system-primary)]
+         focus:ring-offset-2
+         focus:ring-offset-[var(--bg-surface)]
+         disabled:opacity-50
+         disabled:cursor-not-allowed
+         enabled:cursor-pointer">
+
             {{ editingService ? 'Actualizar' : 'Guardar' }}
           </button>
 

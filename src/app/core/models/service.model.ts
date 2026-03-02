@@ -28,11 +28,23 @@ export interface ServiceModel {
 
 export type ServiceMode = 'online' | 'presential' | 'hybrid'; // 
 
-export interface ServiceVariantModel {
+/*export interface ServiceVariantModel {
   id: number;
   duration_minutes: number;
-  price?: number;
+  price: number;
   mode: ServiceMode;
+}*/
+
+export interface ServiceVariantModel {
+  id: number;
+  name: string;
+  duration_minutes: number;
+  price: number;
+  max_capacity: number;
+  mode: ServiceMode;
+  includes_material: boolean;
+  active: boolean;
+  //staff: StaffModel[];
 }
 
 export interface ServiceModel {
@@ -45,7 +57,7 @@ export interface ServiceModel {
   created_at?: string;
   updated_at?: string;
 
-  // 👇 PROPIEDADES DERIVADAS PARA TU UI
+  // PROPIEDADES DERIVADAS PARA UI
   duration_minutes?: number;
   price?: number;
   mode?: 'online' | 'presential' | 'hybrid';

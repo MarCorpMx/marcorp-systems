@@ -6,13 +6,50 @@
       Clientes
     </h2>
 
-    <button class="px-4 py-2 rounded-lg
+    <button (click)="openCreate()" class="px-4 py-2 rounded-lg
            bg-[var(--system-primary)]
            text-white text-sm
            hover:bg-[var(--system-secondary)]
-           transition">
+           transition cursor-pointer">
       + Nuevo cliente
     </button>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+    <div class="relative w-full sm:max-w-sm">
+
+      <!-- Input -->
+      <input type="text" [value]="searchTerm" (input)="onSearch($any($event.target).value)"
+        placeholder="Buscar cliente..." class="input-primary w-full pl-10 pr-10
+             transition-all duration-200
+             focus:ring-2
+             focus:ring-[var(--system-primary)]" />
+
+      <!-- Icono Search -->
+      <!--<lucide-icon [name]="Search" class="absolute left-3 top-1/2 -translate-y-1/2
+             w-4 h-4
+             text-[var(--text-secondary)]
+             transition-colors duration-200
+             group-focus-within:text-[var(--system-primary)]">
+      </lucide-icon>-->
+
+      <!-- Botón limpiar -->
+      @if (searchTerm) {
+      <button (click)="clearSearch()" class="absolute right-3 top-1/2 -translate-y-1/2
+               p-1 rounded-md
+               hover:bg-black/5
+               transition cursor-pointer">
+
+        <lucide-icon [name]="X" class="w-4 h-4 text-[var(--text-secondary)]">
+        </lucide-icon>
+
+      </button>
+      }
+
+    </div>
+
   </div>
 
   <!-- ===============================
@@ -52,12 +89,12 @@
       Agrega tu primer cliente para comenzar a registrar citas y notas.
     </p>
 
-    <button class="inline-flex items-center gap-2
+    <button (click)="openCreate()" class="inline-flex items-center gap-2
              px-4 py-2 rounded-lg
              bg-[var(--system-primary)]
              text-white
              hover:bg-[var(--system-secondary)]
-             transition">
+             transition cursor-pointer">
       + Agregar cliente
     </button>
   </div>
@@ -69,31 +106,81 @@
   @else {
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
     @for (client of clients; track client.id) {
-    <div
-      class="bg-[var(--bg-surface)] rounded-xl p-4 border border-[var(--border-soft)] space-y-2 hover:shadow-soft transition cursor-pointer"
-      [routerLink]="['/sistemas/citas/clientes', client.id]">
+    <div class="bg-[var(--bg-surface)] 
+       rounded-xl 
+       p-4 
+       border border-[var(--border-soft)] 
+       space-y-2 
+       cursor-pointer
+       transition-all duration-200
+       hover:shadow-lg
+       hover:-translate-y-1
+       hover:bg-[var(--bg-base)]" [routerLink]="['/sistemas/citas/clientes', client.id]">
 
-      <div class="flex items-center justify-between">
-        <p class="font-medium text-[var(--text-primary)]">{{ client.name }}</p>
-        <span class="px-2 py-1 text-sm rounded-full font-medium" [ngClass]="getStatusClasses(client.status)">
-          {{ client.status | titlecase }}
-        </span>
+      <div class="flex items-start justify-between">
+        <div>
+          <p class="font-medium text-[var(--text-primary)]">
+            {{ client.full_name }}
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+
+          <!-- Badge -->
+          <span class="px-2 py-1 text-sm rounded-full font-medium" [ngClass]="getStatusClasses(client.status)">
+            {{ client.status | titlecase }}
+          </span>
+
+          <!-- Menu -->
+          <div class="relative" (click)="$event.stopPropagation()">
+            <button (click)="toggleMenu(client.id); $event.stopPropagation()"
+              class="p-1 rounded-md hover:bg-[var(--bg-base)] transition cursor-pointer">
+              <lucide-icon [name]="MoreVertical" class="w-4 h-4 text-[var(--text-secondary)]">
+              </lucide-icon>
+            </button>
+
+            @if (activeMenu === client.id) {
+            <div class="absolute right-0 mt-2 w-36
+         bg-[var(--bg-surface)]
+         border border-[var(--border-soft)]
+         rounded-lg shadow-lg z-20" (click)="$event.stopPropagation()">
+
+              <button (click)="openEdit(client)" class="block w-full text-left px-4 py-2 text-sm
+         bg-transparent
+         hover:bg-black/5
+         transition-colors duration-150
+         cursor-pointer">
+                Editar
+              </button>
+
+              <button (click)="delete(client)" class="cursor-pointer block w-full text-left px-4 py-2 text-sm
+                   text-red-400
+                   hover:bg-red-500/10">
+                Eliminar
+              </button>
+
+            </div>
+            }
+          </div>
+
+        </div>
       </div>
 
       <p class="text-sm text-[var(--text-secondary)]">
-        Última cita: {{ client.lastAppointment }}
+        Última cita:
+        {{ client.last_appointment ? (client.last_appointment | appDate:'datetime') : 'Sin citas' }}
       </p>
 
       <div class="flex items-center gap-2 flex-wrap mt-2">
-        <span *ngFor="let tag of client.tags"
+        <!--<span *ngFor="let tag of client.tags"
           class="bg-[var(--system-accent)] text-[var(--system-secondary)] px-2 py-0.5 rounded-full text-xs">
           {{ tag }}
-        </span>
+        </span> -->
       </div>
 
       <div class="mt-3 flex items-center justify-between">
         <p class="text-sm text-[var(--text-secondary)]">
-          Notas: {{ client.notesCount }}
+          Notas: {{ client.notes_count }}
         </p>
 
         <span class="text-sm text-[var(--system-primary)] font-medium">
@@ -106,4 +193,182 @@
   </div>
   }
 
+  @if (!loading && lastPage > 1) {
+  <div class="mt-8 space-y-4">
+
+    <!-- Info -->
+    <div class="flex justify-center sm:justify-between items-center">
+      <p class="hidden sm:block text-sm text-[var(--text-secondary)]">
+        Página {{ currentPage }} de {{ lastPage }}
+        • {{ total }} clientes
+      </p>
+    </div>
+
+    <!-- Controles -->
+    <div class="flex justify-center sm:justify-end items-center gap-1 sm:gap-2 flex-wrap">
+
+      <!-- Anterior -->
+      <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1" class="px-3 py-1.5 rounded-lg text-sm
+             border border-[var(--border-soft)]
+             text-[var(--text-primary)]
+             transition
+             disabled:opacity-40
+             disabled:cursor-not-allowed
+             hover:bg-[var(--bg-surface)] cursor-pointer">
+        <span class="hidden sm:inline">Anterior</span>
+        <span class="sm:hidden">←</span>
+      </button>
+
+      <!-- Números -->
+      @for (page of pages; track page) {
+      <button (click)="goToPage(page)" class="cursor-pointer px-3 py-1.5 rounded-lg text-sm min-w-[36px] transition"
+        [ngClass]="{
+          'bg-[var(--system-primary)] text-white':
+            currentPage === page,
+          'border border-[var(--border-soft)] text-[var(--text-primary)] hover:bg-[var(--bg-surface)]':
+            currentPage !== page
+        }">
+        {{ page }}
+      </button>
+      }
+
+      <!-- Siguiente -->
+      <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === lastPage" class="px-3 py-1.5 rounded-lg text-sm
+             border border-[var(--border-soft)]
+             text-[var(--text-primary)]
+             transition
+             disabled:opacity-40
+             disabled:cursor-not-allowed
+             hover:bg-[var(--bg-surface)] cursor-pointer">
+        <span class="hidden sm:inline">Siguiente</span>
+        <span class="sm:hidden">→</span>
+      </button>
+
+    </div>
+
+    <!-- Info móvil -->
+    <p class="sm:hidden text-center text-xs text-[var(--text-secondary)]">
+      {{ currentPage }} / {{ lastPage }}
+    </p>
+
+  </div>
+  }
+
+
+
 </section>
+
+@if (showModal) {
+<div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64 
+            z-50 flex items-center justify-center p-4">
+
+  <!-- Overlay -->
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeModal()"></div>
+
+  <!-- Modal -->
+  <div class="relative w-full max-w-xl
+              bg-[var(--bg-surface)]
+              border border-[var(--border-soft)]
+              rounded-2xl shadow-xl
+              flex flex-col">
+
+    <!-- Header -->
+    <div class="p-6 border-b border-[var(--border-soft)]
+                flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+        {{ editingClient ? 'Editar cliente' : 'Nuevo cliente' }}
+      </h3>
+
+      <button (click)="closeModal()"
+        class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
+        ✕
+      </button>
+    </div>
+
+    <!-- FORM -->
+    <form [formGroup]="form" (ngSubmit)="save()" class="p-6 space-y-4">
+
+      <!-- Nombre -->
+      <div>
+        <label class="text-sm text-[var(--text-secondary)]">
+          Nombre
+        </label>
+        <input type="text" formControlName="first_name" class="input-primary">
+      </div>
+
+      <!-- Apellido -->
+      <div>
+        <label class="text-sm text-[var(--text-secondary)]">
+          Apellido
+        </label>
+        <input type="text" formControlName="last_name" class="input-primary">
+      </div>
+
+      <!-- Fecha de nacimiento -->
+      <div>
+        <label class="text-sm text-[var(--text-secondary)]">
+          Fecha de nacimiento
+        </label>
+
+        <input type="date" formControlName="birth_date" class="input-primary">
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label class="text-sm text-[var(--text-secondary)]">
+          Email
+        </label>
+        <input type="email" formControlName="email" class="input-primary">
+      </div>
+
+      <!-- Teléfono -->
+      <div class="flex flex-col gap-1 w-full">
+        <label class="text-sm text-[var(--text-secondary)]">
+          Teléfono
+        </label>
+
+        <ngx-intl-tel-input [preferredCountries]="preferredCountries" [enableAutoCountrySelect]="true"
+          [searchCountryFlag]="true" [searchCountryField]="[
+  SearchCountryField.Name,
+  SearchCountryField.DialCode,
+  SearchCountryField.Iso2
+]" [selectedCountryISO]="CountryISO.Mexico" [phoneValidation]="true" [separateDialCode]="true"
+          [numberFormat]="PhoneNumberFormat.International" formControlName="phone" [cssClass]="'input-primary'">
+        </ngx-intl-tel-input>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex justify-end gap-3 pt-4">
+
+        <button type="button" (click)="closeModal()" class="px-4 py-2 rounded-lg
+                       border border-[var(--border-soft)]
+                       text-[var(--text-secondary)]
+                       cursor-pointer">
+          Cancelar
+        </button>
+
+        <button type="submit" [disabled]="form.invalid" class="px-4 py-2 rounded-lg
+         bg-[var(--system-primary)]
+         text-white
+         transition-all duration-150 ease-out
+         hover:bg-[var(--system-secondary)]
+         active:scale-95
+         focus:outline-none
+         focus:ring-2
+         focus:ring-[var(--system-primary)]
+         focus:ring-offset-2
+         focus:ring-offset-[var(--bg-surface)]
+         disabled:opacity-50
+         disabled:cursor-not-allowed
+         enabled:cursor-pointer">
+
+          {{ editingClient ? 'Actualizar' : 'Guardar' }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+</div>
+}

@@ -1,110 +1,263 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormArray, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ProfessionalsService, Professional } from '../../../../../core/services/professionals.service';
+import { AgendaService, AgendaSettings } from '../../../../../core/services/agenda.service';
+import { NonWorkingDayService, NonWorkingDay } from '../../../../../core/services/non-working-day.service';
 import { Notification } from '../../../../../services/notification.service';
 
-//import { OrganizationService } from '../../../../../core/services/organization.service';
-import { ScheduleService } from '../../../../../core/services/schedule.service';
-import { CommonModule } from '@angular/common';
+/*interface AgendaSettings {
+  appointment_duration: number;
+  break_between_appointments: number;
+  minimum_notice_hours: number;
+  cancellation_limit_hours: number;
+  allow_online_booking: boolean;
+  allow_cancellation: boolean;
+}*/
+
+interface WeekDay {
+  value: number;
+  label: string;
+  active: boolean;
+  start: string;
+  end: string;
+}
 
 @Component({
   selector: 'app-agenda',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, FormsModule],
   templateUrl: './agenda.html',
   styleUrl: './agenda.css',
 })
 
 export class Agenda implements OnInit {
-
-  form!: FormGroup;
-  loading = true;
+  hasChanges = false;
   saving = false;
-  daysOfWeek = ['Lunes', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+  private originalState: any;
+  loading = true;
+
+  professionals: Professional[] = [];
+  nonWorkingDays: NonWorkingDay[] = [];
+  selectedProfessionalId!: number;
+
+  // Configuración por defecto
+  settings: AgendaSettings = {
+    appointment_duration: 50,
+    break_between_appointments: 0,
+    minimum_notice_hours: 0,
+    cancellation_limit_hours: 0,
+    allow_online_booking: false,
+    allow_cancellation: false
+  };
+
+  // Días de la semana
+  weekDays: WeekDay[] = [
+    { value: 1, label: 'Lunes', active: true, start: '09:00', end: '18:00' },
+    { value: 2, label: 'Martes', active: true, start: '09:00', end: '18:00' },
+    { value: 3, label: 'Miércoles', active: true, start: '09:00', end: '18:00' },
+    { value: 4, label: 'Jueves', active: true, start: '09:00', end: '18:00' },
+    { value: 5, label: 'Viernes', active: true, start: '09:00', end: '15:00' },
+    { value: 6, label: 'Sábado', active: false, start: '09:00', end: '14:00' },
+    { value: 0, label: 'Domingo', active: false, start: '09:00', end: '14:00' }
+  ];
 
   constructor(
-    private fb: FormBuilder,
-    //private orgService: OrganizationService,
-    private scheduleService: ScheduleService,
+    private professionalsService: ProfessionalsService,
+    private agendaService: AgendaService,
+    private nonWorkingDayService: NonWorkingDayService,
     private notify: Notification
   ) { }
 
-
   ngOnInit() {
-    this.initForm();
-    this.loadScheduleSettings();
+    this.loadProfessionals();
   }
 
-  initForm() {
-    this.form = this.fb.group({
-      default_appointment_duration: [30, [Validators.required, Validators.min(5)]],
-      break_between_appointments: [10, [Validators.required, Validators.min(0)]],
-      rules: [''],
-      working_hours: this.fb.group(this.daysOfWeek.reduce((acc, day) => {
-        acc[day] = this.fb.group({
-          start: ['09:00'],
-          end: ['18:00']
-        });
-        return acc;
-      }, {} as any)),
-      holidays: this.fb.nonNullable.array<string>([])
-    });
-  }
+  loadProfessionals() {
+    this.professionalsService.getAll().subscribe(res => {
+      this.professionals = res.data;
 
-  get holidays(): FormArray<FormControl<string>> {
-    return this.form.get('holidays') as FormArray<FormControl<string>>;
-  }
-
-  addHoliday(date: string) {
-    if (date) {
-    this.holidays.push(
-      this.fb.nonNullable.control(date)
-    );
-  }
-  }
-
-  removeHoliday(index: number) {
-    this.holidays.removeAt(index);
-  }
-
-  loadScheduleSettings() {
-    this.scheduleService.getSchedule().subscribe(res => {
-      // Patch working_hours
-      if (res.working_hours) {
-        this.daysOfWeek.forEach(day => {
-          if (res.working_hours[day]) {
-            this.form.get(`working_hours.${day}`)?.patchValue(res.working_hours[day]);
-          }
-        });
-      }
-      // Patch other fields
-      this.form.patchValue({
-        default_appointment_duration: res.default_appointment_duration ?? 30,
-        break_between_appointments: res.break_between_appointments ?? 10,
-        rules: res.rules ?? ''
-      });
-      // Patch holidays
-      if (res.holidays && res.holidays.length) {
-        res.holidays.forEach(h => this.addHoliday(h));
+      if (this.professionals.length > 0) {
+        this.selectedProfessionalId = this.professionals[0].id;
+        this.loadAgenda();
       }
 
       this.loading = false;
     });
   }
 
-  save() {
-    if (this.form.invalid) {
-      this.notify.error('Algunos campos son inválidos');
-      this.form.markAllAsTouched();
-      return;
-    }
+  loadAgenda() {
+    this.loading = true;
 
-    this.saving = true;
-    this.scheduleService.updateSchedule(this.form.value).subscribe({
-      next: () => {
-        this.saving = false;
-        this.notify.success('Configuración guardada correctamente');
-      },
-      error: () => this.saving = false
+    this.agendaService
+      .getAgenda(this.selectedProfessionalId)
+      .subscribe(res => {
+
+        const data = res.data;
+
+        this.settings = data.settings;
+        this.weekDays = this.mapBackendSchedule(data.weekly_schedule);
+
+        // Esperamos non working days
+        this.loadNonWorkingDays()?.subscribe({
+          next: (response) => {
+            this.nonWorkingDays = response.data.map((d: any) => ({
+              ...d,
+              date: d.date ? d.date.split('T')[0] : ''
+            }));
+
+            // Tomamos snapshot
+            this.snapshotState();
+            this.loading = false;
+          },
+          error: () => {
+            this.snapshotState();
+            this.loading = false;
+          }
+        });
+      });
+  }
+
+
+  /*loadAgenda() {
+    this.loading = true;
+
+    this.agendaService
+      .getAgenda(this.selectedProfessionalId)
+      .subscribe(res => {
+
+        const data = res.data;
+
+        // SETTINGS
+        this.settings = data.settings;
+
+        // WEEK SCHEDULE
+        this.weekDays = this.mapBackendSchedule(data.weekly_schedule);
+
+        // NON WORKING
+        this.loadNonWorkingDays();
+
+        this.snapshotState();
+        this.loading = false;
+      });
+  }*/
+
+  loadNonWorkingDays() {
+    if (!this.selectedProfessionalId) return;
+
+    return this.nonWorkingDayService
+      .getAll(this.selectedProfessionalId);
+  }
+
+  /*loadNonWorkingDays() {
+    this.loading = true;
+
+    if (!this.selectedProfessionalId) return;
+
+    this.nonWorkingDayService
+      .getAll(this.selectedProfessionalId)
+      .subscribe({
+        next: (response) => {
+          this.nonWorkingDays = response.data.map((d: any) => ({
+            ...d,
+            date: d.date ? d.date.split('T')[0] : ''
+          }));
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Error loading non working days', err);
+          this.loading = false;
+        }
+      });
+  }*/
+
+  mapBackendSchedule(schedule: any[]): WeekDay[] {
+    return this.weekDays.map(day => {
+      const match = schedule.find(
+        s => s.day_of_week === day.value
+      );
+
+      if (!match) {
+        return { ...day, active: false };
+      }
+
+      return {
+        ...day,
+        active: true,
+        start: match.start_time.substring(0, 5),
+        end: match.end_time.substring(0, 5)
+      };
     });
+  }
+
+  snapshotState() {
+    this.originalState = JSON.stringify({
+      settings: this.settings,
+      weekDays: this.weekDays,
+      nonWorkingDays: this.nonWorkingDays
+    });
+  }
+
+  detectChanges() {
+    const current = JSON.stringify({
+      settings: this.settings,
+      weekDays: this.weekDays,
+      nonWorkingDays: this.nonWorkingDays
+    });
+
+    this.hasChanges = current !== this.originalState;
+  }
+
+  openAddNonWorkingDay() {
+    const newDay: NonWorkingDay = {
+      id: Date.now(),
+      date: '',
+      reason: ''
+    };
+
+    this.nonWorkingDays.push(newDay);
+  }
+
+  deleteNonWorking(day: NonWorkingDay) {
+    this.nonWorkingDays = this.nonWorkingDays.filter(d => d.id !== day.id);
+  }
+
+  saveAgenda() {
+    this.saving = true;
+
+    const payload = {
+      ...this.settings,
+      weekly_schedule: this.weekDays
+        .filter(d => d.active)
+        .map(d => ({
+          day_of_week: d.value,
+          start_time: d.start + ':00',
+          end_time: d.end + ':00'
+        })),
+      non_working_days: this.nonWorkingDays.map(d => ({
+        date: d.date,
+        reason: d.reason
+      }))
+    };
+
+    this.agendaService
+      .updateAgenda(this.selectedProfessionalId, payload)
+      .subscribe(() => {
+        this.snapshotState();
+        this.hasChanges = false;
+        this.saving = false;
+        this.notify.success("Datos guardados correctamente");
+      });
+  }
+
+  discardChanges() {
+    const state = JSON.parse(this.originalState);
+
+    this.settings = state.settings;
+    this.weekDays = state.weekDays;
+    this.nonWorkingDays = state.nonWorkingDays;
+
+    this.hasChanges = false;
   }
 
 
