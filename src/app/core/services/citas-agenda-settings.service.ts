@@ -27,7 +27,7 @@ export interface WeeklySchedule {
     |--------------------------------------------------------------------------
     */
 
-export class AgendaService {
+export class AgendaSettingsService {
   private endpoint = 'me/staff-members';
 
   constructor(private api: Api) { }

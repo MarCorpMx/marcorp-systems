@@ -7,11 +7,11 @@
 
     <div>
       <h2 class="text-2xl font-semibold text-[var(--text-primary)]">
-        Configuración de agenda
+        Configuración de citas
       </h2>
 
       <p class="text-sm text-[var(--text-secondary)] mt-1">
-        Personaliza disponibilidad, reservas y reglas del consultorio.
+        Configura disponibilidad, reservas y reglas de tus citas.
       </p>
     </div>
 
@@ -21,12 +21,29 @@
         Profesional
       </label>
 
-      <select [(ngModel)]="selectedProfessionalId" (change)="loadAgenda()" class="px-4 py-2 rounded-xl
-                     bg-[var(--bg-surface)]
-                     border border-[var(--border-soft)]
-                     text-sm text-[var(--text-primary)]
-                     focus:ring-2 focus:ring-[var(--system-primary)]
-                     transition">
+      <!-- STAFF: no puede cambiar -->
+      @if (role === 'staff') {
+
+      <div class="px-4 py-2 rounded-xl
+                bg-[var(--bg-base)]
+                border border-[var(--border-soft)]
+                text-sm text-[var(--text-secondary)]">
+
+        {{ selectedProfessionalName }}
+
+      </div>
+
+      }
+
+      <!-- ADMIN / OWNER / RECEPTIONIST -->
+      @else {
+
+      <select [(ngModel)]="selectedProfessionalId" (change)="selectProfessional(selectedProfessionalId)" class="px-4 py-2 rounded-xl
+             bg-[var(--bg-surface)]
+             border border-[var(--border-soft)]
+             text-sm text-[var(--text-primary)]
+             focus:ring-2 focus:ring-[var(--system-primary)]
+             transition">
 
         @for (p of professionals; track p.id) {
         <option [value]="p.id">{{ p.name }}</option>
@@ -34,7 +51,10 @@
 
       </select>
 
+      }
+
     </div>
+
   </div>
 
   @if (loading) {
@@ -50,8 +70,75 @@
   @else {
 
   <div class="space-y-8">
+    @if (serviceVariants.length === 0) {
+
+    <div class="bg-[var(--bg-surface)]
+             border border-dashed border-[var(--border-soft)]
+             rounded-xl p-10 text-center space-y-4">
+
+      <div class="mx-auto w-12 h-12 rounded-full
+           bg-[var(--system-accent)]
+           flex items-center justify-center
+           text-[var(--system-secondary)] text-xl">
+        <lucide-icon [name]="Briefcase" class="w-6 h-6 text-[var(--system-secondary)]"></lucide-icon>
+      </div>
+
+      <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+        No tienes servicios activos
+      </h3>
+
+      <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+        Crea servicios para poder agendar citas y definir duración, precio y modalidad.
+      </p>
+
+      <button (click)="goToServices()" class="inline-flex items-center gap-2
+             px-4 py-2 rounded-lg
+             bg-[var(--system-primary)]
+             text-white
+             hover:bg-[var(--system-secondary)]
+             transition cursor-pointer">
+        + Crear servicio
+      </button>
+    </div>
+
+    } @else {
+
+    <!-- ================= Servicios disponibles ================= -->
+    <div class="bg-[var(--bg-surface)]
+            border border-[var(--border-soft)]
+            rounded-2xl p-6">
+
+      <h3 class="text-sm font-semibold mb-3">
+        Servicios del profesional
+      </h3>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+        @for (s of serviceVariants; track s.id) {
+
+        <label class="flex items-center gap-3
+                    p-3 rounded-xl
+                    border border-[var(--border-soft)]
+                    cursor-pointer
+                    hover:bg-[var(--bg-base)]">
+
+          <input type="checkbox" [checked]="selectedVariants.includes(s.id)" (change)="toggleVariant(s.id)"
+            class="w-4 h-4">
+
+          <span class="text-sm">
+            {{ s.label }}
+          </span>
+
+        </label>
+
+        }
+
+      </div>
+
+    </div>
 
     <!-- ================= PREFERENCIAS ================= -->
+
     <div class="bg-[var(--bg-surface)]
                 border border-[var(--border-soft)]
                 rounded-2xl p-8 space-y-6 shadow-sm">
@@ -71,10 +158,8 @@
           <label class="text-xs text-[var(--text-secondary)]">
             Duración por cita (min)
           </label>
-          <input type="number" [(ngModel)]="settings.appointment_duration" (ngModelChange)="detectChanges()" class="w-full px-4 py-2 rounded-xl
-                        bg-[var(--bg-base)]
-                        border border-[var(--border-soft)]
-                        focus:ring-2 focus:ring-[var(--system-primary)]">
+          <input type="number" [(ngModel)]="settings.appointment_duration" (ngModelChange)="detectChanges()"
+            class="input-primary">
         </div>
 
         <div class="space-y-1">
@@ -82,28 +167,23 @@
             Descanso entre citas (min)
           </label>
           <input type="number" [(ngModel)]="settings.break_between_appointments" (ngModelChange)="detectChanges()"
-            class="w-full px-4 py-2 rounded-xl
-                        bg-[var(--bg-base)]
-                        border border-[var(--border-soft)]
-                        focus:ring-2 focus:ring-[var(--system-primary)]">
+            class="input-primary">
         </div>
 
         <div class="space-y-1">
           <label class="text-xs text-[var(--text-secondary)]">
             Anticipación mínima (horas)
           </label>
-          <input type="number" [(ngModel)]="settings.minimum_notice_hours" (ngModelChange)="detectChanges()" class="w-full px-4 py-2 rounded-xl
-                        bg-[var(--bg-base)]
-                        border border-[var(--border-soft)]">
+          <input type="number" [(ngModel)]="settings.minimum_notice_hours" (ngModelChange)="detectChanges()"
+            class="input-primary">
         </div>
 
         <div class="space-y-1">
           <label class="text-xs text-[var(--text-secondary)]">
             Límite de cancelación (horas)
           </label>
-          <input type="number" [(ngModel)]="settings.cancellation_limit_hours" (ngModelChange)="detectChanges()" class="w-full px-4 py-2 rounded-xl
-                        bg-[var(--bg-base)]
-                        border border-[var(--border-soft)]">
+          <input type="number" [(ngModel)]="settings.cancellation_limit_hours" (ngModelChange)="detectChanges()"
+            class="input-primary">
         </div>
 
       </div>
@@ -111,12 +191,14 @@
       <div class="flex flex-wrap gap-8 pt-4 border-t border-[var(--border-soft)]">
 
         <label class="flex items-center gap-3 text-sm text-[var(--text-primary)] cursor-pointer">
-          <input type="checkbox" [(ngModel)]="settings.allow_online_booking" (ngModelChange)="detectChanges()" class="w-4 h-4">
+          <input type="checkbox" [(ngModel)]="settings.allow_online_booking" (ngModelChange)="detectChanges()"
+            class="w-4 h-4">
           Permitir reservas online
         </label>
 
         <label class="flex items-center gap-3 text-sm text-[var(--text-primary)] cursor-pointer">
-          <input type="checkbox" [(ngModel)]="settings.allow_cancellation" (ngModelChange)="detectChanges()" class="w-4 h-4">
+          <input type="checkbox" [(ngModel)]="settings.allow_cancellation" (ngModelChange)="detectChanges()"
+            class="w-4 h-4">
           Permitir cancelaciones
         </label>
 
@@ -180,18 +262,14 @@
               <label class="text-xs text-[var(--text-secondary)]">
                 Hora inicio
               </label>
-              <input type="time" [(ngModel)]="day.start" (ngModelChange)="detectChanges()" class="w-full px-4 py-2 rounded-xl
-                            bg-[var(--bg-surface)]
-                            border border-[var(--border-soft)]">
+              <input type="time" [(ngModel)]="day.start" (ngModelChange)="detectChanges()" class="input-primary">
             </div>
 
             <div class="space-y-1">
               <label class="text-xs text-[var(--text-secondary)]">
                 Hora fin
               </label>
-              <input type="time" [(ngModel)]="day.end" (ngModelChange)="detectChanges()" class="w-full px-4 py-2 rounded-xl
-                            bg-[var(--bg-surface)]
-                            border border-[var(--border-soft)]">
+              <input type="time" [(ngModel)]="day.end" (ngModelChange)="detectChanges()" class="input-primary">
             </div>
 
           </div>
@@ -202,6 +280,84 @@
         }
 
       </div>
+
+    </div>
+
+    <!-- ================= Bloqueos recurrentes ================= -->
+    <div class="bg-[var(--bg-surface)]
+            border border-[var(--border-soft)]
+            rounded-2xl p-8 space-y-6 shadow-sm">
+
+      <div class="flex items-center justify-between">
+
+        <div>
+          <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+            Bloqueos recurrentes
+          </h3>
+          <p class="text-xs text-[var(--text-secondary)] mt-1">
+            Ej: horarios de comida o descansos fijos.
+          </p>
+        </div>
+
+        <button (click)="addRecurringBlock()"
+          class="px-4 py-2 rounded-xl bg-[var(--system-primary)] text-white text-sm cursor-pointer">
+          Agregar
+        </button>
+
+      </div>
+
+      @if (recurringBlocks.length === 0) {
+      <div class="border border-dashed border-[var(--border-soft)]
+                    rounded-xl p-10 text-center">
+        <p class="text-sm text-[var(--text-secondary)]">
+          No hay bloqueos recurrentes.
+        </p>
+      </div>
+      }
+
+      @else {
+
+      <div class="space-y-3">
+
+        @for (block of recurringBlocks; track block.id) {
+
+        <div class="flex flex-col sm:flex-row gap-3 items-center
+                border border-[var(--border-soft)]
+                rounded-xl p-4 bg-[var(--bg-base)]">
+
+          <!-- Día -->
+          <select [(ngModel)]="block.day_of_week" (ngModelChange)="detectChanges()"
+            class="px-3 py-2 rounded-xl border text-sm">
+            <!-- @for (d of weekDays; track d.value) { -->
+            <!-- <option [value]="d.value">{{ d.label }}</option> -->
+            <option *ngFor="let d of weekDays" [ngValue]="d.value" [disabled]="!d.active">
+              {{ d.label }}
+            </option>
+            <!-- } -->
+          </select>
+
+          <!-- Hora inicio -->
+          <input type="time" [(ngModel)]="block.start" (ngModelChange)="detectChanges()" class="input-primary">
+
+          <!-- Hora fin -->
+          <input type="time" [(ngModel)]="block.end" (ngModelChange)="detectChanges()" class="input-primary">
+
+          <!-- Label -->
+          <input type="text" [(ngModel)]="block.label" (ngModelChange)="detectChanges()" placeholder="Ej: Comida"
+            class="input-primary">
+
+          <!-- Delete -->
+          <button (click)="removeRecurringBlock(block)" class="text-red-500 text-sm cursor-pointer">
+            Eliminar
+          </button>
+
+        </div>
+
+        }
+
+      </div>
+
+      }
 
     </div>
 
@@ -221,7 +377,7 @@
           </p>
         </div>
 
-        <button (click)="openAddNonWorkingDay(); detectChanges()"  class="px-4 py-2 rounded-xl
+        <button (click)="openAddNonWorkingDay(); detectChanges()" class="px-4 py-2 rounded-xl
                        bg-[var(--system-primary)]
                        text-white text-sm
                        hover:opacity-90 transition cursor-pointer">
@@ -256,20 +412,16 @@
           <div>
             <div class="flex flex-col sm:flex-row gap-3 w-full">
 
-              <input type="date" [(ngModel)]="day.date" (ngModelChange)="detectChanges()" class="px-3 py-2 rounded-xl
-           bg-[var(--bg-surface)]
-           border border-[var(--border-soft)]
-           text-sm w-full sm:w-auto">
+              <input type="date" [(ngModel)]="day.date" (ngModelChange)="detectChanges()" class="input-primary">
 
-              <input type="text" [(ngModel)]="day.reason" (ngModelChange)="detectChanges()" placeholder="Motivo" class="px-3 py-2 rounded-xl
-           bg-[var(--bg-surface)]
-           border border-[var(--border-soft)]
-           text-sm w-full">
+              <input type="text" [(ngModel)]="day.reason" (ngModelChange)="detectChanges()" placeholder="Motivo"
+                class="input-primary">
 
             </div>
           </div>
 
-          <button (click)="deleteNonWorking(day); detectChanges()" (ngModelChange)="detectChanges()" class="text-sm text-red-500 hover:underline cursor-pointer">
+          <button (click)="deleteNonWorking(day); detectChanges()" (ngModelChange)="detectChanges()"
+            class="text-sm text-red-500 hover:underline cursor-pointer">
             Eliminar
           </button>
 
@@ -282,7 +434,7 @@
       }
 
     </div>
-
+    }
   </div>
   }
 

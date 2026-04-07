@@ -3,7 +3,7 @@
   <!-- ===============================
        HEADER
   =============================== -->
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
     <h2 class="text-xl font-semibold text-[var(--text-primary)]">
       Recordatorios
     </h2>
@@ -32,28 +32,27 @@
 
     <div class="flex gap-4 flex-wrap">
 
-      <!-- WhatsApp -->
-      <div class="flex items-center gap-2 px-4 py-2 rounded-lg
-                  border border-[var(--border-soft)]">
-        <lucide-icon [name]="MessageCircle"
-                     class="w-5 h-5 text-green-400"></lucide-icon>
-        <span class="text-sm text-[var(--text-primary)]">WhatsApp</span>
-      </div>
-
       <!-- Email -->
       <div class="flex items-center gap-2 px-4 py-2 rounded-lg
                   border border-[var(--border-soft)]">
-        <lucide-icon [name]="Mail"
-                     class="w-5 h-5 text-blue-400"></lucide-icon>
+        <lucide-icon [name]="Mail" class="w-5 h-5 text-blue-400"></lucide-icon>
         <span class="text-sm text-[var(--text-primary)]">Email</span>
       </div>
+
+      <!-- WhatsApp -->
+      <div class="flex items-center gap-2 px-4 py-2 rounded-lg
+                  border border-[var(--border-soft)]">
+        <lucide-icon [name]="MessageCircle" class="w-5 h-5 text-green-400"></lucide-icon>
+        <span class="text-sm text-[var(--text-primary)]">WhatsApp</span>
+      </div>
+
+
 
       <!-- SMS locked -->
       <div class="flex items-center gap-2 px-4 py-2 rounded-lg
                   border border-dashed border-[var(--border-soft)]
                   feature-locked">
-        <lucide-icon [name]="Bell"
-                     class="w-5 h-5"></lucide-icon>
+        <lucide-icon [name]="Bell" class="w-5 h-5"></lucide-icon>
         <span class="text-sm">SMS</span>
       </div>
 
@@ -64,43 +63,42 @@
        SKELETON
   =============================== -->
   @if (loading) {
-    <div class="space-y-4 animate-pulse">
-      @for (_ of [1,2,3]; track _) {
-        <div class="bg-[var(--bg-surface)]
+  <div class="space-y-4 animate-pulse">
+    @for (_ of [1,2,3]; track _) {
+    <div class="bg-[var(--bg-surface)]
                     border border-[var(--border-soft)]
                     rounded-xl p-5 space-y-3">
-          <div class="h-5 w-48 bg-[var(--border-soft)] rounded"></div>
-          <div class="h-4 w-32 bg-[var(--border-soft)] rounded"></div>
-        </div>
-      }
+      <div class="h-5 w-48 bg-[var(--border-soft)] rounded"></div>
+      <div class="h-4 w-32 bg-[var(--border-soft)] rounded"></div>
     </div>
+    }
+  </div>
   }
 
   <!-- ===============================
        EMPTY STATE
   =============================== -->
-  @else if (!loading && templates.length === 0) {
-    <div class="bg-[var(--bg-surface)]
+  @else if (!loading && reminders.length === 0) {
+  <div class="bg-[var(--bg-surface)]
              border border-dashed border-[var(--border-soft)]
              rounded-xl p-10 text-center space-y-4">
 
-      <lucide-icon [name]="Bell"
-                   class="w-10 h-10 mx-auto text-[var(--system-accent)]"></lucide-icon>
+    <lucide-icon [name]="Bell" class="w-10 h-10 mx-auto text-[var(--system-accent)]"></lucide-icon>
 
-      <h3 class="text-lg font-semibold text-[var(--text-primary)]">
-        No tienes plantillas
-      </h3>
+    <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+      No tienes plantillas
+    </h3>
 
-      <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
-        Crea plantillas para reducir ausencias y automatizar tu agenda.
-      </p>
+    <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+      Crea plantillas para reducir ausencias y automatizar tu agenda.
+    </p>
 
-      <button class="px-4 py-2 rounded-lg
+    <button class="px-4 py-2 rounded-lg
              bg-[var(--system-primary)]
              text-white hover:bg-[var(--system-secondary)] transition">
-        Crear primera plantilla
-      </button>
-    </div>
+      Crear primera plantilla
+    </button>
+  </div>
   }
 
   <!-- ===============================
@@ -108,50 +106,95 @@
   =============================== -->
   @else {
 
-    <div class="space-y-4">
+  <div class="space-y-4">
 
-      @for (tpl of templates; track tpl.id) {
-        <div class="bg-[var(--bg-surface)]
-                    border border-[var(--border-soft)]
-                    rounded-xl p-5 flex items-center justify-between">
+    @for (r of reminders; track r.id) {
+    <div class="bg-[var(--bg-surface)]
+            border border-[var(--border-soft)]
+            rounded-xl p-5
+            flex flex-col gap-4
+            md:flex-row md:items-center md:justify-between">
 
-          <div class="space-y-1">
-            <p class="font-medium text-[var(--text-primary)]">
-              {{ tpl.name }}
-            </p>
+      <!-- INFO -->
+      <div class="space-y-2">
 
-            <div class="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
-              <lucide-icon [name]="getChannelIcon(tpl.channel)"
-                           class="w-4 h-4"></lucide-icon>
-              {{ getChannelLabel(tpl.channel) }}
-            </div>
-          </div>
+        <p class="font-medium text-[var(--text-primary)]">
+          {{ r.name }}
+        </p>
 
-          <div class="flex items-center gap-4">
+        <!-- DESTINATARIOS -->
+        <div class="flex flex-wrap items-center gap-2 text-xs">
 
-            <!-- Estado -->
-            <span class="inline-flex items-center gap-1 text-sm"
-                  [class.text-green-400]="tpl.active"
-                  [class.text-[var(--text-disabled)]]="!tpl.active">
+          <!-- Cliente -->
+          <button (click)="toggleRecipient(r, 'client')" class="px-2 py-1 rounded border transition"
+            [disabled]="!r.active" [class.bg-blue-500]="r.recipients.client && r.active"
+            [class.text-white]="r.recipients.client && r.active" [class.opacity-40]="!r.active"
+            [class.cursor-not-allowed]="!r.active">
+            Cliente
+          </button>
 
-              <lucide-icon
-                [name]="tpl.active ? CheckCircle : XCircle"
-                class="w-4 h-4">
-              </lucide-icon>
-
-              {{ tpl.active ? 'Activa' : 'Inactiva' }}
-            </span>
-
-            <button class="text-sm text-[var(--system-primary)] hover:underline">
-              Editar
-            </button>
-
-          </div>
+          <!-- Staff -->
+          <button (click)="toggleRecipient(r, 'admin')" class="px-2 py-1 rounded border transition"
+            [disabled]="!r.active" [class.bg-purple-500]="r.recipients.admin && r.active"
+            [class.text-white]="r.recipients.admin && r.active" [class.opacity-40]="!r.active"
+            [class.cursor-not-allowed]="!r.active">
+            Equipo
+          </button>
 
         </div>
-      }
+
+        <!-- META -->
+        <div class="flex flex-wrap items-center gap-3 text-sm text-[var(--text-secondary)]">
+
+          <!-- Canal -->
+          <div class="flex items-center gap-1">
+            <lucide-icon [name]="getChannelIcon(r.channel)" class="w-4 h-4"></lucide-icon>
+            {{ getChannelLabel(r.channel) }}
+          </div>
+
+          <!-- Evento -->
+          <span class="text-xs opacity-70">
+            • {{ getEventLabel(r.event) }}
+          </span>
+
+          <!-- Delay -->
+          @if (r.delay_minutes) {
+          <span class="text-xs opacity-70">
+            • {{ r.delay_minutes / 60 }}h antes
+          </span>
+          }
+
+        </div>
+      </div>
+
+      <!-- ACCIONES -->
+      <div class="flex items-center justify-between md:justify-end gap-4">
+
+        <!-- Toggle -->
+        <button (click)="toggleReminder(r)" class="relative w-10 h-5 rounded-full transition"
+          [class.bg-green-500]="r.active" [class.bg-gray-400]="!r.active">
+
+          <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition"
+            [class.translate-x-5]="r.active">
+          </span>
+        </button>
+
+        <!-- Estado -->
+        <span class="text-sm" [class.text-green-400]="r.active" [class.text-[var(--text-disabled)]]="!r.active">
+          {{ r.active ? 'Activa' : 'Inactiva' }}
+        </span>
+
+        <!-- Editar -->
+        <button class="text-sm text-[var(--system-primary)] hover:underline">
+          Editar
+        </button>
+
+      </div>
 
     </div>
+    }
+
+  </div>
   }
 
 </section>

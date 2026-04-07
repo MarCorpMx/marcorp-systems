@@ -28,12 +28,13 @@ export interface ServiceModel {
 
 export type ServiceMode = 'online' | 'presential' | 'hybrid'; // 
 
-/*export interface ServiceVariantModel {
+
+export interface ServiceVariantListItem {
   id: number;
-  duration_minutes: number;
-  price: number;
-  mode: ServiceMode;
-}*/
+  label: string;
+  duration: number;
+  price: number | null;
+}
 
 export interface ServiceVariantModel {
   id: number;

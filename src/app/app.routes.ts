@@ -8,7 +8,7 @@ import { systemAccessGuard } from './core/guards/system-access-guard';
 export const routes: Routes = [
   // Default -> auth
   // ESPAÑOL (UX / Marketing)
-  
+
   /*{
     path: 'iniciar-sesion',
     loadChildren: () =>
@@ -47,6 +47,16 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./account/account.routes')
         .then(m => m.ACCOUNT_ROUTES)
+  },
+
+
+  // SELECT ORGANIZATION (cuando un usuario esta trabajando en varias organizaciones)
+  {
+    path: 'seleccionar-organizacion',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./systems/select-organization/select-organization')
+        .then(c => c.SelectOrganization)
   },
 
   // SELECT SYSTEM (cuando un usuario tiene varios sistemas)

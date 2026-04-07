@@ -1,43 +1,66 @@
 import { AppointmentStatus } from "../../shared/config/appointment-status.config";
 
-/*export type AppointmentStatus =
-  | 'confirmada'
-  | 'pendiente'
-  | 'cancelada'
-  | 'no_asistio';*/
-
 export interface Reminder {
   whatsapp: boolean;
   email: boolean;
   sent: boolean;
 }
 
-export interface Appointment {
+export interface AppointmentModel {
   id: number;
-  date: string; // 👈 importante si luego filtras por día
+
+  start: string;
+  end: string;
+
+  date: string;
   time: string;
-  client: string;
-  service: string;
+
+  client: {
+    id: number | null;
+    name: string | null;
+  };
+
+  service: {
+    id: number | null; // id del service_variant
+
+    main: {
+      id: number | null;
+      name: string | null;
+      color: string | null;
+    } | null;
+
+    variant: {
+      name: string | null;
+      duration: number | null;
+      price: number | null;
+    } | null;
+  };
+
+  staff: {
+    id: number | null;
+    name: string | null;
+  };
+
   status: AppointmentStatus;
+
+  mode: string,
+
   reminders?: Reminder;
 }
 
 export interface CreateAppointmentDto {
-  date: string;
-  time: string;
+
   client_id: number;
-  service_id: number;
-  status?: AppointmentStatus;
-  reminder_whatsapp?: boolean;
-  reminder_email?: boolean;
+
+  staff_member_id: number;
+
+  service_variant_id: number;
+
+  date: string;
+
+  time: string;
+
+  notes?: string;
+
 }
 
-
-/*export interface Appointment {
-  id: number;
-  time: string;
-  client: string;
-  service: string;
-  status: AppointmentStatus;
-  reminders?: Reminder;
-}*/

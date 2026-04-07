@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ServiceModel, CreateServiceDto } from '../models/service.model';
+import { ServiceModel, CreateServiceDto, ServiceVariantListItem } from '../models/service.model';
 import { Api } from './api';
 
 @Injectable({
@@ -22,9 +22,17 @@ export class CitasServicesService {
   */
 
   private endpoint = 'me/services';
+  private variantsEndpoint = 'me/service-variants';
 
+  // ---------------------------
+  // SERVICES (ADMIN)
+  // ---------------------------
   getAll(): Observable<ServiceModel[]> {
     return this.api.get<ServiceModel[]>(this.endpoint);
+  }
+
+  getServiceList(): Observable<any[]> {
+    return this.api.get<any[]>(`${this.endpoint}/list`);
   }
 
   getById(id: number): Observable<ServiceModel> {
@@ -42,5 +50,16 @@ export class CitasServicesService {
   delete(id: number): Observable<void> {
     return this.api.delete<void>(`${this.endpoint}/${id}`);
   }
+
+  // ---------------------------
+  // SERVICE VARIANTS (SELECT)
+  // ---------------------------
+  getVariantList(): Observable<ServiceVariantListItem[]> {
+    return this.api.get<ServiceVariantListItem[]>(
+      `${this.variantsEndpoint}/list`
+    );
+  }
+
+
 
 }

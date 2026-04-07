@@ -1,3 +1,13 @@
+import {
+    CheckCircle,
+    Clock,
+    XCircle,
+    UserX,
+    RotateCcw,
+    Check
+} from 'lucide-angular';
+
+
 export type AppointmentStatus =
     | 'pending'
     | 'confirmed'
@@ -9,6 +19,7 @@ export type AppointmentStatus =
 export interface AppointmentStatusConfig {
     label: string;
     class: string;
+    icon: any;
 }
 
 export const APPOINTMENT_STATUS_CONFIG: Record<
@@ -17,26 +28,32 @@ export const APPOINTMENT_STATUS_CONFIG: Record<
 > = {
     pending: {
         label: 'Pendiente',
-        class: 'bg-yellow-100 text-yellow-700'
+        class: 'bg-yellow-500/10 text-yellow-400',
+        icon: Clock
     },
     confirmed: {
         label: 'Confirmada',
-        class: 'bg-green-100 text-green-700'
+        class: 'bg-green-500/10 text-green-400',
+        icon: CheckCircle
     },
     completed: {
         label: 'Completada',
-        class: 'bg-blue-100 text-blue-700'
+        class: 'bg-blue-500/10 text-blue-400',
+        icon: Check
     },
     rescheduled: {
         label: 'Reprogramada',
-        class: 'bg-purple-100 text-purple-700'
+        class: 'bg-purple-500/10 text-purple-400',
+        icon: RotateCcw
     },
     cancelled: {
         label: 'Cancelada',
-        class: 'bg-red-100 text-red-700'
+        class: 'bg-red-500/10 text-red-400',
+        icon: XCircle
     },
     no_show: {
         label: 'No asistió',
-        class: 'bg-gray-200 text-gray-700'
+        class: 'bg-gray-500/10 text-gray-400',
+        icon: UserX
     }
 };

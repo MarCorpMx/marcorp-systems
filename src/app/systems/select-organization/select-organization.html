@@ -1,0 +1,31 @@
+<div class="system-container">
+  <div class="system-card">
+
+    <h1>Selecciona una organización</h1>
+    <p>Elige dónde deseas trabajar</p>
+
+    <div class="systems-grid">
+
+      @for (org of organizations; track $index) {
+
+        <button class="system-item" (click)="selectOrganization(org)">
+
+          <div class="icon">
+            <lucide-icon [name]="icon" size="40" strokeWidth="1.6"></lucide-icon>
+          </div>
+
+          <div class="info">
+            <h3>{{ org.organization_name }}</h3>
+
+            <span class="badge">
+              {{ org.systems.length }} sistema{{ org.systems.length > 1 ? 's' : '' }}
+            </span>
+          </div>
+
+        </button>
+
+      }
+
+    </div>
+  </div>
+</div>

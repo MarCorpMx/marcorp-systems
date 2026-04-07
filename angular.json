@@ -35,11 +35,38 @@
             ]
           },
           "configurations": {
+            "production": {
+              "baseHref": "/",
+              "deployUrl": "/",
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractLicenses": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.ts"
+                }
+              ],
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "800kB",
+                  "maximumError": "1.5MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kB",
+                  "maximumError": "10kB"
+                }
+              ]
+            },
             "qa": {
-              "baseHref": "/qa/app/",
-              "deployUrl": "/qa/app/",
-              "optimization": false,
-              "sourceMap": true,
+              "baseHref": "/",
+              "deployUrl": "/",
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -47,27 +74,9 @@
                 }
               ]
             },
-            
-            "production": {
-              "baseHref": "",
-              "deployUrl": "",
-              "optimization": true,
-              "sourceMap": false,
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
-                }
-              ],
-              "outputHashing": "all"
-            },
             "development": {
+              "baseHref": "/",
+              "deployUrl": "/",
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true,

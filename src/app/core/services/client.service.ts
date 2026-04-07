@@ -28,6 +28,16 @@ export class ClientService {
     return this.api.get<PaginatedResponse<ClientApi>>(endpoint);
   }
 
+  getClientList(search?: string): Observable<ClientApi[]> {
+    let endpoint = `me/clients/list`;
+
+    if (search) {
+      endpoint += `?search=${encodeURIComponent(search)}`;
+    }
+
+    return this.api.get<ClientApi[]>(endpoint);
+  }
+
   /**
    * GET /api/me/clients/{id}
    */

@@ -13,37 +13,49 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   const token = authService.getToken();
 
-  // Clonar request si hay token
   const authReq = token
     ? req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-        },
-      })
+      setHeaders: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    })
     : req;
 
   return next(authReq).pipe(
     catchError((error) => {
 
-      // 401 → sesión expirada
-      if (error.status === 401) {
-        notification.error('Tu sesión ha expirado');
-        authService.logout();
+
+      // 🔥 CLAVE: ignorar TODO si ya se está deslogueando
+      if (authService.isLoggingOut) {
+        return throwError(() => error);
       }
 
-      // 403 → sin permisos
+      // 🔥 SOLO manejar 401
+      if (error.status === 401) {
+
+        // 🔥 si no hay token → ignorar
+        if (!authService.getToken()) {
+          return throwError(() => error);
+        }
+
+        notification.error('Tu sesión ha expirado');
+
+        authService.clearSession();
+        authService.redirectToLogin();
+
+        return throwError(() => error);
+      }
+
       if (error.status === 403) {
         notification.error('No tienes permisos para esta acción');
       }
 
-      // Errores de validación Laravel (422)
       if (error.status === 422 && error.error?.errors) {
         const firstError = Object.values(error.error.errors)[0] as string[];
         notification.error(firstError[0]);
       }
 
-      // Error general
       if (error.status >= 500) {
         notification.error('Error interno del servidor');
       }

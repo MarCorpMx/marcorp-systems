@@ -48,18 +48,18 @@ export class Configuracion implements OnInit {
     },
     {
       id: 2,
-      title: 'Preferencias de agenda',
-      description: 'Duración por defecto, tiempos de descanso y reglas.',
+      title: 'Horario de atención',
+      description: 'Define reglas generales como duración, descansos y políticas de reserva.',
       icon: this.Clock,
       route: '/sistemas/citas/configuracion/agenda'
     },
-    {
+    /*{
       id: 3,
       title: 'Notificaciones',
       description: 'Canales, plantillas y comportamiento de recordatorios.',
       icon: this.Bell,
       route: '/citas/configuracion/notificaciones'
-    },
+    },*/
     {
       id: 4,
       title: 'Pagos y facturación',

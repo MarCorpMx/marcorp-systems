@@ -80,13 +80,22 @@ export const CITAS_ROUTES: Routes = [
           breadcrumb: 'Servicios'
         }
       },
-      {
+      /*{
         path: 'horarios',
         loadComponent: () =>
           import('./pages/horarios/horarios')
             .then(m => m.Horarios),
         data: {
           breadcrumb: 'Horarios'
+        }
+      },*/
+      {
+        path: 'disponibilidad',
+        loadComponent: () =>
+          import('./pages/disponibilidad/disponibilidad')
+            .then(m => m.Disponibilidad),
+        data: {
+          breadcrumb: 'Disponibilidad'
         }
       },
       {
@@ -160,7 +169,7 @@ export const CITAS_ROUTES: Routes = [
             loadComponent: () =>
               import('./pages/configuracion/agenda/agenda')
                 .then(m => m.Agenda),
-            data: { breadcrumb: 'Preferencias de agenda' }
+            data: { breadcrumb: 'Horario de atención' }
           }
         ]
       },

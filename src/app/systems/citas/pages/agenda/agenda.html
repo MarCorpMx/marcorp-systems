@@ -4,18 +4,80 @@
        HEADER
   =============================== -->
     <div class="flex items-center justify-between">
-        <h2 class="text-xl font-semibold text-[var(--text-primary)]">
-            Agenda
-        </h2>
 
-        <button class="px-4 py-2 rounded-lg
-             bg-[var(--system-primary)]
-             text-white text-sm
-             hover:bg-[var(--system-secondary)]
-             transition">
-            + Nueva cita
+        <!-- Título + Navegación -->
+        <div class="flex items-center gap-6">
+
+            <h2 class="text-xl font-semibold text-[var(--text-primary)]">
+                Agenda
+            </h2>
+
+            <!-- Navegador de fecha -->
+            <div class="flex items-center gap-3
+                bg-[var(--bg-surface)]
+                border border-[var(--border-soft)]
+                rounded-lg px-3 py-1.5">
+
+                <button (click)="changeDay(-1)" class="text-[var(--text-secondary)]
+               hover:text-[var(--system-primary)]
+               transition cursor-pointer">
+                    ←
+                </button>
+
+                <span class="text-sm font-medium text-[var(--text-primary)] capitalize">
+                    {{ formattedSelectedDate }}
+                </span>
+
+                <button (click)="changeDay(1)" class="text-[var(--text-secondary)]
+               hover:text-[var(--system-primary)]
+               transition cursor-pointer">
+                    →
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- Botón nueva cita -->
+        <button (click)="openAppointmentModal()" [disabled]="isPast"
+            class="px-4 py-2 rounded-lg text-sm transition font-medium" [ngClass]="
+    isPast
+      ? 'bg-[var(--bg-soft)] text-[var(--text-secondary)] cursor-not-allowed opacity-60'
+      : 'bg-[var(--system-primary)] text-white hover:bg-[var(--system-secondary)] cursor-pointer'
+  ">
+            {{ isPast ? 'Día finalizado' : '+ Agendar cita' }}
         </button>
+
     </div>
+
+    @if (isPast && hasAppointments) {
+    <div class="bg-[var(--system-accent)]
+              border border-[var(--border-soft)]
+              rounded-xl p-4 mb-6
+              flex items-center justify-between">
+
+        <div>
+            <p class="text-sm text-[var(--text-secondary)]">
+                Resumen del día
+            </p>
+
+            <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+                {{ totalAppointments }} citas atendidas
+            </h3>
+        </div>
+
+        <div class="text-right">
+            <p class="text-sm text-[var(--text-secondary)]">
+                Ingresos estimados
+            </p>
+
+            <h3 class="text-lg font-semibold text-[var(--system-primary)]">
+                {{ totalRevenue | currency:'MXN' }}
+            </h3>
+        </div>
+
+    </div>
+    }
 
     <!-- ===============================
        SKELETON
@@ -66,20 +128,39 @@
         </div>
 
         <h3 class="text-lg font-semibold text-[var(--text-primary)]">
-            Aún no tienes citas
+            {{ emptyStateTitle }}
         </h3>
 
         <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
-            Agenda tu primera cita para organizar tu día y reducir ausencias.
+            {{ emptyStateDescription }}
         </p>
 
-        <button class="inline-flex items-center gap-2
-               px-4 py-2 rounded-lg
-               bg-[var(--system-primary)]
-               text-white
-               hover:bg-[var(--system-secondary)]
-               transition">
-            + Agendar primera cita
+        @if (isPast && !hasAppointments) {
+        <div class="text-xs text-[var(--system-secondary)]
+              bg-[var(--system-accent)]
+              px-4 py-2 rounded-lg">
+            {{ pastInsight }}
+        </div>
+        }
+
+        <button (click)="openAppointmentModal()" [disabled]="isPast" class="inline-flex items-center gap-2
+         px-5 py-2.5 rounded-lg
+         transition font-medium
+         disabled:opacity-50
+         disabled:cursor-not-allowed" [ngClass]="
+    isPast
+      ? 'bg-[var(--bg-soft)] text-[var(--text-secondary)]'
+      : isFuture
+        ? 'bg-[var(--system-secondary)] text-white hover:scale-105 cursor-pointer'
+        : 'bg-[var(--system-primary)] text-white hover:bg-[var(--system-secondary)] cursor-pointer'
+  ">
+            {{
+            isPast
+            ? 'Día finalizado'
+            : isFuture
+            ? 'Planifica con anticipación'
+            : '+ Agendar cita'
+            }}
         </button>
     </div>
     }
@@ -93,7 +174,7 @@
                 border border-[var(--border-soft)]
                 rounded-xl divide-y divide-[var(--border-soft)]">
 
-        @for (item of appointments; track item.time) {
+        @for (item of appointments; track item.id) {
 
         <div class="px-6 py-4 flex items-center justify-between
            hover:bg-[var(--state-hover)]
@@ -101,28 +182,55 @@
 
             <!-- INFO -->
             <div class="space-y-1">
-                <p class="font-medium text-[var(--text-primary)]">
-                    {{ item.time }} · {{ item.client }}
+                <p class="font-medium text-[var(--text-primary)] flex items-center gap-2 flex-wrap">
+
+                    <span>
+                        {{ item.time }}
+                    </span>
+
+                    <span class="text-xs text-[var(--text-secondary)]">
+                        ({{ item.service.variant?.duration }} min)
+                    </span>
+
+                    <span>·</span>
+
+                    <span>
+                        {{ item.client.name }}
+                    </span>
+
                 </p>
 
-                <p class="text-sm text-[var(--text-secondary)]">
-                    {{ item.service }}
-                </p>
+                <div class="flex items-center gap-2 flex-wrap">
+
+                    <p class="text-sm text-[var(--text-secondary)]">
+                        {{ item.service.main?.name }} · {{ item.service.variant?.name }}
+                    </p>
+
+                    <!-- BADGE MODALIDAD -->
+                    <span class="text-xs px-2 py-0.5 rounded-full font-medium" [ngClass]="
+      item.mode === 'online'
+        ? 'bg-blue-500/10 text-blue-400'
+        : 'bg-emerald-500/10 text-emerald-400'
+    ">
+                        {{ item.mode === 'online' ? 'Online' : 'Presencial' }}
+                    </span>
+
+                </div>
 
                 <!-- RECORDATORIOS -->
                 <div class="flex items-center gap-3 mt-1 text-[var(--text-secondary)]">
 
-                    @if (item.reminders?.whatsapp) {
+                    <!-- @if (item.reminders?.whatsapp) { -->
                     <lucide-icon [name]="MessageCircle" class="w-4 h-4" [class.text-green-400]="item.reminders?.sent"
                         [class.opacity-50]="!item.reminders?.sent" title="Recordatorio por WhatsApp">
                     </lucide-icon>
-                    }
+                    <!-- } -->
 
-                    @if (item.reminders?.email) {
+                    <!-- @if (item.reminders?.email) { -->
                     <lucide-icon [name]="Mail" class="w-4 h-4" [class.text-blue-400]="item.reminders?.sent"
                         [class.opacity-50]="!item.reminders?.sent" title="Recordatorio por Email">
                     </lucide-icon>
-                    }
+                    <!-- } -->
 
                     <!-- Estado de envío -->
                     @if (item.reminders && !item.reminders.sent) {
@@ -130,23 +238,116 @@
                     </lucide-icon>
                     }
 
-                    @if (item.reminders?.sent) {
+                    <!-- @if (item.reminders?.sent) { -->
                     <lucide-icon [name]="Check" class="w-4 h-4 text-green-400" title="Recordatorios enviados">
                     </lucide-icon>
-                    }
+                    <!-- } -->
 
                 </div>
             </div>
 
-            <!-- STATUS -->
-            <span class="inline-flex items-center gap-2
-             px-3 py-1 rounded-full text-sm font-medium" [ngClass]="getStatusClasses(item.status)">
+            <!-- STATUS + MENU -->
+            <div class="flex items-center gap-2">
 
-                <lucide-icon [name]="getStatusIcon(item.status)" class="w-4 h-4">
-                </lucide-icon>
+                <!-- STATUS BADGE -->
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium"
+                    [ngClass]="statusConfig[item.status].class">
 
-                {{ getStatusLabel(item.status) }}
-            </span>
+                    <lucide-icon [name]="statusConfig[item.status].icon" class="w-4 h-4"></lucide-icon>
+                    {{ statusConfig[item.status].label }}
+
+                </span>
+
+                <!-- MENU -->
+                @if (!isClosedStatus(item.status)) {
+                <div class="relative menu-container">
+
+                    <button class="p-1.5 rounded-md hover:bg-[var(--state-hover)] transition cursor-pointer"
+                        (click)="toggleMenu(item.id)">
+
+                        <lucide-icon [name]="MoreVertical" class="w-4 h-4 text-[var(--text-secondary)]"></lucide-icon>
+
+                    </button>
+
+                    @if (activeMenu === item.id) {
+
+                    <div class="absolute right-0 mt-2 w-40
+                    bg-[var(--bg-surface)]
+                    border border-[var(--border-soft)]
+                    rounded-lg shadow-lg
+                    z-10 py-1">
+
+                        @if (item.status === 'pending' || item.status === 'rescheduled') {
+
+                        <button class="w-full text-left px-3 py-2 text-sm hover:bg-[var(--state-hover)] cursor-pointer"
+                            (click)="confirmAppointment(item)">
+                            Confirmar
+                        </button>
+
+                        }
+
+                        @if (
+                        item.status === 'pending' ||
+                        item.status === 'confirmed' ||
+                        item.status === 'rescheduled' ||
+                        item.status === 'no_show'
+                        ) {
+
+                        <button class="w-full text-left px-3 py-2 text-sm hover:bg-[var(--state-hover)] cursor-pointer"
+                            (click)="rescheduleAppointment(item)">
+                            Reagendar
+                        </button>
+
+                        }
+
+                        @if (
+                        item.status === 'pending' ||
+                        item.status === 'confirmed' ||
+                        item.status === 'rescheduled'
+                        ) {
+                        <button
+                            class="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-[var(--state-hover)] cursor-pointer"
+                            (click)="cancelAppointment(item)">
+                            Cancelar
+                        </button>
+                        }
+
+                        @if (item.status === 'confirmed') {
+
+                        <button class="w-full text-left px-3 py-2 text-sm hover:bg-[var(--state-hover)] cursor-pointer"
+                            (click)="completeAppointment(item)">
+                            Completar
+                        </button>
+
+                        <button class="w-full text-left px-3 py-2 text-sm hover:bg-[var(--state-hover)] cursor-pointer"
+                            (click)="markNoShow(item)">
+                            No asistió
+                        </button>
+
+                        }
+
+                    </div>
+
+                    }
+
+                </div>
+                }
+
+                @if (isClosedStatus(item.status)) {
+
+                <button class="px-3 py-1.5 text-sm rounded-lg
+    bg-[var(--state-hover)]
+    hover:bg-[var(--border-soft)] cursor-pointer
+    transition" (click)="viewAppointmentDetails(item)">
+
+                    Ver detalles
+
+                </button>
+
+                }
+
+            </div>
+
 
         </div>
 
@@ -156,3 +357,62 @@
     }
 
 </section>
+
+<app-agenda-modal [show]="showAppointmentModal" [selectedDate]="selectedDate" (closed)="handleModalClose($event)">
+</app-agenda-modal>
+
+@if (showNoteModal) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+
+    <div class="w-full max-w-md bg-[var(--bg-surface)] rounded-2xl shadow-xl p-5 space-y-4">
+
+        <!-- Header -->
+        <div class="flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+                Agregar nota
+            </h3>
+
+            <button (click)="showNoteModal = false"
+                class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
+                ✕
+            </button>
+        </div>
+
+        <!-- Status -->
+        <p class="text-sm text-[var(--text-secondary)]">
+            Estatus: <span class="font-medium text-[var(--text-primary)]">
+                {{ statusConfig[noteStatus!].label }}
+            </span>
+        </p>
+
+        <!-- Textarea -->
+        <!-- [(ngModel)]="noteText" -->
+        <textarea [(ngModel)]="noteText" rows="4" placeholder="Escribe una nota (opcional)..." class="w-full rounded-lg border border-[var(--border-soft)]
+             bg-[var(--bg-base)]
+             px-3 py-2 text-sm
+             focus:outline-none focus:ring-2 focus:ring-[var(--system-primary)]">
+    </textarea>
+
+        <!-- Actions -->
+        <div class="flex justify-end gap-2 pt-2">
+
+            <button (click)="showNoteModal = false" class="px-4 py-2 text-sm rounded-lg
+               bg-[var(--bg-soft)]
+               text-[var(--text-secondary)]
+               hover:bg-[var(--border-soft)]
+               cursor-pointer">
+                Cancelar
+            </button>
+
+            <button (click)="saveNoteAndStatus()" class="px-4 py-2 text-sm rounded-lg
+               bg-[var(--system-primary)]
+               text-white hover:bg-[var(--system-secondary)]
+               cursor-pointer">
+                Guardar
+            </button>
+
+        </div>
+
+    </div>
+</div>
+}

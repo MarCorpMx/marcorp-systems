@@ -1,0 +1,138 @@
+@if (show) {
+
+<div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64 
+            z-50 flex items-center justify-center p-4">
+
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="close()"></div>
+
+    <div class="relative w-full max-w-xl
+              bg-[var(--bg-surface)]
+              border border-[var(--border-soft)]
+              rounded-2xl shadow-xl
+              flex flex-col">
+
+        <!-- Header -->
+        <div class="p-6 border-b border-[var(--border-soft)]
+                flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+                Nueva cita
+            </h3>
+
+            <button (click)="close()"
+                class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
+                ✕
+            </button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="save()" class="p-6 space-y-4">
+
+            <!-- Cliente -->
+            <div>
+                <label class="text-sm text-[var(--text-secondary)]">
+                    Cliente *
+                </label>
+                <select formControlName="client_id" class="input-primary">
+                    <option [value]="null">Seleccionar cliente</option>
+                    <option *ngFor="let c of clients" [value]="c.id">
+                        {{ c.full_name }}
+                    </option>
+                </select>
+                @if (getError('client_id')) {
+                <small class="text-red-400 text-xs mt-1 block">
+                    {{ getError('client_id') }}
+                </small>
+                }
+
+                <button type="button" (click)="useOccasionalClient()"
+                    class="text-xs text-[var(--system-primary)] mt-1 cursor-pointer">
+                    Cliente ocasional
+                </button>
+            </div>
+
+            <!-- Servicio -->
+            <div>
+                <label class="text-sm text-[var(--text-secondary)]">
+                    Servicio *
+                </label>
+                <select (change)="onVariantChange($event)" formControlName="service_variant_id" class="input-primary">
+                    <option [value]="null">Seleccionar servicio</option>
+                    <option *ngFor="let v of variants" [value]="v.id">
+                        {{ v.label }}
+                        <span *ngIf="v.price"> - ${{ v.price }}</span>
+                    </option>
+
+                </select>
+
+                @if (getError('service_variant_id')) {
+                <small class="text-red-400 text-xs mt-1 block">
+                    {{ getError('service_variant_id') }}
+                </small>
+                }
+            </div>
+
+            <!-- Colaborador -->
+            <div>
+                <label class="text-sm text-[var(--text-secondary)]">
+                    Profesional *
+                </label>
+                <select formControlName="staff_member_id" class="input-primary">
+                    <option [value]="null">Seleccionar profesional</option>
+                    <option *ngFor="let s of staffMembers" [value]="s.id">
+                        {{ s.name }}
+                    </option>
+                </select>
+                @if (getError('staff_member_id')) {
+                <small class="text-red-400 text-xs mt-1 block">
+                    {{ getError('staff_member_id') }}
+                </small>
+                }
+            </div>
+
+            <!-- Hora -->
+            <div>
+                <label class="text-sm text-[var(--text-secondary)]">
+                    Hora *
+                </label>
+                <input type="time" formControlName="time" class="input-primary">
+                @if (getError('time')) {
+                <small class="text-red-400 text-xs mt-1 block">
+                    {{ getError('time') }}
+                </small>
+                }
+            </div>
+
+            <!-- Notas -->
+            <div>
+                <label class="text-sm text-[var(--text-secondary)]">
+                    Notas
+                </label>
+                <textarea formControlName="notes" rows="3" class="input-primary"></textarea>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex justify-end gap-3 pt-4">
+
+                <button type="button" (click)="close()" class="px-4 py-2 rounded-lg
+                       border border-[var(--border-soft)]
+                       text-[var(--text-secondary)]
+                       cursor-pointer">
+                    Cancelar
+                </button>
+
+                <button type="submit" [disabled]="form.invalid || saving" class="px-4 py-2 rounded-lg
+                       bg-[var(--system-primary)]
+                       text-white
+                       hover:bg-[var(--system-secondary)]
+                       cursor-pointer
+                       disabled:opacity-50
+                       disabled:cursor-not-allowed">
+
+                    {{ saving ? 'Guardando...' : 'Guardar cita' }}
+                </button>
+
+            </div>
+
+        </form>
+    </div>
+</div>
+}

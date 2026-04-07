@@ -8,12 +8,12 @@
       Equipo
     </h2>
 
-    <button class="px-4 py-2 rounded-lg
+    <button (click)="openModal()" class="px-4 py-2 rounded-lg
            bg-[var(--system-primary)]
            text-white text-sm
            hover:bg-[var(--system-secondary)]
-           transition">
-      + Invitar miembro
+           transition cursor-pointer">
+      + Agregar miembro
     </button>
   </div>
 
@@ -21,109 +21,401 @@
        SKELETON
   =============================== -->
   @if (loading) {
-    <div class="space-y-3 animate-pulse">
-      <div *ngFor="let _ of [1,2,3]"
-           class="bg-[var(--bg-surface)]
+  <div class="space-y-3 animate-pulse">
+    <div *ngFor="let _ of [1,2,3]" class="bg-[var(--bg-surface)]
                   border border-[var(--border-soft)]
                   rounded-xl p-4 flex items-center justify-between">
 
-        <div class="flex items-center gap-4">
-          <div class="w-10 h-10 rounded-full bg-[var(--border-soft)]"></div>
-          <div class="space-y-2">
-            <div class="h-4 w-32 bg-[var(--border-soft)] rounded"></div>
-            <div class="h-3 w-24 bg-[var(--border-soft)] rounded"></div>
-          </div>
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 rounded-full bg-[var(--border-soft)]"></div>
+        <div class="space-y-2">
+          <div class="h-4 w-32 bg-[var(--border-soft)] rounded"></div>
+          <div class="h-3 w-24 bg-[var(--border-soft)] rounded"></div>
         </div>
-
-        <div class="h-6 w-20 bg-[var(--border-soft)] rounded-full"></div>
       </div>
+
+      <div class="h-6 w-20 bg-[var(--border-soft)] rounded-full"></div>
     </div>
+  </div>
   }
 
   <!-- ===============================
        EMPTY STATE
   =============================== -->
   @else if (!loading && members.length === 0) {
-    <div class="bg-[var(--bg-surface)]
+  <div class="bg-[var(--bg-surface)]
                 border border-dashed border-[var(--border-soft)]
                 rounded-xl p-10 text-center space-y-4">
 
-      <div class="mx-auto w-12 h-12 rounded-full
+    <div class="mx-auto w-12 h-12 rounded-full
            bg-[var(--system-accent)]
            flex items-center justify-center">
-        <lucide-icon [name]="Users"
-                     class="w-6 h-6 text-[var(--system-secondary)]">
-        </lucide-icon>
-      </div>
+      <lucide-icon [name]="Users" class="w-6 h-6 text-[var(--system-secondary)]">
+      </lucide-icon>
+    </div>
 
-      <h3 class="text-lg font-semibold text-[var(--text-primary)]">
-        No hay miembros en el equipo
-      </h3>
+    <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+      No hay miembros en el equipo
+    </h3>
 
-      <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
-        Invita colaboradores para gestionar citas, clientes y reportes.
-      </p>
+    <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+      Invita colaboradores para gestionar citas, clientes y reportes.
+    </p>
 
-      <button class="px-4 py-2 rounded-lg
+    <button (click)="openModal()" class="px-4 py-2 rounded-lg
              bg-[var(--system-primary)]
              text-white hover:bg-[var(--system-secondary)]
              transition">
-        + Invitar primer miembro
-      </button>
-    </div>
+      + Agregar miembro
+    </button>
+  </div>
   }
 
   <!-- ===============================
        EQUIPO
   =============================== -->
   @else {
-    <div class="bg-[var(--bg-surface)]
+  <div class="bg-[var(--bg-surface)]
                 border border-[var(--border-soft)]
                 rounded-xl divide-y divide-[var(--border-soft)]">
 
-      @for (member of members; track member.id) {
-        <div class="px-6 py-4 flex items-center justify-between
-                    hover:bg-[var(--state-hover)]
-                    transition">
+    @for (member of members; track member.id) {
+    <div class="px-6 py-4
+            flex flex-col gap-3
+            sm:flex-row sm:items-center sm:justify-between
+            hover:bg-[var(--state-hover)]
+            transition">
 
-          <!-- INFO -->
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-full
-                        bg-[var(--system-accent)]
-                        flex items-center justify-center
-                        text-[var(--system-secondary)]
-                        font-medium">
-              {{ member.name.charAt(0) }}
-            </div>
+      <!-- INFO -->
+      <div class="flex items-center gap-4 min-w-0">
 
-            <div>
-              <p class="font-medium text-[var(--text-primary)]">
-                {{ member.name }}
-              </p>
-              <p class="text-sm text-[var(--text-secondary)]">
-                {{ member.email }}
-              </p>
-            </div>
-          </div>
-
-          <!-- ROLE + STATUS -->
-          <div class="flex items-center gap-4">
-
-            <span class="px-3 py-1 rounded-full text-sm font-medium"
-                  [ngClass]="getRoleClasses(member.role)">
-              {{ member.role }}
-            </span>
-
-            <span class="px-3 py-1 rounded-full text-sm"
-                  [ngClass]="getStatusClasses(member.status)">
-              {{ member.status }}
-            </span>
-
-          </div>
-
+        <!-- Avatar -->
+        <div class="w-10 h-10 flex-shrink-0 rounded-full
+                bg-[var(--system-accent)]
+                flex items-center justify-center
+                text-[var(--system-secondary)]
+                font-medium">
+          {{ getInitial(member.name) }}
         </div>
-      }
+
+        <!-- Text -->
+        <div class="min-w-0">
+          <p class="font-medium text-[var(--text-primary)] truncate">
+            {{ member.name }}
+          </p>
+
+          <p class="text-xs text-[var(--text-secondary)]">
+            {{ member.is_staff ? 'Atiende citas' : 'Acceso al sistema' }}
+          </p>
+
+          <p class="text-sm text-[var(--text-secondary)] truncate">
+            {{ member.email }}
+          </p>
+        </div>
+      </div>
+
+      <!-- BADGES -->
+      <div class="flex flex-wrap gap-2 sm:justify-end">
+
+        <span class="px-3 py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap"
+          [ngClass]="getRoleClasses(member.role.key)">
+          {{ getRoleLabel(member.role) }}
+        </span>
+
+        <span class="px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap"
+          [ngClass]="getStatusClasses(member.status)">
+          {{ member.status }}
+        </span>
+
+        <span *ngIf="!member.has_access" class="px-3 py-1 rounded-full text-xs sm:text-sm font-medium  whitespace-nowrap
+                 bg-yellow-500/10 text-yellow-400">
+          Sin acceso
+        </span>
+
+
+        <!-- BOTÓN MENÚ -->
+        <div class="relative" *ngIf="member.role.key !== 'owner'">
+          <div class="relative">
+            <button (click)="toggleMenu(member.id); $event.stopPropagation()" class="px-2 py-1 rounded-full text-xs
+         bg-[var(--bg-surface)]
+         border border-[var(--border-soft)]
+         text-[var(--text-secondary)]
+         hover:bg-[var(--state-hover)] transition cursor-pointer">
+              ⋯
+            </button>
+
+            <!-- DROPDOWN -->
+            <div *ngIf="openMenuId === member.id" (click)="$event.stopPropagation()" class="absolute right-0 mt-2 w-40
+            bg-[var(--bg-surface)]
+            border border-[var(--border-soft)]
+            rounded-lg shadow-lg z-10">
+
+              <button (click)="edit(member)" class="w-full text-left px-3 py-2 text-sm
+             hover:bg-[var(--state-hover)] cursor-pointer">
+                Editar
+              </button>
+
+              <button *ngIf="member.status !== 'Suspendido'" (click)="suspend(member)" class="w-full text-left px-3 py-2 text-sm
+             text-red-400 hover:bg-[var(--state-hover)] cursor-pointer">
+                Suspender
+              </button>
+
+              <button *ngIf="member.status === 'Suspendido'" (click)="activate(member)" class="w-full text-left px-3 py-2 text-sm
+             text-green-400 hover:bg-[var(--state-hover)] cursor-pointer">
+                Activar
+              </button>
+
+            </div>
+          </div>
+        </div>
+
+
+
+      </div>
+
     </div>
+    }
+  </div>
   }
 
 </section>
+
+<!-- MODAL -->
+
+@if (showModal) {
+<div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64 
+            z-50 flex items-center justify-center
+            p-3 sm:p-4">
+
+  <!-- Overlay -->
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeModal()"></div>
+
+  <!-- Modal -->
+  <div class="relative w-full max-w-2xl
+            max-h-[90vh]
+            bg-[var(--bg-surface)]
+            border border-[var(--border-soft)]
+            rounded-2xl shadow-xl
+            flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <div class="p-6 border-b border-[var(--border-soft)]
+            flex items-center justify-between
+            sticky top-0 z-10
+            bg-[var(--bg-surface)]">
+      <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+        {{ editingMember ? 'Editar miembro' : 'Nuevo miembro' }}
+      </h3>
+
+      <button (click)="closeModal()"
+        class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
+        ✕
+      </button>
+    </div>
+
+    <!-- FORM -->
+    <form [formGroup]="form" (ngSubmit)="saveMember()" class="p-6 space-y-4 overflow-y-auto">
+
+
+      <!-- ACCESO AL SISTEMA -->
+      <div class="space-y-3">
+
+        <p class="text-sm font-medium text-[var(--text-primary)]">
+          Acceso al sistema
+        </p>
+
+        <!-- Toggle -->
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" formControlName="has_access">
+          <span class="text-[var(--text-secondary)]">
+            Puede acceder al sistema
+          </span>
+        </label>
+
+        <!-- Mensajito UX -->
+        @if (form.get('has_access')?.value) {
+        <p class="text-xs text-[var(--text-secondary)]">
+          Se creará un usuario para que pueda iniciar sesión.
+        </p>
+        }
+
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <!-- Nombre -->
+        <div>
+          <label class="text-sm text-[var(--text-secondary)]">
+            Nombre *
+          </label>
+          <input type="text" formControlName="first_name" placeholder="Ej: Margarita" class="input-primary">
+          @if (getError('first_name')) {
+          <small class="text-red-400 text-xs">{{ getError('first_name') }}</small>
+          }
+        </div>
+
+        <!-- Apellido -->
+        <div>
+          <label class="text-sm text-[var(--text-secondary)]">
+            Apellido
+          </label>
+          <input type="text" formControlName="last_name" placeholder="Ej: Escobar" class="input-primary">
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label class="text-sm text-[var(--text-secondary)]">
+            Email *
+          </label>
+          <input type="email" formControlName="email" placeholder="correo@ejemplo.com" class="input-primary">
+          @if (getError('email')) {
+          <small class="text-red-400 text-xs">{{ getError('email') }}</small>
+          }
+        </div>
+
+        <!-- Teléfono -->
+        <div class="flex flex-col gap-1 w-full">
+          <label class="text-sm text-[var(--text-secondary)]">
+            Teléfono
+          </label>
+
+          <div class="w-full">
+            <ngx-intl-tel-input class="w-full" [preferredCountries]="preferredCountries"
+              [selectedCountryISO]="CountryISO.Mexico" [phoneValidation]="true" formControlName="phone"
+              [cssClass]="'input-primary w-full'">
+            </ngx-intl-tel-input>
+          </div>
+        </div>
+
+        <!-- Título -->
+        <div>
+          <label class="text-sm text-[var(--text-secondary)]">
+            Título profesional
+          </label>
+          <input type="text" formControlName="title" placeholder="Ej: Tanatólogo" class="input-primary">
+        </div>
+
+        <!-- Especialidad -->
+        <div>
+          <label class="text-sm text-[var(--text-secondary)]">
+            Especialidad
+          </label>
+          <input type="text" formControlName="specialty" placeholder="Ej: Tanatología" class="input-primary">
+        </div>
+
+      </div>
+
+      <!-- CAMPOS DE ACCESO (CONDICIONAL) -->
+      @if (form.get('has_access')?.value) {
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <!-- Username (SOLO CREAR) -->
+        @if (!editingMember) {
+        <div>
+          <label class="text-sm text-[var(--text-secondary)]">
+            Usuario *
+          </label>
+          <input type="text" formControlName="username" placeholder="Ej: margarita.escobar" class="input-primary">
+
+          @if (getError('username')) {
+          <small class="text-red-400 text-xs">
+            {{ getError('username') }}
+          </small>
+          }
+        </div>
+        }
+
+        <!-- Password (SOLO CREAR) -->
+        @if (!editingMember) {
+        <div>
+          <label class="text-sm text-[var(--text-secondary)]">
+            Contraseña *
+          </label>
+          <input type="password" formControlName="password" placeholder="Mínimo 6 caracteres" class="input-primary">
+
+          @if (getError('password')) {
+          <small class="text-red-400 text-xs">
+            {{ getError('password') }}
+          </small>
+          }
+        </div>
+        }
+
+        <!-- ROLE (SIEMPRE VISIBLE) -->
+        <div class="sm:col-span-2">
+          <label class="text-sm text-[var(--text-secondary)]">
+            Tipo de acceso
+          </label>
+
+          <select formControlName="role" class="input-primary">
+            <option value="admin">Administrador</option>
+            <option value="staff">Profesional (gestiona sus citas)</option>
+            <option value="receptionist">Recepción (agenda citas)</option>
+          </select>
+        </div>
+
+      </div>
+
+      }
+
+      <!-- Bio -->
+      <div>
+        <label class="text-sm text-[var(--text-secondary)]">
+          Descripción
+        </label>
+        <textarea formControlName="bio" rows="3" placeholder="Describe al profesional..."
+          class="input-primary"></textarea>
+      </div>
+
+      <!-- Toggles -->
+      <div class="flex flex-wrap gap-4 text-sm">
+
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" formControlName="is_active">
+          <span class="text-[var(--text-secondary)]">Activo</span>
+        </label>
+
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" formControlName="is_public">
+          <span class="text-[var(--text-secondary)]">Mostrar en página de citas</span>
+        </label>
+
+
+      </div>
+
+      <!-- Footer -->
+      <div class="flex justify-end gap-3 pt-4">
+
+        <button type="button" (click)="closeModal()" class="px-4 py-2 rounded-lg
+                       border border-[var(--border-soft)]
+                       text-[var(--text-secondary)]
+                       cursor-pointer">
+          Cancelar
+        </button>
+
+        <button type="submit" [disabled]="form.invalid || saving" class="px-4 py-2 rounded-lg
+                       bg-[var(--system-primary)]
+                       text-white
+                       transition-all
+                       hover:bg-[var(--system-secondary)]
+                       cursor-pointer
+                       disabled:opacity-50
+                       disabled:cursor-not-allowed">
+
+          {{ saving ? 'Guardando...' : (editingMember ? 'Actualizar' : 'Guardar') }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+</div>
+}
+
+
+<!-- FUTURO -->
+<!-- <div class="pt-4 border-t border-[var(--border-soft)] text-xs text-[var(--text-secondary)]">
+        Próximamente podrás invitar por email 🔒
+      </div> -->

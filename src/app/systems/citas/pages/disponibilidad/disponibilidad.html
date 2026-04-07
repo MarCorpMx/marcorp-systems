@@ -1,0 +1,219 @@
+<section class="space-y-6 max-w-6xl mx-auto px-2 sm:px-0">
+
+    <!-- ================= HEADER ================= -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+        <div>
+            <h2 class="text-xl sm:text-2xl font-semibold text-[var(--text-primary)]">
+                Bloqueos de disponibilidad
+            </h2>
+
+            <p class="text-xs sm:text-sm text-[var(--text-secondary)] mt-1">
+                Define bloqueos puntuales sobre la disponibilidad semanal del profesional.
+            </p>
+
+        </div>
+
+        <!-- ================= PROFESSIONAL SELECTOR ================= -->
+        <div class="flex items-center gap-3">
+
+            <label class="text-xs text-[var(--text-secondary)]">
+                Profesional
+            </label>
+
+            <!-- STAFF: no puede cambiar -->
+            @if (role === 'staff') {
+
+            <div class="px-4 py-2 rounded-xl
+                bg-[var(--bg-base)]
+                border border-[var(--border-soft)]
+                text-sm text-[var(--text-secondary)]">
+
+                {{ selectedProfessionalName }}
+
+            </div>
+
+            }
+
+            <!-- ADMIN / OWNER / RECEPTIONIST -->
+            @else {
+
+            <select [(ngModel)]="selectedProfessionalId" (change)="selectProfessional(selectedProfessionalId)" class="px-4 py-2 rounded-xl
+             bg-[var(--bg-surface)]
+             border border-[var(--border-soft)]
+             text-sm text-[var(--text-primary)]
+             focus:ring-2 focus:ring-[var(--system-primary)]
+             transition">
+
+                @for (p of professionals; track p.id) {
+                <option [value]="p.id">{{ p.name }}</option>
+                }
+
+            </select>
+
+            }
+
+        </div>
+
+    </div>
+
+    <!-- ================= HELP / LEGEND ================= -->
+    <div class="flex flex-wrap items-center gap-4 text-xs">
+
+        <div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded bg-green-200 border border-green-400"></div>
+            <span class="text-[var(--text-secondary)]">Horario laboral</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded bg-red-300 border border-red-400"></div>
+            <span class="text-[var(--text-secondary)]">Bloqueado</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded bg-blue-100 border border-blue-300"></div>
+            <span class="text-[var(--text-secondary)]">Selección</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded bg-gray-200 border border-gray-400"></div>
+            <span class="text-[var(--text-secondary)]">No disponible</span>
+        </div>
+
+    </div>
+
+    <!-- ================= SKELETON ================= -->
+    @if (loading) {
+    <div class="animate-pulse h-80 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-soft)]"></div>
+    }
+
+    @else {
+
+    <!-- ================= EMPTY ================= -->
+    @if (!blocks.length) {
+    <!-- <div class="border border-dashed border-[var(--border-soft)]
+                rounded-xl p-6 text-center text-sm text-[var(--text-secondary)]">
+        No hay bloqueos. Todo está disponible.
+    </div> -->
+    }
+
+    <!-- ================= SELECTING INFO ================= -->
+    @if (tempStart) {
+    <div class="text-xs text-blue-500 font-medium">
+        Selecciona la hora final del bloqueo
+    </div>
+    }
+
+
+    <!-- ================= CALENDAR ================= -->
+    <div class="text-xs text-[var(--text-secondary)]">
+        Este calendario solo afecta cambios puntuales.
+        El horario regular se configura en "Configuración > Horario de atención"
+    </div>
+    <div class="overflow-x-auto">
+
+        <div class="min-w-[720px] bg-[var(--bg-surface)]
+ border border-[var(--border-soft)]
+ rounded-2xl overflow-hidden shadow-sm">
+
+            <!-- Days -->
+            <div class="grid grid-cols-8 border-b border-[var(--border-soft)]">
+
+                <div></div>
+
+                @for (d of days; track d) {
+                <div class="text-center text-xs py-2 font-medium text-[var(--text-secondary)]">
+                    {{ d }}
+                </div>
+                }
+
+            </div>
+
+            <!-- Grid -->
+            <div class="grid grid-cols-8">
+
+                <!-- Hours -->
+                <div class="flex flex-col border-r border-[var(--border-soft)]">
+                    @for (h of hours; track h) {
+                    <div class="h-10 sm:h-14 text-[10px] sm:text-xs text-right pr-2 pt-1
+ text-[var(--text-secondary)] font-medium">
+                        {{ h }}
+                    </div>
+                    }
+                </div>
+
+                <!-- Days -->
+                @for (dayIndex of [0,1,2,3,4,5,6]; track dayIndex) {
+
+                <div class="relative border-r border-[var(--border-soft)] overflow-hidden" (mouseenter)="hoveredDay = dayIndex"
+                    (mouseleave)="hoveredDay = null" [ngClass]="{
+  'bg-blue-50/40': hoveredDay === dayIndex
+}">
+
+
+
+                    <!-- Cells -->
+                    @for (h of hours; track h) {
+
+                    <div class="calendar-cell h-10 sm:h-14 border-b border-gray-200
+ cursor-pointer relative z-10 transition-all duration-150 ease-out" (click)="onCellClick(dayIndex, h)" [ngClass]="{
+
+  'bg-gray-100 text-gray-400 cursor-not-allowed':
+    getCellState(dayIndex, h) === 'disabled',
+
+  'bg-red-200 border-red-400':
+    getCellState(dayIndex, h) === 'blocked',
+
+  'bg-white':
+    getCellState(dayIndex, h) === 'available',
+
+  'bg-blue-200 border-blue-400 ring-1 ring-blue-300':
+    isSelectingCell(dayIndex, h)
+
+}">
+
+                        <!-- HOVER SUAVE -->
+                        @if (getCellState(dayIndex, h) === 'available') {
+                        <div
+                            class="absolute inset-0 bg-blue-400/20 opacity-0 hover:opacity-100 transition duration-150 pointer-events-none rounded-md">
+                        </div>
+                        }
+
+                    </div>
+                    }
+
+                    <!-- Blocks -->
+                    @for (block of getBlocksForDay(dayIndex); track block.start + block.end + block.dayIndex) {
+
+                    <div (click)="removeBlock(block)" class="absolute left-1 right-1 rounded-xl text-[9px] sm:text-xs px-2 py-1
+ border shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02] cursor-pointer" [ngClass]="{
+  'bg-yellow-100 border-yellow-300 text-yellow-700': block.label === 'Comida',
+  'bg-red-100 border-red-300 text-red-700': !block.label
+}" [style.top.%]="(toHour(block.start) - startHour) * (100 / hours.length)"
+                        [style.height.%]="(toHour(block.end) - toHour(block.start)) * 100 / hours.length">
+
+                        <div class="font-medium truncate">
+                            {{ block.label || 'Bloqueado' }}
+                        </div>
+
+                        <div class="text-[9px] opacity-70">
+                            {{ block.start }} - {{ block.end }}
+                        </div>
+
+                    </div>
+
+                    }
+
+                </div>
+
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+    }
+
+</section>

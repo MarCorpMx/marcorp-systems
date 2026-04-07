@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   font-family: 'Inter', sans-serif;
@@ -11,16 +12,16 @@ html, body {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-    width: 5px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #0f0f0f;
+  background: #0f0f0f;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgb(16, 185, 129);
-    border-radius: 4px;
+  background: rgb(16, 185, 129);
+  border-radius: 4px;
 }
 
 /*.snackbar-success {
@@ -75,6 +76,11 @@ html, body {
   box-shadow: 0 0 0 2px var(--state-focus);
 }
 
+.input-primary::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
 /*:root {
   --marcorp-primary: #10b981;
   --marcorp-bg-main: #0f1615;
@@ -94,5 +100,3 @@ $marcorp-light: #e5f7f2;
 $citas-accent: #3fcaf7;
 $escolar-accent: #facc15;
 $inventarios-accent: #fb923c; */
-
-

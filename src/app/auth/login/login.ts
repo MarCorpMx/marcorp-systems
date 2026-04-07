@@ -29,8 +29,10 @@ export class Login {
   loginForm = new FormGroup({
     //login: new FormControl('', [Validators.required]),
     //password: new FormControl('', [Validators.required])
-    login: new FormControl('michell_admin', [Validators.required]),
-    password: new FormControl('Admin@123456', [Validators.required])
+
+    login: new FormControl('michelle_admin', [Validators.required]),
+    password: new FormControl('Admin@calma2788', [Validators.required])
+    // Admin@calma2788
   });
 
   get login() {
@@ -74,14 +76,26 @@ export class Login {
         this.notify.success('Acceso concedido!!!');
       },
       error: (err) => {
+        this.isSubmitting = false;
+
+        let message = 'Error en el servidor, intenta más tarde';
+
+        // Credenciales incorrectas
         if (err.status === 401) {
-          this.isSubmitting = false;
-          // Errores de validación de Laravel
-          let messages = err.error?.message || 'Error al iniciar sesión';
-          this.notify.error(messages);
-        } else {
-          this.notify.error('Error en el servidor, intenta más tarde');
+          message = err.error?.message || 'Credenciales incorrectas';
         }
+
+        // Sin acceso a organizaciones
+        else if (err.status === 403) {
+          message = err.error?.message || 'No tienes acceso al sistema';
+        }
+
+        // Validaciones (por si luego las usas en login)
+        else if (err.status === 422) {
+          message = err.error?.message || 'Datos inválidos';
+        }
+
+        this.notify.error(message);
       }
     });
   }
