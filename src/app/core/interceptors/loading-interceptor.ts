@@ -6,9 +6,17 @@ import { LoadingService } from '../services/loading.service';
 export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
   const loader = inject(LoadingService);
 
-  loader.show();
+  const useGlobalLoader = req.headers.get('x-loader') === 'global';
+  
+  if (useGlobalLoader) {
+    loader.showGlobal();
+  }
 
   return next(req).pipe(
-    finalize(() => loader.hide())
+    finalize(() => {
+      if (useGlobalLoader) {
+        loader.hide();
+      }
+    })
   );
 };

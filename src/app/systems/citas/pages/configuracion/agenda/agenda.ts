@@ -20,7 +20,6 @@ interface WeekDay {
 }
 
 
-
 @Component({
   selector: 'app-agenda',
   imports: [ReactiveFormsModule, CommonModule, FormsModule, LucideAngularModule],

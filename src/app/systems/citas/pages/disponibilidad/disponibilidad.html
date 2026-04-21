@@ -1,5 +1,4 @@
 <section class="space-y-6 max-w-6xl mx-auto px-2 sm:px-0">
-
     <!-- ================= HEADER ================= -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
@@ -15,35 +14,21 @@
         </div>
 
         <!-- ================= PROFESSIONAL SELECTOR ================= -->
+        @if (role !== 'staff') {
+
         <div class="flex items-center gap-3">
 
             <label class="text-xs text-[var(--text-secondary)]">
                 Profesional
             </label>
 
-            <!-- STAFF: no puede cambiar -->
-            @if (role === 'staff') {
-
-            <div class="px-4 py-2 rounded-xl
-                bg-[var(--bg-base)]
-                border border-[var(--border-soft)]
-                text-sm text-[var(--text-secondary)]">
-
-                {{ selectedProfessionalName }}
-
-            </div>
-
-            }
-
-            <!-- ADMIN / OWNER / RECEPTIONIST -->
-            @else {
-
             <select [(ngModel)]="selectedProfessionalId" (change)="selectProfessional(selectedProfessionalId)" class="px-4 py-2 rounded-xl
-             bg-[var(--bg-surface)]
-             border border-[var(--border-soft)]
-             text-sm text-[var(--text-primary)]
-             focus:ring-2 focus:ring-[var(--system-primary)]
-             transition">
+                   bg-[var(--bg-surface)]
+                   border border-[var(--border-soft)]
+                   text-sm text-[var(--text-primary)]
+                   focus:ring-2 focus:ring-[var(--system-primary)]
+                   transition 
+                   cursor-pointer">
 
                 @for (p of professionals; track p.id) {
                 <option [value]="p.id">{{ p.name }}</option>
@@ -51,34 +36,9 @@
 
             </select>
 
-            }
-
         </div>
 
-    </div>
-
-    <!-- ================= HELP / LEGEND ================= -->
-    <div class="flex flex-wrap items-center gap-4 text-xs">
-
-        <div class="flex items-center gap-2">
-            <div class="w-3 h-3 rounded bg-green-200 border border-green-400"></div>
-            <span class="text-[var(--text-secondary)]">Horario laboral</span>
-        </div>
-
-        <div class="flex items-center gap-2">
-            <div class="w-3 h-3 rounded bg-red-300 border border-red-400"></div>
-            <span class="text-[var(--text-secondary)]">Bloqueado</span>
-        </div>
-
-        <div class="flex items-center gap-2">
-            <div class="w-3 h-3 rounded bg-blue-100 border border-blue-300"></div>
-            <span class="text-[var(--text-secondary)]">Selección</span>
-        </div>
-
-        <div class="flex items-center gap-2">
-            <div class="w-3 h-3 rounded bg-gray-200 border border-gray-400"></div>
-            <span class="text-[var(--text-secondary)]">No disponible</span>
-        </div>
+        }
 
     </div>
 
@@ -86,25 +46,35 @@
     @if (loading) {
     <div class="animate-pulse h-80 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-soft)]"></div>
     }
-
     @else {
 
-    <!-- ================= EMPTY ================= -->
-    @if (!blocks.length) {
-    <!-- <div class="border border-dashed border-[var(--border-soft)]
-                rounded-xl p-6 text-center text-sm text-[var(--text-secondary)]">
-        No hay bloqueos. Todo está disponible.
-    </div> -->
-    }
+    @if (emptyState) {
+    <div class="bg-[var(--bg-surface)]
+             border border-dashed border-[var(--border-soft)]
+             rounded-xl p-10 text-center space-y-4">
 
-    <!-- ================= SELECTING INFO ================= -->
-    @if (tempStart) {
-    <div class="text-xs text-blue-500 font-medium">
-        Selecciona la hora final del bloqueo
+        <div class="mx-auto w-12 h-12 rounded-full
+           bg-[var(--system-accent)]
+           flex items-center justify-center
+           text-[var(--system-secondary)] text-xl">
+            <lucide-icon [name]="Clock" class="w-6 h-6 text-[var(--system-secondary)]"></lucide-icon>
+        </div>
+
+        <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+            Este profesional aún no tiene horario configurado
+        </h3>
+
+        <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+            Define sus días y horas de trabajo para comenzar a gestionar citas.
+        </p>
+
+        <button (click)="goToConfig()" class="mar-btn-primary">
+            Configurar horario
+        </button>
+
     </div>
     }
-
-
+    @else {
     <!-- ================= CALENDAR ================= -->
     <div class="text-xs text-[var(--text-secondary)]">
         Este calendario solo afecta cambios puntuales.
@@ -112,108 +82,305 @@
     </div>
     <div class="overflow-x-auto">
 
-        <div class="min-w-[720px] bg-[var(--bg-surface)]
- border border-[var(--border-soft)]
- rounded-2xl overflow-hidden shadow-sm">
+        <div class="calendar-light">
+            <full-calendar [options]="calendarOptions"></full-calendar>
+        </div>
 
-            <!-- Days -->
-            <div class="grid grid-cols-8 border-b border-[var(--border-soft)]">
+    </div>
+    }
 
-                <div></div>
+    }
 
-                @for (d of days; track d) {
-                <div class="text-center text-xs py-2 font-medium text-[var(--text-secondary)]">
-                    {{ d }}
-                </div>
-                }
+    @if (blockModal.open) {
+
+    <div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64 
+            z-50 flex items-center justify-center p-4">
+
+        <!-- Overlay -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeBlockModal()"></div>
+
+        <!-- Modal -->
+        <div class="relative w-full max-w-md sm:max-w-lg
+              bg-[var(--bg-surface)]
+              border border-[var(--border-soft)]
+              rounded-2xl shadow-xl
+              overflow-hidden">
+
+            <!-- Header -->
+            <div class="px-5 py-4 border-b border-[var(--border-soft)]
+                flex items-center justify-between">
+
+                <h3 class="text-base font-semibold text-[var(--text-primary)]">
+                    Bloquear horario
+                </h3>
+
+                <button (click)="closeBlockModal()"
+                    class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
+                    ✕
+                </button>
 
             </div>
 
-            <!-- Grid -->
-            <div class="grid grid-cols-8">
+            <!-- Body -->
+            <div class="p-4 sm:p-5 space-y-4">
 
-                <!-- Hours -->
-                <div class="flex flex-col border-r border-[var(--border-soft)]">
-                    @for (h of hours; track h) {
-                    <div class="h-10 sm:h-14 text-[10px] sm:text-xs text-right pr-2 pt-1
- text-[var(--text-secondary)] font-medium">
-                        {{ h }}
+                <!-- Fecha -->
+                <div class="text-sm">
+                    <div class="text-[var(--text-secondary)] capitalize">
+                        {{ blockModal.start | date:'EEEE d MMMM' }}
                     </div>
-                    }
+
+                    <div class="text-[var(--text-primary)] font-semibold">
+                        {{ blockModal.start | date:'HH:mm' }} - {{ blockModal.end | date:'HH:mm' }}
+                    </div>
                 </div>
 
-                <!-- Days -->
-                @for (dayIndex of [0,1,2,3,4,5,6]; track dayIndex) {
+                <!-- Motivo -->
+                <div class="space-y-1">
+                    <label class="text-xs text-[var(--text-secondary)]">
+                        Motivo
+                    </label>
 
-                <div class="relative border-r border-[var(--border-soft)] overflow-hidden" (mouseenter)="hoveredDay = dayIndex"
-                    (mouseleave)="hoveredDay = null" [ngClass]="{
-  'bg-blue-50/40': hoveredDay === dayIndex
-}">
+                    <input [(ngModel)]="blockModal.reason" (input)="blockModal.error = false"
+                        placeholder="Ej: Comida, reunión, descanso..." class="input-primary h-11" maxlength="60" />
 
+                    <div class="flex justify-between items-center min-h-[16px]">
 
+                        <p class="text-xs text-red-400">
+                            {{ blockModal.error ? 'El motivo es obligatorio' : '' }}
+                        </p>
 
-                    <!-- Cells -->
-                    @for (h of hours; track h) {
-
-                    <div class="calendar-cell h-10 sm:h-14 border-b border-gray-200
- cursor-pointer relative z-10 transition-all duration-150 ease-out" (click)="onCellClick(dayIndex, h)" [ngClass]="{
-
-  'bg-gray-100 text-gray-400 cursor-not-allowed':
-    getCellState(dayIndex, h) === 'disabled',
-
-  'bg-red-200 border-red-400':
-    getCellState(dayIndex, h) === 'blocked',
-
-  'bg-white':
-    getCellState(dayIndex, h) === 'available',
-
-  'bg-blue-200 border-blue-400 ring-1 ring-blue-300':
-    isSelectingCell(dayIndex, h)
-
-}">
-
-                        <!-- HOVER SUAVE -->
-                        @if (getCellState(dayIndex, h) === 'available') {
-                        <div
-                            class="absolute inset-0 bg-blue-400/20 opacity-0 hover:opacity-100 transition duration-150 pointer-events-none rounded-md">
-                        </div>
-                        }
+                        <span class="text-[10px] text-[var(--text-secondary)]">
+                            {{ blockModal.reason.length }}/60
+                        </span>
 
                     </div>
-                    }
-
-                    <!-- Blocks -->
-                    @for (block of getBlocksForDay(dayIndex); track block.start + block.end + block.dayIndex) {
-
-                    <div (click)="removeBlock(block)" class="absolute left-1 right-1 rounded-xl text-[9px] sm:text-xs px-2 py-1
- border shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02] cursor-pointer" [ngClass]="{
-  'bg-yellow-100 border-yellow-300 text-yellow-700': block.label === 'Comida',
-  'bg-red-100 border-red-300 text-red-700': !block.label
-}" [style.top.%]="(toHour(block.start) - startHour) * (100 / hours.length)"
-                        [style.height.%]="(toHour(block.end) - toHour(block.start)) * 100 / hours.length">
-
-                        <div class="font-medium truncate">
-                            {{ block.label || 'Bloqueado' }}
-                        </div>
-
-                        <div class="text-[9px] opacity-70">
-                            {{ block.start }} - {{ block.end }}
-                        </div>
-
-                    </div>
-
-                    }
-
                 </div>
 
-                }
+                <!-- Footer -->
+                <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+                    <button (click)="closeBlockModal()" class="mar-btn-secondary">
+                        Cancelar
+                    </button>
+
+                    <button *ngIf="blockModal.editMode" (click)="deleteBlock()" class="mar-btn-danger">
+                        Eliminar
+                    </button>
+
+                    <button (click)="saveBlock()" class="mar-btn-primary">
+                        {{ blockModal.editMode ? 'Actualizar' : 'Guardar' }}
+                    </button>
+
+
+
+                </div>
 
             </div>
 
         </div>
-
     </div>
 
     }
 
+    @if (appointmentModal.open) {
+    <div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64 
+            z-50 flex items-center justify-center p-4">
+
+        <!-- Overlay -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeAppointmentModal()"></div>
+
+        <!-- Modal -->
+        <div class="relative w-full max-w-md
+              bg-[var(--bg-surface)]
+              border border-[var(--border-soft)]
+              rounded-2xl shadow-xl
+              flex flex-col
+              max-h-[90vh]">
+
+            <!-- Header -->
+            <div class="px-5 py-4 border-b border-[var(--border-soft)]
+                flex items-center justify-between shrink-0">
+                <h3 class="text-base font-semibold text-[var(--text-primary)]">
+                    Detalle de cita
+                </h3>
+
+                <button (click)="closeAppointmentModal()"
+                    class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-5 space-y-4 flex-1 overflow-y-auto min-h-0" *ngIf="appointmentModal.data as appointment">
+
+                <!-- Cliente -->
+                <div>
+                    <p class="text-xs text-[var(--text-secondary)]">Cliente</p>
+                    <p class="text-sm font-medium text-[var(--text-primary)]">
+                        {{ appointment.client?.name }}
+                    </p>
+                </div>
+
+                <!-- Servicio -->
+                <div>
+                    <p class="text-xs text-[var(--text-secondary)]">Servicio</p>
+                    <p class="text-sm text-[var(--text-primary)]">
+                        {{ appointment.service?.main?.name }}
+                        <span class="text-xs text-[var(--text-secondary)]">
+                            ({{ appointment.service?.variant?.name }})
+                        </span>
+                    </p>
+                </div>
+
+                <!-- Staff -->
+                <div>
+                    <p class="text-xs text-[var(--text-secondary)]">Profesional</p>
+                    <p class="text-sm text-[var(--text-primary)]">
+                        {{ appointment.staff?.name }}
+                    </p>
+                </div>
+
+                <!-- Fecha -->
+                <div>
+                    <p class="text-xs text-[var(--text-secondary)]">Fecha</p>
+                    <p class="text-sm text-[var(--text-primary)] capitalize">
+                        {{ appointment.start | date:'EEEE d MMMM' }}
+                    </p>
+                </div>
+
+                <!-- Hora -->
+                <div>
+                    <p class="text-xs text-[var(--text-secondary)]">Hora</p>
+                    <p class="text-sm font-medium text-[var(--text-primary)]">
+                        {{ appointment.start | date:'HH:mm' }} -
+                        {{ appointment.end | date:'HH:mm' }}
+                    </p>
+                </div>
+
+                <!-- Modalidad -->
+                <div>
+                    <p class="text-xs text-[var(--text-secondary)]">Modalidad</p>
+
+                    <span class="text-xs px-2 py-1 rounded-full" [ngClass]="getModeClasses(appointment.mode)">
+                        {{ getModeLabel(appointment.mode) }}
+                    </span>
+                </div>
+
+                <!-- Estado -->
+                <div>
+                    <p class="text-xs text-[var(--text-secondary)]">Estado</p>
+
+                    <span class="text-xs px-2 py-1 rounded-full" [ngClass]="statusConfig[appointment.status].class">
+
+                        {{ statusConfig[appointment.status].label }}
+                    </span>
+                </div>
+
+                <!-- Notas -->
+                <!-- @if (appointmentModal.data.notes) {
+                <div>
+                    <p class="text-xs text-[var(--text-secondary)]">Notas</p>
+                    <p class="text-sm text-[var(--text-primary)]">
+                        {{ appointmentModal.data.notes }}
+                    </p>
+                </div>
+                } -->
+
+                <!-- Historial de notas -->
+                <div *ngIf="appointment.appointmentNotes?.length">
+                    <p class="text-xs text-[var(--text-secondary)] mb-2">Historial de notas</p>
+
+                    <div class="space-y-3 max-h-[250px] overflow-y-auto pr-1">
+
+                        <div *ngFor="let note of appointment.appointmentNotes">
+                            <!-- CLIENTE -->
+                            <div *ngIf="note.type.includes('client')" class="flex justify-start">
+                                <div
+                                    class="max-w-[85%] sm:max-w-[75%] bg-gray-100 text-gray-800 rounded-xl px-3 py-2 text-sm shadow-sm">
+
+                                    <p class="text-[11px] text-gray-500 mb-1">
+                                        {{ note.user?.name || 'Cliente' }}
+                                    </p>
+
+                                    <p *ngIf="!note.expanded">
+                                        {{ note.note | slice:0:120 }}
+                                        <span *ngIf="note.note.length > 120" class="text-blue-500 cursor-pointer ml-1"
+                                            (click)="toggleNote(note)">
+                                            ver más
+                                        </span>
+                                    </p>
+
+                                    <p *ngIf="note.expanded">
+                                        {{ note.note }}
+                                        <span class="text-blue-500 cursor-pointer ml-1" (click)="toggleNote(note)">
+                                            ver menos
+                                        </span>
+                                    </p>
+
+                                    <p class="text-[10px] text-gray-400 mt-1">
+                                        {{ note.created_at | date:'short' }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- ADMIN -->
+                            <div *ngIf="note.type.includes('staff')" class="flex justify-end">
+                                <div
+                                    class="max-w-[85%] sm:max-w-[75%] bg-blue-500 text-white rounded-xl px-3 py-2 text-sm shadow-sm">
+
+                                    <p class="text-[11px] text-blue-100 mb-1">
+                                        {{ note.user?.name || 'Staff' }}
+                                    </p>
+
+                                    <p *ngIf="!note.expanded">
+                                        {{ note.note | slice:0:120 }}
+                                        <span *ngIf="note.note.length > 120" class="text-blue-200 cursor-pointer ml-1"
+                                            (click)="toggleNote(note)">
+                                            ver más
+                                        </span>
+                                    </p>
+
+                                    <p *ngIf="note.expanded">
+                                        {{ note.note }}
+                                        <span class="text-blue-200 cursor-pointer ml-1" (click)="toggleNote(note)">
+                                            ver menos
+                                        </span>
+                                    </p>
+
+                                    <p class="text-[10px] text-blue-100 mt-1">
+                                        {{ note.created_at | date:'short' }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- EVENTOS (reagendar, cancelar, etc) -->
+                            <div *ngIf="isEvent(note.type)" class="flex justify-center">
+                                <div class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full shadow-sm">
+                                    {{ getEventLabel(note.type) }}
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="flex justify-end gap-2 p-4 border-t border-[var(--border-soft)] shrink-0">
+
+                <button (click)="closeAppointmentModal()" class="mar-btn-secondary">
+                    Cerrar
+                </button>
+
+                <button class="mar-btn-danger" (click)="cancelAppointment(appointmentModal.data)">
+                    Cancelar cita
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+    }
 </section>

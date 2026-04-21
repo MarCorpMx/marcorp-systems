@@ -5,11 +5,13 @@
   <p>{{ message }}</p>
 
   <div class="actions">
-    <button class="btn cancel" (click)="cancel.emit()">
+    <!-- <button class="btn cancel" (click)="cancel.emit()"> -->
+    <button class="mar-btn-secondary" (click)="cancel.emit()">
       {{ confirmDialog.btnCancelText() }}
     </button>
 
-    <button class="btn confirm" (click)="confirm.emit()">
+    <!-- <button class="btn confirm" (click)="confirm.emit()"> -->
+    <button class="mar-btn-primary" (click)="confirm.emit()">
       {{ confirmDialog.btnConfirmText() }}
     </button>
   </div>

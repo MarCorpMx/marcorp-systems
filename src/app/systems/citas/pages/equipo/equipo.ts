@@ -14,30 +14,30 @@ type MemberRole = 'Administrador' | 'Terapeuta' | 'Recepción';
 interface TeamMember {
   id: string; // "user-4" | "staff-2"
 
-  // 🔥 Identidad
+  // Identidad
   name: string;
   first_name?: string;
   last_name?: string;
 
-  // 🔥 Contacto
+  // Contacto
   email?: string;
   phone?: any; // ngx-intl-tel-input (luego si quieres lo tipamos fino)
 
-  // 🔥 Perfil profesional
+  // Perfil profesional
   title?: string;
   specialty?: string;
   bio?: string;
 
-  // 🔥 Estado del sistema
+  // Estado del sistema
   status: 'Activo' | 'Invitado' | 'Suspendido';
   is_active?: boolean;
   is_public?: boolean;
 
-  // 🔥 Accesos
+  // Accesos
   has_access: boolean; // puede entrar al sistema
   is_staff: boolean;   // atiende citas
 
-  // 🔥 Rol
+  // Rol
   role: {
     key: 'root' | 'owner' | 'admin' | 'staff' | 'receptionist' | string;
     name: string;

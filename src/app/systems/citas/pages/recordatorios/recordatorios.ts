@@ -15,6 +15,28 @@ import { CitasNotificationService } from '../../../../core/services/citas-notifi
 
 type Channel = 'whatsapp' | 'email';
 
+/*
+✔️ SEPARACIÓN CORRECTA
+Recordatorios (menú propio)
+→ ejecución (envíos, canales, lógica)
+Avanzado
+→ configuración técnica (cómo, límites, reglas)
+*/
+
+/*
+Recordatorios (FEATURE CORE)
+- Crear recordatorios
+- Ver historial
+- Activar/desactivar
+- Canales (email, whatsapp futuro)
+
+Avanzado (CONFIG)
+- Cuántos recordatorios puede crear
+- Cuántos envíos al mes (limit_value)
+- Config SMTP (futuro)
+- Reglas (ej: horas antes)
+*/
+
 
 interface Reminder {
   id: number;

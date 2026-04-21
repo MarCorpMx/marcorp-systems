@@ -1,56 +1,116 @@
 <section class="space-y-6">
 
-    <!-- ===============================
-       HEADER
-  =============================== -->
-    <div class="flex items-center justify-between">
+    <!-- =============================== HEADER =============================== -->
+    <div class="flex flex-col gap-4">
 
-        <!-- Título + Navegación -->
-        <div class="flex items-center gap-6">
-
-            <h2 class="text-xl font-semibold text-[var(--text-primary)]">
+        <!-- ================= HEADER TOP ================= -->
+        <div>
+            <h2 class="text-xl sm:text-2xl font-semibold text-[var(--text-primary)]">
                 Agenda
             </h2>
 
-            <!-- Navegador de fecha -->
-            <div class="flex items-center gap-3
+            <p class="text-xs sm:text-sm text-[var(--text-secondary)] mt-1">
+                Administra tu agenda diaria y gestiona tus citas de forma clara y rápida.
+            </p>
+        </div>
+
+        @if (noDataProffesionals) {
+        <div class="bg-[var(--bg-surface)]
+             border border-dashed border-[var(--border-soft)]
+             rounded-xl p-10 text-center space-y-4">
+
+            <div class="mx-auto w-12 h-12 rounded-full
+           bg-[var(--system-accent)]
+           flex items-center justify-center
+           text-[var(--system-secondary)] text-xl">
+                <lucide-icon [name]="UsersRound" class="w-6 h-6 text-[var(--system-secondary)]"></lucide-icon>
+            </div>
+
+            <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+                Aún no tienes profesionales disponibles
+            </h3>
+
+            <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+                Agrega o activa alguno para comenzar a gestionar citas.
+            </p>
+
+            <button (click)="goToStaff()" class="mar-btn-primary">
+                + Crear profesional
+            </button>
+
+        </div>
+        }
+        @else{
+
+        <!-- ================= HEADER CONTROLS ================= -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+            <!-- IZQUIERDA -->
+            <div class="flex flex-wrap items-center gap-3">
+
+                <!-- Selector -->
+                @if (role !== 'staff') {
+                <div class="flex items-center gap-2">
+
+                    <label class="text-xs text-[var(--text-secondary)]">
+                        Profesional
+                    </label>
+
+                    <select [(ngModel)]="selectedProfessionalId" (change)="selectProfessional(selectedProfessionalId)"
+                        class="px-3 py-2 rounded-lg
+                    bg-[var(--bg-surface)]
+                    border border-[var(--border-soft)]
+                    text-sm text-[var(--text-primary)]
+                    focus:ring-2 focus:ring-[var(--system-primary)]">
+
+                        @for (p of professionals; track p.id) {
+                        <option [value]="p.id">{{ p.name }}</option>
+                        }
+                    </select>
+                </div>
+                }
+
+                <!-- Navegador -->
+                <div class="flex items-center gap-3
                 bg-[var(--bg-surface)]
                 border border-[var(--border-soft)]
                 rounded-lg px-3 py-1.5">
 
-                <button (click)="changeDay(-1)" class="text-[var(--text-secondary)]
-               hover:text-[var(--system-primary)]
-               transition cursor-pointer">
-                    ←
-                </button>
+                    <button (click)="changeDay(-1)"
+                        class="text-[var(--text-secondary)] hover:text-[var(--system-primary)]">
+                        ←
+                    </button>
 
-                <span class="text-sm font-medium text-[var(--text-primary)] capitalize">
-                    {{ formattedSelectedDate }}
-                </span>
+                    <span class="text-sm font-medium text-[var(--text-primary)] capitalize">
+                        {{ formattedSelectedDate }}
+                    </span>
 
-                <button (click)="changeDay(1)" class="text-[var(--text-secondary)]
-               hover:text-[var(--system-primary)]
-               transition cursor-pointer">
-                    →
-                </button>
+                    <button (click)="changeDay(1)"
+                        class="text-[var(--text-secondary)] hover:text-[var(--system-primary)]">
+                        →
+                    </button>
+                </div>
 
             </div>
 
+            <!-- DERECHA (CTA) -->
+            <button (click)="openAppointmentModal()" [disabled]="isPast"
+                class="w-full sm:w-auto px-4 py-2 rounded-lg text-sm font-medium transition" [ngClass]="
+                isPast
+                ? 'bg-[var(--bg-soft)] text-[var(--text-secondary)] cursor-not-allowed opacity-60'
+                : 'bg-[var(--system-primary)] text-white hover:bg-[var(--system-secondary)]'
+            ">
+
+                {{ isPast ? 'Día finalizado' : '+ Agendar cita' }}
+
+            </button>
+
         </div>
-
-        <!-- Botón nueva cita -->
-        <button (click)="openAppointmentModal()" [disabled]="isPast"
-            class="px-4 py-2 rounded-lg text-sm transition font-medium" [ngClass]="
-    isPast
-      ? 'bg-[var(--bg-soft)] text-[var(--text-secondary)] cursor-not-allowed opacity-60'
-      : 'bg-[var(--system-primary)] text-white hover:bg-[var(--system-secondary)] cursor-pointer'
-  ">
-            {{ isPast ? 'Día finalizado' : '+ Agendar cita' }}
-        </button>
-
+        } <!-- Fin de "No hay prfesionales -->
     </div>
 
-    @if (isPast && hasAppointments) {
+
+    @if (isPast && hasAppointments && !noDataProffesionals) {
     <div class="bg-[var(--system-accent)]
               border border-[var(--border-soft)]
               rounded-xl p-4 mb-6
@@ -82,7 +142,7 @@
     <!-- ===============================
        SKELETON
   =============================== -->
-    @if (loading) {
+    @if (loading && !noDataProffesionals) {
     <div class="bg-[var(--bg-surface)]
                 border border-[var(--border-soft)]
                 rounded-xl p-6 animate-pulse">
@@ -170,6 +230,7 @@
   =============================== -->
     @else {
 
+    @if (appointments.length > 0) {
     <div class="bg-[var(--bg-surface)]
                 border border-[var(--border-soft)]
                 rounded-xl divide-y divide-[var(--border-soft)]">
@@ -254,6 +315,7 @@
                     [ngClass]="statusConfig[item.status].class">
 
                     <lucide-icon [name]="statusConfig[item.status].icon" class="w-4 h-4"></lucide-icon>
+
                     {{ statusConfig[item.status].label }}
 
                 </span>
@@ -355,11 +417,16 @@
 
     </div>
     }
+    }
 
 </section>
 
+
 <app-agenda-modal [show]="showAppointmentModal" [selectedDate]="selectedDate" (closed)="handleModalClose($event)">
 </app-agenda-modal>
+
+
+
 
 @if (showNoteModal) {
 <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">

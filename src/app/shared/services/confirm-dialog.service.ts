@@ -19,6 +19,8 @@ export class ConfirmDialogService {
     btnCancelText?: string,
     btnConfirmText?: string
   ) {
+
+
     this.title.set(title);
     this.message.set(message);
     this.btnCancelText.set(btnCancelText ?? 'Cancelar');

@@ -6,6 +6,20 @@ export interface Reminder {
   sent: boolean;
 }
 
+export interface AppointmentNote {
+  id: number;
+  type: string;
+  note: string;
+  created_at: string;
+
+  user?: {
+    id: number | null;
+    name: string | null;
+  };
+
+  expanded: boolean;
+}
+
 export interface AppointmentModel {
   id: number;
 
@@ -44,6 +58,8 @@ export interface AppointmentModel {
   status: AppointmentStatus;
 
   mode: string,
+
+  appointmentNotes?: AppointmentNote[],
 
   reminders?: Reminder;
 }

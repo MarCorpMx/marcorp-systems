@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Api } from './api';
 import { Organization } from '../models/organization.model';
+import { ONBOARDING_ROUTES_MAP } from '../../onboarding/models/onboarding.model';
 
 @Injectable({
   providedIn: 'root',
@@ -25,4 +26,6 @@ export class OrganizationService {
     return this.api.put('me/organization', data);
   }
 
+
+  
 }

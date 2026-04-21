@@ -1,31 +1,3 @@
-
-/*export interface StaffModel {
-  id: number;
-  name: string;
-}
-
-export interface ServiceVariantModel {
-  id: number;
-  name: string;
-  duration_minutes: number;
-  price?: number;
-  max_capacity: number;
-  mode: ServiceMode;
-  includes_material: boolean;
-  active: boolean;
-  staff: StaffModel[];
-}
-
-export interface ServiceModel {
-  id: number;
-  name: string;
-  description?: string;
-  active: boolean;
-  variants: ServiceVariantModel[];
-  created_at?: string;
-  updated_at?: string;
-}*/
-
 export type ServiceMode = 'online' | 'presential' | 'hybrid'; // 
 
 
@@ -81,4 +53,15 @@ export interface CreateServiceVariantDto {
   includes_material?: boolean;
   active?: boolean;
   staff_ids?: number[];
+}
+
+// Sirve para respuesta en Onboarding
+export interface OnboardingServiceResponse {
+  message: string;
+  organization: {
+    id: number;
+    name: string;
+    onboarding_step: string;
+    onboarding_completed_at: string | null;
+  };
 }

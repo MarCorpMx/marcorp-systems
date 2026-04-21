@@ -1,0 +1,48 @@
+<!-- <div class="min-h-screen bg-[#050505] flex items-center justify-center p-4"> -->
+<div class="w-full max-w-4xl mx-auto bg-[#0f0f0f] rounded-2xl border border-white/5 shadow-2xl">
+
+    <div class="w-full max-w-4xl bg-[#0f0f0f] rounded-2xl border border-white/5 shadow-2xl ">
+
+        <!-- HEADER -->
+        <div class="sticky top-0 z-10 bg-[#0f0f0f] border-b border-white/10">
+            <div class="p-4 md:p-6 flex items-center justify-between">
+
+                <div class="leading-tight">
+                    <h1 class="text-base md:text-lg font-bold text-white">
+                        CIT<span class="text-[#10b981]">ARA</span>
+                    </h1>
+                    <p class="text-[10px] md:text-xs text-gray-500">
+                        Configuración inicial
+                    </p>
+                </div>
+
+                <button class="logout-btn" (click)="logout()">
+                    <lucide-icon [name]="LogOut" size="18" />
+                    <span class="hidden md:inline">Cerrar sesión</span>
+                </button>
+
+            </div>
+        </div>
+
+        <!-- PROGRESS -->
+        <div class="sticky top-[64px] z-10 bg-[#0f0f0f] px-4 md:px-6 pt-3">
+            <app-progress-bar *ngIf="showProgress"></app-progress-bar>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8">
+            <div class="max-w-md mx-auto w-full">
+
+                @if(confirm.visible()){
+                <app-confirm-dialog [title]="confirm.title()" [message]="confirm.message()"
+                    (confirm)="confirm.confirm()" (cancel)="confirm.close()">
+                </app-confirm-dialog>
+                }
+                <router-outlet></router-outlet>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>

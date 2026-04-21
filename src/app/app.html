@@ -1,6 +1,6 @@
 
-@if(loading.loading()){
-    <app-loading  />
+@if(loading.loading() && loading.mode() === 'global'){
+    <app-loading />
 }
 
 <router-outlet></router-outlet>

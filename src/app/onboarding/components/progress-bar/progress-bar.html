@@ -1,0 +1,47 @@
+<div class="w-full">
+
+    <div class="flex items-center justify-between relative">
+
+        @for (step of steps; let i = $index; track step) {
+        @if (step !== 'completed') {
+        <!-- STEP -->
+        <div class="flex flex-col items-center flex-1 relative z-10">
+
+            <!-- CIRCLE -->
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300"
+                [ngClass]="{
+            'bg-[#10b981] text-black shadow-[0_0_10px_rgba(16,185,129,0.8)]': isCompleted(i),
+            'bg-[#10b981] text-black scale-110': isActive(i),
+            'bg-white/10 text-gray-400': !isCompleted(i) && !isActive(i)
+          }">
+                @if (isCompleted(i)) {
+                ✓
+                } @else {
+                {{ i + 1 }}
+                }
+            </div>
+
+            <!-- LABEL -->
+            <span class="text-[10px] md:text-xs mt-2 text-gray-400 text-center">
+                {{ getLabel(step) }}
+            </span>
+
+        </div>
+
+        <!-- LINE -->
+        @if (i < steps.length - 1) { <div class="absolute top-4 left-0 right-0 h-[2px] z-0 flex">
+            <div class="flex-1 flex">
+                <div class="h-[2px] flex-1 transition-all duration-500" [ngClass]="{
+                'bg-[#10b981]': isCompleted(i),
+                'bg-white/10': !isCompleted(i)
+              }"></div>
+            </div>
+    </div>
+    }
+    }
+
+    }
+
+</div>
+
+</div>

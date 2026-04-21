@@ -40,6 +40,10 @@ export class ThemeService {
     } else {
       this.clearTheme();
     }
+
+    // (tema visual)
+    const theme = this.getTheme();
+    this.setTheme(theme);
   }
 
   /**
@@ -49,4 +53,34 @@ export class ThemeService {
     document.body.removeAttribute('data-system');
     localStorage.removeItem(this.STORAGE_KEY);
   }
+
+  // soporte dark/light
+  private readonly THEME_KEY = 'theme';
+
+ /* setTheme(theme: 'dark' | 'light') {
+    if (theme === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+
+    localStorage.setItem(this.THEME_KEY, theme);
+  }*/
+
+  setTheme(theme: 'dark' | 'light') {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem(this.THEME_KEY, theme);
+  }
+
+  toggleTheme() {
+    const current = this.getTheme();
+    const next = current === 'dark' ? 'light' : 'dark';
+    this.setTheme(next);
+  }
+
+  getTheme(): 'dark' | 'light' {
+    return (localStorage.getItem(this.THEME_KEY) as any) || 'dark';
+  }
+
+
 }

@@ -1,7 +1,6 @@
 import { Component, inject, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../../../core/services/auth.service';
 import {
   LucideAngularModule,
   Calendar,
@@ -12,13 +11,16 @@ import {
   Check,
   MessageCircle,
   Mail,
-  MoreVertical
+  MoreVertical,
+  UsersRound
 } from 'lucide-angular';
 
+// Servicios Internos
+import { AuthService } from '../../../../core/services/auth.service';
+import { ProfessionalsService, Professional } from '../../../../core/services/professionals.service';
 import { CitasAgendaService } from '../../../../core/services/citas-agenda.service';
 import { AppointmentModel } from '../../../../core/models/appointment.model';
 import { APPOINTMENT_STATUS_CONFIG, AppointmentStatus } from '../../../../shared/config/appointment-status.config';
-
 import { AgendaModal } from './agenda-modal/agenda-modal';
 import { Notification } from '../../../../services/notification.service';
 
@@ -73,13 +75,22 @@ export class Agenda implements OnInit {
   readonly MessageCircle = MessageCircle;
   readonly Mail = Mail;
   readonly MoreVertical = MoreVertical;
+  readonly UsersRound = UsersRound;
 
   private auth = inject(AuthService);
+  private professionalsService = inject(ProfessionalsService);
   private appointmentsService = inject(CitasAgendaService);
+  private notify = inject(Notification);
 
   loading = true;
   selectedDate!: string;
   showAppointmentModal = false;
+  role: string | null = null;
+  staffId: number | null = null;
+
+  professionals: Professional[] = [];
+  selectedProfessionalId: number | null = null;
+  noDataProffesionals = false;
 
   appointments: AppointmentModel[] = [];
   statusConfig = APPOINTMENT_STATUS_CONFIG;
@@ -94,24 +105,6 @@ export class Agenda implements OnInit {
   noteAppointmentId: number | null = null;
   noteText: string = '';
 
-  isClosedStatus(status: string): boolean {
-    return ['completed', 'cancelled', 'no_show'].includes(status);
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) {
-
-    const target = event.target as HTMLElement;
-
-    if (!target.closest('.menu-container')) {
-      this.activeMenu = null;
-    }
-
-  }
-
-  constructor(
-    private notify: Notification
-  ) { }
 
   /*appointments: Appointment[] = [
     {
@@ -166,22 +159,143 @@ export class Agenda implements OnInit {
 
   ngOnInit() {
     this.selectedDate = this.getTodayLocal();
+
+    this.role = this.auth.getRole();
+    this.staffId = this.auth.getStaffId();
+
+    if (!this.role) {
+      console.warn('No hay rol definido');
+    }
+
+    // STAFF → no cargar profesionales
+    if (this.role === 'staff') {
+      if (this.staffId) {
+        this.selectedProfessionalId = this.staffId;
+        this.loadAppointments();
+      }
+      return;
+    }
+
+    this.loadProfessionals();
+
+  }
+
+  loadProfessionals() {
+    this.professionalsService.getAll({
+      active: true,
+      //public: true
+      exclude_role: 'receptionist',
+      subsystem: 'citas'
+    }).subscribe(res => {
+      this.professionals = res.data;
+
+      //if (!this.professionals.length) return;
+
+      if (!this.professionals.length) {
+        this.selectedProfessionalId = null;
+        this.appointments = [];
+        this.noDataProffesionals = true; // 👈 para mostrar UI tipo “No hay profesionales”
+        return;
+      }
+
+      // STAFF → solo él mismo
+      if (this.role === 'staff') {
+
+        if (this.staffId) {
+          this.selectedProfessionalId = this.staffId;
+          this.loadAppointments();
+        }
+
+        return; // NO cargar selector
+      }
+
+      // ADMIN / OWNER / RECEPTIONIST
+
+      // buscar si el user tiene staff asociado
+      const ownProfessional = this.professionals.find(
+        p => p.id === this.staffId // importante: staff_member_id === professional.id
+      );
+
+      if (ownProfessional) {
+        // cargar su propio horario por default
+        this.selectedProfessionalId = ownProfessional.id;
+      } else {
+        // fallback
+        this.selectedProfessionalId = this.professionals[0].id;
+      }
+
+      this.loadAppointments();
+
+    });
+  }
+
+  selectProfessional(id: number | null) {
+    if (id === null) return;
+    this.selectedProfessionalId = id;
     this.loadAppointments();
+  }
+
+  private loadAppointments() {
+    this.loading = true;
+
+    //const today = new Date().toISOString().split('T')[0];
+    //const today = this.getTodayLocal();
+
+    //console.log(this.selectedDate);
+
+    this.appointmentsService.getAll({ date: this.selectedDate }).subscribe({
+      next: (response) => {
+        console.log('todo bien con las citas: ', response.data);
+
+        //this.appointments = response.data;
+        // rombi - Simular recordatorios
+
+        this.appointments = response.data.map((a, index) => ({
+          ...a,
+          reminders: a.reminders ?? {
+            whatsapp: true,
+            email: true,
+            sent: true
+            /*whatsapp: index % 2 === 0,
+            email: index % 3 === 0,
+            sent: index % 4 === 0*/
+          }
+        }));
+
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error cargando citas', error);
+        this.appointments = [];
+        this.loading = false;
+      }
+    });
+  }
+
+  get selectedProfessionalName(): string {
+    const found = this.professionals.find(p => p.id === this.selectedProfessionalId);
+    return found ? found.name : 'Mi agenda';
+  }
+
+  isClosedStatus(status: string): boolean {
+    return ['completed', 'cancelled', 'no_show'].includes(status);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+
+    const target = event.target as HTMLElement;
+
+    if (!target.closest('.menu-container')) {
+      this.activeMenu = null;
+    }
+
   }
 
   private getTodayLocal(): string {
     const today = new Date();
     return this.formatDate(today);
   }
-
-  /*private getTodayLocal(): string {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
-  }*/
 
   private formatDate(date: Date): string {
     const year = date.getFullYear();
@@ -263,43 +377,6 @@ export class Agenda implements OnInit {
     const day = this.formattedSelectedDate;
 
     return `El ${day} estuvo libre. Podría ser una oportunidad para promociones o campañas de reactivación.`;
-  }
-
-  private loadAppointments() {
-    this.loading = true;
-
-    //const today = new Date().toISOString().split('T')[0];
-    //const today = this.getTodayLocal();
-
-    //console.log(this.selectedDate);
-
-    this.appointmentsService.getAll({ date: this.selectedDate }).subscribe({
-      next: (response) => {
-        console.log('todo bien con las citas: ', response.data);
-
-        //this.appointments = response.data;
-        // rombi - Simular recordatorios
-
-        this.appointments = response.data.map((a, index) => ({
-          ...a,
-          reminders: a.reminders ?? {
-            whatsapp: true,
-            email: true,
-            sent: true
-            /*whatsapp: index % 2 === 0,
-            email: index % 3 === 0,
-            sent: index % 4 === 0*/
-          }
-        }));
-
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error cargando citas', error);
-        this.appointments = [];
-        this.loading = false;
-      }
-    });
   }
 
   openAppointmentModal(appointment?: any) {
@@ -405,6 +482,10 @@ export class Agenda implements OnInit {
         this.notify.error('Ocurrió un error al actualizar la cita. Intenta nuevamente.');
       }
     });
+  }
+
+  goToStaff() {
+    window.location.href = '/sistemas/citas/equipo';
   }
 
 }

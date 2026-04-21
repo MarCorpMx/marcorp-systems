@@ -1,7 +1,17 @@
-.sidebar{
+/* =========================
+   SIDEBAR BASE
+========================= */
+.sidebar {
   width: 260px;
   height: 100vh;
-  background: linear-gradient(180deg, #0b1110, #070a0a);
+
+  /* background: linear-gradient(180deg, #0b1110, #070a0a);  */
+  /* background: var(--bg-app) !important; */
+
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border-soft);
+  box-shadow: inset -1px 0 0 var(--border-soft);
+
   color: var(--marcorp-text-main);
 
   display: flex;
@@ -12,18 +22,46 @@
   left: 0;
   top: 0;
   z-index: 1000;
+
   transform: translateX(0);
-  transition: transform 0.3s ease;
+  transition:
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.2s ease;
 }
 
+/* Fade inferior PRO */
+.sidebar::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+
+  pointer-events: none;
+
+  background: linear-gradient(to bottom,
+      rgba(0, 0, 0, 0),
+      var(--bg-app));
+}
+
+/* =========================
+   📱 RESPONSIVE SIDEBAR
+========================= */
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
-    /* top: var(--topbar-height);  */
-    height: calc(100vh - var(--topbar-height));
+    /* top: var(--topbar-height); */
+    /* height: calc(100vh - var(--topbar-height)); */
+    
+    height: 100vh;
+    top: 0;
+
     left: 0;
     width: 260px;
+
     z-index: 1000;
+
     transform: translateX(-100%);
     transition: transform 0.3s ease;
   }
@@ -33,6 +71,9 @@
   }
 }
 
+/* =========================
+   🌫 OVERLAY
+========================= */
 .overlay {
   position: fixed;
   inset: 0;
@@ -40,6 +81,18 @@
   z-index: 900;
 }
 
+.overlay {
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.overlay.closing {
+  opacity: 0;
+}
+
+/* =========================
+   🎬 ANIMACIONES
+========================= */
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -52,24 +105,31 @@
   }
 }
 
+/* =========================
+   🧩 HEADER
+========================= */
 .sidebar-header {
   display: flex;
   gap: 1rem;
-  
+
   margin-bottom: 1.5rem;
-  padding-bottom: 0.8rem; 
-  border-bottom: 1px solid var(--marcorp-border) !important;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--border-soft) !important;
 
   .logo {
     width: 40px;
     height: 40px;
     border-radius: 10px;
+
     background: var(--system-primary, var(--marcorp-primary));
+    color: #002b1f;
+    font-weight: bold;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #002b1f;
-    font-weight: bold;
+
+    box-shadow: var(--shadow-xs);
   }
 
   .system {
@@ -92,40 +152,124 @@
   }
 }
 
+/* =========================
+   MENU (SCROLL)
+========================= */
+.menu {
+  flex: 1;
+  min-height: 0;
+
+  overflow-y: auto;
+  scroll-behavior: smooth;
+
+  padding-right: 4px;
+  padding-bottom: 2rem;
+}
+
+/* Scrollbar */
+.menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.menu::-webkit-scrollbar-thumb {
+  background: var(--border-soft);
+  border-radius: 10px;
+}
+
+.menu::-webkit-scrollbar-thumb:hover {
+  background: var(--border-default);
+}
+
+/* =========================
+   🔗 MENU ITEMS
+========================= */
 .menu a {
   display: flex;
   align-items: center;
   gap: .8rem;
+
   padding: .7rem 1rem;
-  border-radius: 12px;
-  color: inherit;
+  margin-bottom: .3rem;
+  border-radius: 10px;
+
+  color: var(--text-secondary);
   text-decoration: none;
-  margin-bottom: .4rem;
+
   transition: all .2s ease;
 }
 
-.menu a:hover,
-.menu a.active {
-  background: rgba(255, 255, 255, .08);
+/* Hover */
+.menu a:hover {
+  background: var(--state-hover);
+  color: var(--text-primary);
   border-left: 3px solid var(--system-primary);
-  transform: translateX(4px);
+  transform: translateX(3px);
 }
 
+/* Active */
+.menu a.active {
+  background: var(--state-active);
+  color: var(--text-primary);
+  border-left: 3px solid var(--system-primary);
+  font-weight: 500;
+
+  box-shadow: var(--shadow-xs);
+}
+
+/* Icon states */
+.menu a lucide-icon {
+  opacity: 0.8;
+  transition: all .2s ease;
+}
+
+.menu a:hover lucide-icon,
+.menu a.active lucide-icon {
+  opacity: 1;
+}
+
+/* Disabled */
+.menu a.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.menu a.disabled::after {
+  content: " 🔒";
+  position: absolute;
+  right: 10px;
+
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 6px;
+
+  background: var(--bg-elevated);
+  color: var(--marcorp-primary);
+  border: 1px solid var(--border-soft);
+}
+
+/* =========================
+   🔚 FOOTER
+========================= */
 .footer {
   margin-top: auto;
 }
 
 .logout {
   width: 100%;
+  padding: .7rem;
+
+  display: flex;
+  justify-content: center;
+  gap: .6rem;
+
   background: none;
   border: 1px solid var(--marcorp-border);
-  color: inherit;
-  padding: .7rem;
   border-radius: 12px;
+
+  color: inherit;
   cursor: pointer;
-  display: flex;
-  gap: .6rem;
-  justify-content: center;
+
   transition: all .2s ease;
 }
 
@@ -134,13 +278,19 @@
   border-color: rgba(255, 0, 0, .4);
 }
 
+/* =========================
+   🎯 UTILS
+========================= */
 .desktop-only {
   display: block;
 }
 
-
+/* =========================
+   ❌ CLOSE BUTTON
+========================= */
 .close-btn {
-  display: flex;
+  display: none !important;
+
   align-items: center;
   justify-content: center;
 
@@ -150,23 +300,21 @@
 
   background: var(--marcorp-bg-soft);
   color: var(--marcorp-text-muted);
-
   border: 1px solid var(--marcorp-border);
-  cursor: pointer;
 
+  cursor: pointer;
   transition: all .2s ease;
 }
 
 .close-btn:hover {
-  background: rgba(24, 196, 143, 0.12); /* verde marca */
+  background: var(--state-hover);
   color: var(--marcorp-primary);
   border-color: var(--marcorp-primary);
 }
 
-.close-btn {
-  display: none !important;
-}
-
+/* =========================
+   📱 RESPONSIVE UTILS
+========================= */
 @media (max-width: 768px) {
   .desktop-only {
     display: none;
@@ -174,5 +322,116 @@
 
   .close-btn {
     display: flex !important;
+  }
+}
+
+/* =========================
+   🏢 BRANCH SELECTOR
+========================= */
+
+.branch-selector {
+  position: relative;
+  margin-top: 4px;
+}
+
+/* 🔹 caso 1 sucursal */
+.branch-single {
+  font-size: .75rem;
+  color: var(--text-secondary);
+}
+
+/* 🔹 trigger */
+.branch-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+
+  font-size: .75rem;
+  color: var(--text-secondary);
+
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+
+  transition: all .2s ease;
+}
+
+.branch-dropdown-trigger:hover {
+  background: var(--state-hover);
+  color: var(--text-primary);
+}
+
+/* 🔹 dropdown */
+.branch-dropdown {
+  position: absolute;
+  top: 110%;
+  left: 0;
+
+  min-width: 180px;
+  padding: .4rem;
+
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+
+  box-shadow: var(--shadow-soft);
+  z-index: 2000;
+
+  backdrop-filter: blur(10px);
+}
+
+/* 🔹 opciones */
+.branch-dropdown button {
+  width: 100%;
+  text-align: left;
+
+  padding: .5rem .6rem;
+  border: none;
+  background: none;
+
+  border-radius: 8px;
+  cursor: pointer;
+
+  color: var(--text-primary);
+  font-size: .8rem;
+
+  transition: all .2s ease;
+}
+
+.branch-dropdown button:hover {
+  background: var(--state-hover);
+}
+
+/* 🔹 activa */
+.branch-dropdown button.active {
+  background: var(--state-active);
+  font-weight: 500;
+}
+
+/* =========================
+   🎬 ANIMACIÓN PRO SIDEBAR
+========================= */
+
+.sidebar {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* estado cerrado (default mobile) */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  /* 👇 NUEVO: cierre suave */
+  .sidebar.closing {
+    transform: translateX(-100%);
+    opacity: 0;
   }
 }

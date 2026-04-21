@@ -12,20 +12,20 @@ export const AUTH_ROUTES: Routes = [
         path: 'iniciar-sesion',
         loadComponent: () =>
           import('./login/login').then(m => m.Login),
-         data: { leftTitle: 'Bienvenido de nuevo al núcleo central de operaciones.' }
+         data: { leftTitle: 'Administra tus citas y clientes desde un solo lugar.' }
       },
       {
         path: 'registrarse',
         loadComponent: () =>
           import('./register/register').then(m => m.Register),
-        data: { leftTitle: 'Únete a la red y comienza a transformar el futuro digital.' }
+        data: { leftTitle: 'Administra tus citas y clientes desde un solo lugar.' }
       },
       {
         path: 'recuperar-contrasena',
         loadComponent: () =>
           import('./recover-password/recover-password')
             .then(m => m.RecoverPassword),
-            data: { leftTitle: 'Recupera tu acceso' }
+            data: { leftTitle: 'Recupera el acceso y continúa gestionando tu agenda.' }
       },
       {
         path: '',

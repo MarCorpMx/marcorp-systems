@@ -21,7 +21,8 @@ import {
   LogOut,
   Menu,
   X,
-  ArrowLeft
+  ArrowLeft,
+  Settings
 } from 'lucide-angular';
 
 interface AccountMenuItem {
@@ -40,35 +41,117 @@ interface AccountMenuItem {
   styleUrl: './account-layout.css',
 })
 export class AccountLayout {
-  readonly CircleUser = CircleUser;
-  readonly User = User;
-  readonly Shield = Shield;
-  readonly Building2 = Building2;
-  readonly KeyRound = KeyRound;
-  readonly Crown = Crown;
-  readonly Gauge = Gauge;
-  readonly CreditCard = CreditCard;
-  readonly Users = Users;
-  readonly Bell = Bell;
-  readonly LifeBuoy = LifeBuoy;
-  readonly LogOut = LogOut;
-  readonly Menu = Menu;
-  readonly X = X;
-  readonly ArrowLeft = ArrowLeft;
+
+  ICON_MAP: any = {
+    CircleUser,
+    User,
+    Shield,
+    Building2,
+    KeyRound,
+    Crown,
+    Gauge,
+    CreditCard,
+    Users,
+    Bell,
+    LifeBuoy,
+    LogOut,
+    Menu,
+    X,
+    ArrowLeft,
+    Settings
+  };
+
+  /*
+ * Bell (notificaciones)
+  Alertas del sistema (pagos, errores, invitaciones)
+Actividad del equipo
+Recordatorios
+Cambios en cuenta
+- UX real:
+Badge rojo con contador (🔥 importantísimo después)
+Dropdown con lista de eventos
+“Te invitaron a una organización”
+“Tu factura está lista”
+
+*Settings (configuración rápida)
+Ajustes rápidos del usuario
+Tema / idioma
+Preferencias de cuenta
+Accesos rápidos (seguridad, API keys, etc.)
+- UX real:
+Abre un mini menú tipo dropdown
+O lleva a configuración general
+
+*/
+
+
+/*Asi debe quedar el puto manu man:
+Cuenta
+- Perfil
+- Seguridad
+
+Suscripción
+- Plan
+- Uso y límites
+- Facturación
+
+Soporte
+- Soporte
+*/
+
 
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  //private confirm = inject(ConfirmDialogService);
   private auth = inject(AuthService);
 
 
   pageTitle = 'Cuenta';
   sidebarOpen = signal(false);
 
+  user = this.auth.getUser();
+
   organization_name = computed(() => {
     const current = this.auth.getCurrentSystem();
     return current?.organization_name ?? '';
   });
+
+  menuSections = [
+    {
+      label: 'Cuenta',
+      items: [
+        { label: 'Perfil', icon: this.ICON_MAP.User, route: 'profile' },
+        { label: 'Seguridad', icon: this.ICON_MAP.Shield, route: 'security' },
+        { label: 'Notificaciones', icon: this.ICON_MAP.Bell, route: 'notifications' }
+      ]
+    },
+    {
+      label: 'Organización',
+      items: [
+        { label: 'Organizaciones', icon: this.ICON_MAP.Building2, route: 'organizations' },
+        { label: 'Permisos', icon: this.ICON_MAP.KeyRound, route: 'permissions' }
+      ]
+    },
+    {
+      label: 'Suscripción',
+      items: [
+        { label: 'Suscripciones', icon: this.ICON_MAP.Crown, route: 'subscriptions' },
+        { label: 'Uso y límites', icon: this.ICON_MAP.Gauge, route: 'usage' },
+        { label: 'Facturación', icon: this.ICON_MAP.CreditCard, route: 'billing' }
+      ]
+    },
+    /*{
+      label: 'Equipo',
+      items: [
+        { label: 'Equipo', icon: this.ICON_MAP.Users, route: 'team' }
+      ]
+    },*/
+    {
+      label: 'Soporte',
+      items: [
+        { label: 'Soporte', icon: this.ICON_MAP.LifeBuoy, route: 'support' }
+      ]
+    }
+  ];
 
   constructor(public confirm: ConfirmDialogService) {
     this.router.events

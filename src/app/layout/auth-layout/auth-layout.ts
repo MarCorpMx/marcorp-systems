@@ -1,21 +1,29 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd, ActivatedRoute } from '@angular/router';
-import { filter } from 'rxjs/operators';
-import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
-//import { Utils } from './services/utils';
+import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-auth-layout',
   imports: [RouterOutlet, CommonModule],
   templateUrl: './auth-layout.html',
   styleUrl: './auth-layout.css',
+  animations: [
+    trigger('routeAnimation', [
+      transition('* <=> *', [
+        style({ opacity: 0, transform: 'translateY(10px)' }),
+        animate('250ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ])
+  ]
 })
 export class AuthLayout {
-  leftTitle: string = 'Bienvenido al núcleo central de operaciones.';
+  leftTitle: string = 'Administra tus citas y clientes desde un solo lugar.';
   urlImg = 'marcorp/images/authLayout_left.png';
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  constructor(public route: ActivatedRoute, public router: Router) { }
+
+
 
   ngOnInit(): void {
     this.router.events.subscribe(() => {

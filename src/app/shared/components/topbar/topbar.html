@@ -8,16 +8,19 @@
     <!-- LEFT -->
     <div class="left">
         <h1 class="system-name">{{ organization_name() }}</h1>
-        
+
         @if(breadcrumbs().length){
         <nav class="breadcrumbs">
-            <!-- @for (bc of breadcrumbs; track $index; let last = $last) { -->
-             @for (crumb of breadcrumbs(); track crumb) {
-            <span>
-                <span class="crumb current">{{ crumb }}</span>
-            </span>
-            @if(!$last){
-            <lucide-icon [name]="ChevronRight" size="14" class="separator"></lucide-icon>
+            @for (crumb of breadcrumbs(); track crumb; let last = $last) {
+
+            @if (last) {
+            <span class="crumb current">{{ crumb }}</span>
+            }
+
+            @if (!last) {
+            <span class="crumb desktop-only">{{ crumb }}</span>
+            <lucide-icon *ngIf="!last" [name]="ChevronRight" size="14" class="separator desktop-only">
+            </lucide-icon>
             }
             }
         </nav>
@@ -26,6 +29,11 @@
 
     <!-- RIGHT -->
     <div class="right">
+
+        <button class="theme-toggle" (click)="toggleTheme()">
+            <lucide-icon [name]="isDark() ? Moon : Sun" size="18">
+            </lucide-icon>
+        </button>
 
         <!-- USER MENU -->
         <div class="user-menu" (click)="toggleUserMenu()">
@@ -41,7 +49,7 @@
                 Mi cuenta
             </button>
 
-            <button routerLink="/select-system" style="margin-bottom: 4px;" >
+            <button routerLink="/select-system" style="margin-bottom: 4px;">
                 Cambiar sistema
             </button>
 

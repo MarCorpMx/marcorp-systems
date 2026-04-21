@@ -1,10 +1,23 @@
+/* =========================
+   1. RESET BASE
+========================= */
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--marcorp-bg-dark);
-  color: var(--marcorp-text-main);
+  height: 100%;
+
   font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg-app);
+  color: var(--text-primary);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+
+/* =========================
+   2. ELEMENTOS BASE
+========================= */
 
 a {
   color: inherit;
@@ -13,12 +26,106 @@ a {
 
 button {
   font-family: inherit;
+  border: none;
+  // background: none;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 button.is-loading {
-  opacity: .6;
+  opacity: 0.6;
   cursor: not-allowed;
   pointer-events: none;
 }
 
 
+/* =========================
+   3. UTILITIES (UI SYSTEM)
+========================= */
+
+.bg-app {
+  background: var(--bg-app);
+}
+
+.bg-surface {
+  background: var(--bg-surface);
+}
+
+.bg-surface-soft {
+  background: var(--bg-surface-soft);
+}
+
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-disabled {
+  color: var(--text-disabled);
+}
+
+.border-default {
+  border: 1px solid var(--border-default);
+}
+
+
+/* =========================
+   4. HELPERS UX (CLAVE SaaS)
+========================= */
+
+/* hover consistente */
+.hoverable {
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.hoverable:hover {
+  background: var(--state-hover);
+}
+
+/* active click */
+.clickable:active {
+  transform: scale(0.97);
+}
+
+/* focus accesible */
+.focusable:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--state-focus);
+}
+
+/* =========================
+   5. FEATURES BLOQUEADAS -> estilos para las organizacion
+========================= */
+
+.feature-locked {
+  color: var(--text-disabled);
+  opacity: 0.7;
+  position: relative;
+}
+
+.feature-locked::after {
+  content: "PRO";
+  font-size: 10px;
+  margin-left: 6px;
+  color: var(--brand-primary);
+}
+
+
+// inputs de hora
+input[type="time"] {
+  min-width: 0; 
+}
+
+@media (max-width: 640px) {
+  input[type="time"] {
+    font-size: 12px;
+    padding: 0.5rem;
+  }
+}

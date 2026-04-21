@@ -5,12 +5,15 @@ import { filter } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 import { BreadcrumbService } from '../../../core/services/breadcrumb.service';
+import { Notification } from '../../../services/notification.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import {
   LucideAngularModule,
   LogOut,
   ChevronRight,
   User,
-  ChevronDown
+  ChevronDown,
+  Sun, Moon
 } from 'lucide-angular';
 
 @Component({
@@ -24,12 +27,16 @@ export class Topbar {
   readonly ChevronRight = ChevronRight;
   readonly User = User;
   readonly ChevronDown = ChevronDown;
+  readonly Sun = Sun;
+  readonly Moon = Moon;
 
   private auth = inject(AuthService);
   private router = inject(Router);
   private confirm = inject(ConfirmDialogService);
   private el = inject(ElementRef);
   breadcrumbService = inject(BreadcrumbService);
+  private notify = inject(Notification);
+  private theme = inject(ThemeService);
 
   userMenuOpen = signal(false);
 
@@ -46,7 +53,7 @@ export class Topbar {
 
   breadcrumbs = this.breadcrumbService.breadcrumbs;
 
-  constructor() {}
+  constructor() { }
 
   toggleUserMenu() {
     this.userMenuOpen.update(v => !v);
@@ -63,6 +70,15 @@ export class Topbar {
     }
   }
 
+
+  toggleTheme() {
+    this.theme.toggleTheme();
+  }
+
+  isDark() {
+    return this.theme.getTheme() === 'dark';
+  }
+
   goToAccount() {
     this.closeUserMenu();
     this.router.navigate(['/account']);
@@ -74,11 +90,15 @@ export class Topbar {
       'Cerrar sesión',
       '¿Seguro que deseas cerrar tu sesión?',
       () => {
+
         this.auth.logout().subscribe(() => {
+          // this.notify.success('Has cerrado sesión');
           this.router.navigate(['/auth/login']);
         });
       }
     );
   }
+
+
 
 }

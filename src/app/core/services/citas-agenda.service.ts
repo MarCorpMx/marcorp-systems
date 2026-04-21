@@ -21,7 +21,7 @@ export class CitasAgendaService {
 
   private endpoint = 'me/appointments';
 
-  getAll(params?: { date?: string }): Observable<{ data: AppointmentModel[] }> {
+  getAll(params?: { date?: string; staff_member_id?: number }): Observable<{ data: AppointmentModel[] }> {
     return this.api.get<{ data: AppointmentModel[] }>(
       this.endpoint,
       { params }

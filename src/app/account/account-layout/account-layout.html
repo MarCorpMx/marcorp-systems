@@ -5,81 +5,45 @@
 
         <div class="sidebar-header">
             <div class="header-main">
-                <lucide-icon [name]="CircleUser" class="account-icon" size="18"></lucide-icon>
-                <span class="title">{{ organization_name() }}</span>
+                <lucide-icon [name]="ICON_MAP.CircleUser" class="account-icon" size="18"></lucide-icon>
+                <!-- <span class="title">{{ organization_name() }}</span> -->
+                <div class="user-block">
+                    <span class="title">{{ user.name }}</span>
+                    <span class="subtitle">{{ organization_name() }}</span>
+                </div>
             </div>
 
             <button class="close-btn " (click)="sidebarOpen.set(false)" aria-label="Cerrar menú">
-                <lucide-icon [name]="X" size="20" />
+                <lucide-icon [name]="ICON_MAP.X" size="20" />
             </button>
         </div>
 
         <nav class="menu">
-            <a routerLink="profile" routerLinkActive="active" class="sidebar-item">
-                <lucide-icon [name]="User" size="16" class="sidebar-icon" />
-                <span>Perfil</span>
-            </a>
+            @for (section of menuSections; track section) {
 
-            <a routerLink="security" routerLinkActive="active" class="sidebar-item">
-                <lucide-icon [name]="Shield" size="16" class="sidebar-icon" />
-                <span>Seguridad</span>
-            </a>
+            <div class="menu-section">
 
-            <a routerLink="notifications" routerLinkActive="active" class="sidebar-item">
-                <lucide-icon [name]="Bell" size="16" class="sidebar-icon" />
-                <span>Notificaciones</span>
-            </a>
+                <span class="section-label desktop-only">
+                    {{ section.label }}
+                </span>
 
-            <hr />
+                @for (item of section.items; track item) {
+                <a [routerLink]="item.route" routerLinkActive="active" class="sidebar-item"
+                    (click)="sidebarOpen.set(false)">
+                    <lucide-icon [name]="item.icon" size="16" />
+                    <span>{{ item.label }}</span>
+                </a>
 
-            <a routerLink="organizations" routerLinkActive="active" class="sidebar-item">
-                <lucide-icon [name]="Building2" size="16" class="sidebar-icon" />
-                <span>Organizaciones</span>
-            </a>
+                }
 
-            <a routerLink="permissions" routerLinkActive="active" class="sidebar-item">
-                <lucide-icon [name]="KeyRound" size="16" class="sidebar-icon" />
-                <span>Permisos</span>
-            </a>
+            </div>
 
-            <hr />
-
-            <a routerLink="subscriptions" routerLinkActive="active" class="sidebar-item">
-                <lucide-icon [name]="Crown" size="16" class="sidebar-icon" />
-                <span>Suscripciones</span>
-            </a>
-
-            <a routerLink="usage" routerLinkActive="active" class="sidebar-item">
-                <lucide-icon [name]="Gauge" size="16" class="sidebar-icon" />
-                <span>Uso y límites</span>
-            </a>
-
-            <a routerLink="billing" routerLinkActive="active" class="sidebar-item">
-                <lucide-icon [name]="CreditCard" size="16" class="sidebar-icon" />
-                <span>Facturación</span>
-            </a>
-
-            <hr />
-
-            <a routerLink="team" routerLinkActive="active" class="sidebar-item">
-                <lucide-icon [name]="Users" size="16" class="sidebar-icon" />
-                <span>Equipo</span>
-            </a>
-
-
-            <hr />
-
-            <a routerLink="support" routerLinkActive="active" class="sidebar-item">
-                <lucide-icon [name]="LifeBuoy" size="16" class="sidebar-icon" />
-                <span>Soporte</span>
-            </a>
-
-            <hr />
+            }
         </nav>
 
         <div class="sidebar-footer">
             <button class="sidebar-item logout" (click)="logout()">
-                <lucide-icon [name]="LogOut" size="16" />
+                <lucide-icon [name]="ICON_MAP.LogOut" size="16" />
                 <span>Cerrar sesión</span>
             </button>
         </div>
@@ -97,24 +61,36 @@
         <!-- TOPBAR -->
         <header class="account-topbar">
 
-            @if(!sidebarOpen()){
-            <button class="menu-btn mobile-only" (click)="sidebarOpen.set(true)" aria-label="Abrir menú">
-                <lucide-icon [name]="Menu" size="20" />
-            </button>
-            }
-            <!--<button class="menu-btn mobile-only" (click)="sidebarOpen.set(true)">
-                ☰
-            </button>-->
+            <div class="left-actions">
+                <button class="menu-btn mobile-only" (click)="sidebarOpen.set(true)">
+                    <lucide-icon [name]="ICON_MAP.Menu" size="20" />
+                </button>
 
-            <button class="back-btn" (click)="goBackToSystem()" aria-label="Volver al sistema">
-
-                <lucide-icon [name]="ArrowLeft" size="18" />
-                <span class="label">Volver</span>
-            </button>
+                <button class="back-btn" (click)="goBackToSystem()">
+                    <lucide-icon [name]="ICON_MAP.ArrowLeft" size="18" />
+                    <span class="label">Volver</span>
+                </button>
+            </div>
 
             <h1 class="page-title">
-                {{ pageTitle }} 
+                {{ pageTitle }}
+                <span class="breadcrumb-hint">/ Mi cuenta</span>
             </h1>
+
+            <div class="topbar-right">
+                <button class="back-btn mobile-only" (click)="goBackToSystem()">
+                    <lucide-icon [name]="ICON_MAP.ArrowLeft" size="18" />
+                </button>
+
+                <button class="icon-btn">
+                    <lucide-icon [name]="ICON_MAP.Bell" size="18" />
+                </button>
+
+                <button class="icon-btn">
+                    <lucide-icon [name]="ICON_MAP.Settings" size="18" />
+                </button>
+            </div>
+
         </header>
 
         <!-- PAGE -->

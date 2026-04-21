@@ -1,0 +1,97 @@
+<div class="w-full max-w-md mx-auto">
+
+    <div class="bg-[var(--bg-surface)] 
+                border border-[var(--border-soft)] 
+                shadow-[var(--shadow-soft)] 
+                rounded-2xl p-6 md:p-8 text-center space-y-6">
+
+        @if (loading) {
+
+        <!-- SKELETON -->
+        <div class="space-y-6 animate-pulse">
+
+            <!-- ICON -->
+            <div class="w-16 h-16 mx-auto rounded-full bg-[var(--bg-surface-soft)]"></div>
+
+            <!-- TITLE -->
+            <div class="space-y-2">
+                <div class="h-5 w-2/3 mx-auto bg-[var(--bg-surface-soft)] rounded"></div>
+                <div class="h-4 w-1/2 mx-auto bg-[var(--bg-surface-soft)] rounded"></div>
+            </div>
+
+            <!-- LIST -->
+            <div class="space-y-2">
+                <div class="h-4 w-3/4 mx-auto bg-[var(--bg-surface-soft)] rounded"></div>
+                <div class="h-4 w-2/3 mx-auto bg-[var(--bg-surface-soft)] rounded"></div>
+                <div class="h-4 w-1/2 mx-auto bg-[var(--bg-surface-soft)] rounded"></div>
+            </div>
+
+            <!-- BUTTON -->
+            <div class="h-10 w-full bg-[var(--bg-surface-soft)] rounded-xl"></div>
+
+        </div>
+
+        }
+
+        @if (!loading) {
+
+        <!-- ICON -->
+        <div class="w-16 h-16 mx-auto rounded-full 
+                    bg-[var(--system-primary)]/10 
+                    flex items-center justify-center
+                    border border-[var(--system-primary)]/20">
+
+            <lucide-icon [name]="CheckCircle" class="text-[var(--system-primary)]" size="28"></lucide-icon>
+        </div>
+
+        <!-- TITLE -->
+        <div>
+            <h2 class="text-xl md:text-2xl font-semibold text-[var(--text-primary)]">
+                Todo listo
+            </h2>
+
+            <p class="text-sm text-[var(--text-secondary)] mt-1">
+                Tu sistema ya está configurado y listo para recibir citas.
+            </p>
+        </div>
+
+        <!-- MINI RESUMEN -->
+        <div class="bg-[var(--bg-base)] 
+            border border-[var(--border-soft)] 
+            rounded-xl p-4 space-y-2">
+
+            <div class="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                <lucide-icon [name]="CheckCircle" class="text-[var(--system-primary)]" size="16"></lucide-icon>
+                <span>Negocio configurado</span>
+            </div>
+
+            <div class="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                <lucide-icon [name]="CheckCircle" class="text-[var(--system-primary)]" size="16"></lucide-icon>
+                <span>Servicios creados</span>
+            </div>
+
+            <div class="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                <lucide-icon [name]="CheckCircle" class="text-[var(--system-primary)]" size="16"></lucide-icon>
+                <span>Horarios definidos</span>
+            </div>
+
+        </div>
+
+        <!-- CTA -->
+        <button (click)="goToDashboard()" class="w-full bg-[var(--brand-primary)]
+                   hover:bg-[var(--brand-primary-dark)]
+                   text-[var(--text-primary)]
+                   transition px-6 py-3 rounded-xl font-medium">
+
+            Ir a mi panel
+        </button>
+
+        <!-- EXTRA -->
+        <p class="text-xs text-[var(--text-secondary)]">
+            Puedes editar tu configuración en cualquier momento
+        </p>
+
+        }
+
+    </div>
+</div>

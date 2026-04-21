@@ -1,15 +1,50 @@
-<aside class="sidebar" [class.open]="open" >
+
+<!-- @if(open){
+<div class="overlay" 
+     [class.closing]="isClosing"
+     (click)="closeSidebar()">
+</div>
+} -->
+<aside class="sidebar" [class.open]="open" [class.closing]="isClosing">
     <div class="sidebar-overlay" (click)="closeSidebar()"></div>
     <!-- HEADER -->
     <div class="sidebar-header">
         <div class="logo">M</div>
         <div class="system">
-            <span class="name">{{ currentSystem?.subsystem.name }}</span>
-            @if(systems.length > 1){
-            <button class="switch" (click)="switchSystem()">
-                Cambiar sistema
-            </button>
-            }
+            <!-- <span class="name">{{ currentSystem?.subsystem.name }}</span> -->
+            <span class="name">CITARA</span>
+
+            <div class="branch-selector">
+
+                <!-- SOLO TEXTO (1 sucursal) -->
+                @if(branches.length === 1){
+                <span class="branch-single">
+                    {{ branches[0].name }}
+                </span>
+                }
+
+                <!-- DROPDOWN (más de 1) -->
+                @if(branches.length > 1){
+                <div class="branch-dropdown-trigger" (click)="toggleBranchMenu()">
+                    <span>{{ currentBranch.name }}</span>
+                    <lucide-icon [name]="ICON_MAP.ChevronDown" size="14"></lucide-icon>
+                </div>
+
+                @if(branchMenuOpen){
+                <div class="branch-dropdown">
+
+                    @for (branch of branches; track branch.id) {
+                    <button (click)="selectBranch(branch)" [class.active]="branch.id === currentBranch.id">
+
+                        {{ branch.name }}
+                    </button>
+                    }
+
+                </div>
+                }
+                }
+
+            </div>
         </div>
 
         <button class="close-btn " (click)="closeSidebar()" aria-label="Cerrar menú">
@@ -18,25 +53,28 @@
 
     </div>
 
-    <!-- MENU -->
+
     <nav class="menu">
-        @for(item of menu(); track $index){
-        @if(hasAccess(item)){
-        <a [routerLink]="item.route" routerLinkActive="active">
-            <lucide-icon [name]="item.icon" size="20"></lucide-icon>
+        @for (item of menu(); track $index) {
+
+        <!-- (click)="!item.enabled && handleBlocked(item)" -->
+        <a [routerLink]="item.enabled ? item.route : null" routerLinkActive="active" [class.disabled]="!item.enabled"
+            (click)="handleMenuClick(item)">
+
+            <lucide-icon [img]="ICON_MAP[item.icon]" size="20"></lucide-icon>
             <span>{{ item.label }}</span>
         </a>
-        }
+
         }
     </nav>
 
     <!-- FOOTER -->
-    <div class="footer desktop-only">
+    <!-- <div class="footer desktop-only">
         <button class="logout" (click)="logout()" appDisableWhileLoading>
             <lucide-icon [name]="LogOut" size="18"></lucide-icon>
             Cerrar sesión
         </button>
-    </div>
+    </div> -->
 
 
 

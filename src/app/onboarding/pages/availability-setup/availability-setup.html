@@ -1,0 +1,133 @@
+<div class="w-full max-w-3xl mx-auto">
+
+    <!-- CARD PRINCIPAL -->
+    <div class="bg-[var(--bg-surface)] 
+                border border-[var(--border-soft)] 
+                shadow-[var(--shadow-soft)] 
+                rounded-2xl p-6 md:p-8 space-y-8">
+
+        <!-- HEADER -->
+        <div class="text-center">
+            <h1 class="text-xl md:text-2xl font-semibold text-[var(--text-primary)]">
+                Configura tu disponibilidad
+            </h1>
+
+            <p class="text-sm text-[var(--text-secondary)] mt-1 max-w-md mx-auto">
+                Define tus horarios para comenzar a recibir citas.
+                Puedes cambiar esto más adelante.
+            </p>
+        </div>
+
+        <!-- LOADING -->
+        @if (loading) {
+        <div class="space-y-4 animate-pulse">
+            <div class="h-20 bg-[var(--bg-surface-soft)] rounded-xl"></div>
+            <div class="h-60 bg-[var(--bg-surface-soft)] rounded-xl"></div>
+        </div>
+        }
+
+        @if (!loading) {
+
+
+        <!-- ================= CONFIG RAPIDA ================= -->
+        <div class="space-y-3">
+            <h3 class="text-sm font-semibold text-[var(--text-primary)]">
+                Configuración rápida
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                <div>
+                    <label class="text-xs text-[var(--text-secondary)]">
+                        Duración de cita (minutos)
+                    </label>
+                    <input type="number" [(ngModel)]="settings.appointment_duration" class="input-primary">
+                </div>
+
+                <div>
+                    <label class="text-xs text-[var(--text-secondary)]">
+                        Descanso entre citas (minutos)
+                    </label>
+                    <input type="number" [(ngModel)]="settings.break_between_appointments" class="input-primary">
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= HORARIO ================= -->
+        <div class="space-y-4">
+
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-[var(--text-primary)]">
+                    Horario de atención
+                </h3>
+
+                <button (click)="applyDefaultSchedule()"
+                    class="text-xs text-[var(--system-primary)] hover:underline cursor-pointer">
+                    Usar horario estándar
+                </button>
+            </div>
+
+            <div class="space-y-2">
+
+                @for (day of weekDays; track day.value) {
+
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between
+                            gap-3 p-3 rounded-xl border transition" [ngClass]="day.active
+                        ? 'bg-[var(--bg-base)] border-[var(--system-primary)]/30'
+                        : 'bg-[var(--bg-surface-soft)] border-[var(--border-soft)]'">
+
+                    <!-- LEFT -->
+                    <div class="flex items-center gap-3">
+
+                        <input type="checkbox" [(ngModel)]="day.active" class="w-4 h-4">
+
+                        <span class="text-sm font-medium text-[var(--text-primary)]">
+                            {{ day.label }}
+                        </span>
+
+                    </div>
+
+                    <!-- RIGHT -->
+                    @if (day.active) {
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+
+                        <div class="flex items-center gap-2 w-full">
+
+                            <input type="time" [(ngModel)]="day.start"
+                                class="input-primary w-full sm:w-28 text-xs min-w-0">
+
+                            <span class="text-xs text-[var(--text-secondary)]">—</span>
+
+                            <input type="time" [(ngModel)]="day.end"
+                                class="input-primary w-full sm:w-28 text-xs min-w-0">
+
+                        </div>
+
+                    </div>
+                    }
+
+                </div>
+
+                }
+
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="flex justify-end pt-2">
+            <button (click)="save()" [disabled]="saving" class="bg-[var(--brand-primary)]
+                       hover:bg-[var(--brand-primary-dark)]
+                       text-[var(--text-primary)]
+                       transition px-6 py-2.5 rounded-xl font-medium
+                       disabled:opacity-50">
+
+                {{ saving ? 'Guardando...' : 'Finalizar configuración' }}
+
+            </button>
+        </div>
+
+        }
+
+    </div>
+</div>

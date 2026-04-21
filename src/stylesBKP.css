@@ -1,0 +1,427 @@
+ /* ================================1. DESIGN SYSTEM================================ */
+ @use '.stylesvariables';
+ @use '.stylessystems';
+ @use '.stylesglobals';
+ ================================2. LIBRERÍAS BASE================================@import tailwindcss;
+ @import ..node_modulesintl-tel-inputbuildcssintlTelInput.css;
+ @import ..node_modulesflatpickrdistflatpickr.css;
+ @import ..node_modulesangular-calendarcssangular-calendar.css;
+ ================================3. CUSTOM THEME================================@import .custom-theme.scss;
+
+ ================================4. FIXES (CRÍTICO)================================reset base (evita texto invisible) body {
+     height 100%;
+     margin 0;
+     font-family 'Inter',
+     sans-serif;
+     font-family 'Inter',
+     system-ui,
+     sans-serif;
+     background var(--bg-app);
+     color var(--text-primary);
+     font-size 14px;
+ }
+
+ html,
+ body {
+     height 100%;
+     margin 0;
+     font-family 'Inter',
+     sans-serif;
+     background-color #f5f1f1;
+     font-size 14px;
+ }
+
+ ================================5. Custom scrollbar================================estándar moderno {
+     scrollbar-width thin;
+     scrollbar-color var(--brand-primary) #0f0f0f;
+ }
+
+ chrome edge opera -webkit-scrollbar {
+     width 8px;
+ }
+
+ -webkit-scrollbar-track {
+     background #0f0f0f;
+ }
+
+ -webkit-scrollbar-thumb {
+     background var(--brand-primary);
+     border-radius 8px;
+ }
+
+ ================================6. snackbar MENSAJES================================.snackbar-success {
+     --mat-sys-inverse-surface #0f172a !important;
+     --mat-sys-inverse-on-surface #10b981 !important;
+     border-left 5px solid #10b981;
+ }
+
+ .snackbar-error {
+     --mat-sys-inverse-surface #0f172a !important;
+     --mat-sys-inverse-on-surface #ef4444 !important;
+     border-left 5px solid #ef4444;
+ }
+
+ .snackbar-info {
+     --mat-sys-inverse-surface #0f172a !important;
+     --mat-sys-inverse-on-surface #38bdf8 !important;
+     border-left 5px solid #38bdf8;
+ }
+
+ .snackbar-warning {
+     --mat-sys-inverse-surface #ef6c00;
+     --mat-sys-inverse-on-surface white;
+ }
+
+ =========================SNACKBAR – Saltos de línea=========================.multiline-snackbar {
+     white-space pre-line;
+     Hace que n funcione
+ }
+
+ ================================7. INPUTS================================.input-primary {
+     @apply w-full mt-1 px-4 py-2 rounded-xl transition;
+     background var(--bg-surface-soft);
+     border 1px solid var(--border-default);
+     color var(--text-primary);
+ }
+
+ .input-primaryfocus {
+     outline none;
+     border-color var(--brand-primary);
+     box-shadow 0 0 0 2px var(--state-focus);
+ }
+
+ .input-primaryplaceholder {
+     color var(--text-secondary);
+     opacity 0.6;
+ }
+
+ ================================5. AISLAMIENTO CALENDARIO================================FULLCALENDAR FIX .fc {
+     background #ffffff;
+     color #111827;
+     font-family 'Inter',
+     sans-serif;
+ }
+
+ headers .fc-toolbar-title {
+     font-weight 600;
+ }
+
+ .fc-button {
+     background transparent;
+     border 1px solid var(--border-soft);
+     color var(--text-secondary);
+     border-radius 8px;
+ }
+
+ .fc-buttonhover {
+     background var(--bg-surface-soft);
+ }
+
+ hoy .fc-day-today {
+     background rgba(59, 130, 246, 0.08) !important;
+ }
+
+ grid .fc-theme-standard td,
+ .fc-theme-standard th {
+     border-color #e5e7eb;
+ }
+
+ horas .fc-timegrid-slot-label {
+     color #6b7280;
+ }
+
+ toolbar .fc-toolbar {
+     gap 8px;
+ }
+
+ botones base .fc .fc-button {
+     background var(--bg-surface);
+     border 1px solid var(--border-soft);
+     color var(--text-secondary);
+     border-radius 10px;
+     padding 6px 12px;
+     font-size 12px;
+     transition all 150ms ease;
+ }
+
+ hover .fc .fc-buttonhover {
+     background var(--bg-surface-soft);
+     color var(--text-primary);
+ }
+
+ activo .fc .fc-button-active {
+     background var(--brand-primary) !important;
+     color #0E1111 !important;
+     border-color var(--brand-primary) !important;
+ }
+
+ hoy .fc .fc-today-button {
+     font-weight 500;
+ }
+
+ espacio general .fc {
+     padding 12px;
+ }
+
+ toolbar separación .fc-toolbar {
+     margin-bottom 12px;
+ }
+
+ ================================FULLCALENDAR MOBILE FIX================================@media (max-width 768px) {
+     .fc {
+         font-size 12px;
+     }
+
+     toolbar más compacto .fc-toolbar {
+         flex-direction column;
+         gap 6px;
+     }
+
+     .fc-toolbar-title {
+         font-size 14px;
+     }
+
+     botones .fc .fc-button {
+         padding 4px 8px;
+         font-size 11px;
+     }
+
+     horas .fc-timegrid-slot-label {
+         font-size 10px;
+     }
+
+     eventos .fc-event {
+         font-size 11px;
+         padding 2px;
+     }
+ }
+
+ .calendar-light {
+     background #ffffff;
+     color #111827;
+
+         {
+         color inherit;
+     }
+ }
+
+ .calendar-light .cal-month-view,
+ .calendar-light .cal-week-view,
+ .calendar-light .cal-day-view {
+     background #ffffff !important;
+     color #111827 !important;
+ }
+
+ .calendar-light .cal-header {
+     color #374151 !important;
+ }
+
+ .calendar-light .cal-time {
+     color #6b7280 !important;
+ }
+
+ .calendar-light .cal-day-cell,
+ .calendar-light .cal-hour-segment {
+     border-color #e5e7eb !important;
+ }
+
+ _globals.scss html,
+ body {
+     margin 0;
+     padding 0;
+     background var(--marcorp-bg-dark);
+     color var(--marcorp-text-main);
+     font-family 'Inter',
+     system-ui,
+     sans-serif;
+ }
+
+ a {
+     color inherit;
+     text-decoration none;
+ }
+
+ button {
+     font-family inherit;
+ }
+
+ button.is-loading {
+     opacity .6;
+     cursor not-allowed;
+     pointer-events none;
+ }
+
+ _systems.scss======================SISTEMA DE CITAS======================body[data-system=citas] {
+     --system-primary #1FD6A1;
+     --system-secondary #0FB487;
+     --system-accent #A9F3DB;
+ }
+
+ ======================SISTEMA ESCOLAR======================body[data-system=escolar] {
+     --system-primary #4F8CFF;
+     --system-secondary #2E6BE6;
+     --system-accent #BFD4FF;
+ }
+
+ ======================SISTEMA INVENTARIOS======================body[data-system=inventarios] {
+     --system-primary #FF9F43;
+     --system-secondary #E07A1F;
+     --system-accent #FFD8B0;
+ }
+
+ ================================BUTTONS - MARCORP SYSTEM================================
+ @mixin mar-btn-base {
+     @apply px-4 py-2 text-sm rounded-lg cursor-pointer transition;
+ }
+
+ Guardar .mar-btn-primary {
+     @include mar-btn-base;
+     @apply text-white;
+     background var(--system-primary);
+
+     &hover {
+         background var(--system-secondary);
+     }
+ }
+
+ Cancelar .mar-btn-secondary {
+     @include mar-btn-base;
+     background var(--bg-soft);
+     color var(--text-secondary);
+
+     &hover {
+         background var(--border-soft);
+     }
+ }
+
+ Eliminar .mar-btn-danger {
+     @include mar-btn-base;
+     background var(--bg-soft);
+     color #ef4444;
+
+     &hover {
+         background rgba(239, 68, 68, 0.1);
+     }
+ }
+
+ _variables.scss root {
+     ======================MARCORP – CORE BRAND======================--brand-primary #18C48F;
+     --brand-primary-dark #12A576;
+     --brand-primary-light #4FE3B3;
+     --marcorp-primary #18C48F;
+     --marcorp-primary-dark #12A576;
+     --marcorp-primary-light #4FE3B3;
+     --marcorp-bg-dark #0E1111;
+     --marcorp-bg-card #151A1A;
+     --marcorp-bg-soft #1E2424;
+     --marcorp-border #263131;
+     ===TEXTO===--marcorp-text-main #e5e7eb;
+     texto principal (claro) --marcorp-text-muted #9ca3af;
+     texto secundario===SUPERFICIES===--surface #0f172a;
+     dropdowns cards (slate-900) --surface-soft #020617;
+     sidebar fondo oscuro===BORDES===--marcorp-border rgba(255, 255, 255, .08);
+     ===HOVER ACTIVE===--hover rgba(255, 255, 255, .08);
+     --active rgba(16, 185, 129, .15);
+     ===SHADOW===--shadow-soft 0 10px 30px rgba(0, 0, 0, .35);
+
+     ======================MARCORP UTILITIES======================.bg-surface {
+         background-color var(--bg-surface);
+     }
+
+     .bg-surface-soft {
+         background-color var(--bg-surface-soft);
+     }
+
+     .text-primary {
+         color var(--text-primary);
+     }
+
+     .text-secondary {
+         color var(--text-secondary);
+     }
+
+     .border-default {
+         border 1px solid var(--border-default);
+     }
+
+     .input-dark {
+         background-color var(--bg-surface-soft);
+         color var(--text-primary);
+         border 1px solid var(--border-default);
+     }
+
+     .input-darkfocus {
+         outline none;
+         border-color var(--brand-primary);
+         box-shadow 0 0 0 2px var(--state-focus);
+     }
+
+     .btn-primary {
+         background-color var(--brand-primary);
+         color #0E1111;
+     }
+
+     .btn-primaryhover {
+         background-color var(--brand-primary-dark);
+     }
+
+     VERIFICAR ESTOS TEMAS======================THEME – DARK======================--bg-app #0E1111;
+     fondo general --bg-surface #151A1A;
+     cards --bg-surface-soft #1E2424;
+     sidebar panels======================TEXT======================--text-primary #EAFBF5;
+     --text-secondary #9FBEB4;
+     --text-disabled #6B8F82;
+     ======================BORDERS======================--border-default #263131;
+     --border-soft rgba(255, 255, 255, .08);
+     ======================STATES======================--state-hover rgba(255, 255, 255, .08);
+     --state-active rgba(24, 196, 143, .15);
+     --state-focus rgba(24, 196, 143, .35);
+     ======================SHADOWS======================--shadow-soft 0 10px 30px rgba(0, 0, 0, .35);
+
+     4️⃣ ¿Dónde usar cada color (esto evita caos) 🟢 Verde (brand-primary) Usar SOLO para Botones principales Toggles activos Links importantes CTA (comprar, activar módulo) ❌ NO usarlo para Texto normal Fondos grandes Sidebar completo ⚫ Fondos oscuros bg-app → body bg-surface → cards,
+     modals bg-surface-soft → sidebar,
+     account menu ⚪ Texto text-primary → títulos y contenido text-secondary → labels,
+     hints text-disabled → features bloqueadas 🔒 (importante para vender) 5️⃣ MUY importante para tu SaaS (ventas 💰) 🔒 Features bloqueadas (premium) Te recomiendo un patrón visual consistente .feature-locked {
+         color var(--text-disabled);
+         opacity .7;
+     }
+
+     .feature-lockedafter {
+         content PRO;
+         color var(--brand-primary);
+     }
+
+     Eso No frustra Comunica valor Empuja a pagar
+ }
+
+ root[data-theme=light] root[data-theme=light] {
+     --bg-app #F8FAFC;
+     --bg-surface #FFFFFF;
+     --bg-surface-soft #F1F5F9;
+     --text-primary #0f172a;
+     --text-secondary #64748b;
+     --text-disabled #94a3b8;
+     --border-default #e5e7eb;
+     --border-soft rgba(0, 0, 0, 0.06);
+ }
+
+ toggleTheme() {
+     const current=document.documentElement.getAttribute('data-theme');
+
+     if (current==='light') {
+         document.documentElement.removeAttribute('data-theme');
+     }
+
+     else {
+         document.documentElement.setAttribute('data-theme', 'light');
+     }
+ }
+
+ [data-theme=light] .calendar-light {
+     background #ffffff;
+ }
+
+ not([data-theme=light]) .calendar-light {
+     background #ffffff;
+     lo dejamos light siempre
+ }

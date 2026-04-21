@@ -14,9 +14,9 @@ export interface arrSubsystem {
 })
 
 export class Subsystem {
-  constructor(private api: Api) {}
+  constructor(private api: Api) { }
 
   getActiveSubsystems(): Observable<Subsystem[]> {
-    return this.api.get<Subsystem[]>('subsystems');
+    return this.api.get<Subsystem[]>('subsystems', {});
   }
 }

@@ -1,26 +1,97 @@
+/* =====================================
+   🎯 SISTEMAS (BRANDING POR PRODUCTO)
+===================================== */
+
 /* ======================
-   SISTEMA DE CITAS
+   CITAS (CITARA)
 ====================== */
 body[data-system="citas"] {
-    --system-primary: #1FD6A1;
-    --system-secondary: #0FB487;
-    --system-accent: #A9F3DB;
+  --system-primary: #1FD6A1;
+  --system-secondary: #0FB487;
+  --system-accent: #A9F3DB;
 }
 
+
 /* ======================
-   SISTEMA ESCOLAR
+   ESCOLAR
 ====================== */
 body[data-system="escolar"] {
-    --system-primary: #4F8CFF;
-    --system-secondary: #2E6BE6;
-    --system-accent: #BFD4FF;
+  --system-primary: #4F8CFF;
+  --system-secondary: #2E6BE6;
+  --system-accent: #BFD4FF;
+
+  
 }
 
+
 /* ======================
-   SISTEMA INVENTARIOS
+   INVENTARIOS
 ====================== */
 body[data-system="inventarios"] {
-    --system-primary: #FF9F43;
-    --system-secondary: #E07A1F;
-    --system-accent: #FFD8B0;
+  --system-primary: #FF9F43;
+  --system-secondary: #E07A1F;
+  --system-accent: #FFD8B0;
+
+}
+
+
+/* =====================================
+   🧩 COMPONENTES DEL SISTEMA
+===================================== */
+
+/* BASE BOTÓN */
+@mixin btn-base {
+  @apply px-4 py-2 text-sm rounded-lg transition;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  cursor: pointer;
+}
+
+
+/* ======================
+   PRIMARY (acción principal)
+====================== */
+.btn-primary {
+  @include btn-base;
+
+  background: var(--system-primary);
+  color: #0E1111;
+
+  &:hover {
+    background: var(--system-secondary);
+  }
+}
+
+
+/* ======================
+   SECONDARY (neutral)
+====================== */
+.btn-secondary {
+  @include btn-base;
+
+  background: var(--bg-surface-soft);
+  color: var(--text-secondary);
+
+  &:hover {
+    background: var(--state-hover);
+    color: var(--text-primary);
+  }
+}
+
+
+/* ======================
+   DANGER
+====================== */
+.btn-danger {
+  @include btn-base;
+
+  background: var(--bg-surface-soft);
+  color: #ef4444;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.1);
+  }
 }

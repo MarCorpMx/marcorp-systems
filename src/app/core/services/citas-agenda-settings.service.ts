@@ -17,6 +17,17 @@ export interface WeeklySchedule {
   end_time: string;
 }
 
+// Respuesta en onboarding
+export interface UpdateAgendaResponse {
+  message: string;
+  organization?: {
+    id: number;
+    name: string;
+    onboarding_step: string;
+    onboarding_completed_at: string | null;
+  };
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -39,9 +50,32 @@ export class AgendaSettingsService {
   }
 
   updateAgenda(professionalId: number, data: any) {
-    return this.api.put(
+    return this.api.put<UpdateAgendaResponse>(
       `${this.endpoint}/${professionalId}/agenda`,
       data
     );
   }
+
+  // Bloqueos individuales
+  createBlock(professionalId: number, data: any) {
+    return this.api.post(
+      `${this.endpoint}/${professionalId}/blocked-slots`,
+      data
+    );
+  }
+
+  updateBlock(professionalId: number, blockedSlot: number, data: any) {
+    return this.api.put(
+      `${this.endpoint}/${professionalId}/blocked-slots/${blockedSlot}`,
+      data
+    );
+  }
+
+  deleteBlock(professionalId: number, blockedSlot: number) {
+    return this.api.delete(
+      `${this.endpoint}/${professionalId}/blocked-slots/${blockedSlot}`
+    );
+  }
+
+
 }

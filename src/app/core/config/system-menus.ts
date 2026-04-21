@@ -25,7 +25,7 @@ export const SYSTEM_MENUS: Record<string, any[]> = {
       label: 'Dashboard',
       icon: LayoutDashboard,
       route: '/sistemas/citas/dashboard',
-      roles: ['root', 'owner', 'admin', 'staff'],
+      roles: ['root', 'owner', 'admin', 'receptionist', 'staff'],
       core: true
     },
     {
@@ -33,36 +33,28 @@ export const SYSTEM_MENUS: Record<string, any[]> = {
       label: 'Agenda',
       icon: Calendar,
       route: '/sistemas/citas/agenda',
-      roles: ['root', 'owner', 'admin', 'staff']
+      roles: ['root', 'owner', 'admin', 'receptionist', 'staff']
     },
     {
       featureKey: 'clients',
       label: 'Clientes',
       icon: UserRound,
       route: '/sistemas/citas/clientes',
-      roles: ['root', 'owner', 'admin', 'staff']
+      roles: ['root', 'owner', 'admin', 'receptionist', 'staff']
     },
     {
       featureKey: 'services',
       label: 'Servicios',
       icon: Briefcase,
       route: '/sistemas/citas/servicios',
-      roles: ['root', 'owner', 'admin', 'staff']
+      roles: ['root', 'owner', 'admin', 'receptionist', 'staff']
     },
-    /*{
-      featureKey: 'schedule',
-      label: 'Horarios', 
-      icon: Clock,
-      route: '/sistemas/citas/horarios',
-      roles: ['root', 'owner', 'admin']
-    },*/
-
     {
       featureKey: 'schedule',
       label: 'Disponibilidad', 
       icon: Clock,
       route: '/sistemas/citas/disponibilidad',
-      roles: ['root', 'owner', 'admin', 'staff']
+      roles: ['root', 'owner', 'admin', 'receptionist', 'staff']
     },
 
     {
@@ -70,28 +62,28 @@ export const SYSTEM_MENUS: Record<string, any[]> = {
       label: 'Recordatorios',
       icon: Bell,
       route: '/sistemas/citas/recordatorios',
-      roles: ['root', 'owner', 'admin']
+      roles: ['root', 'owner', 'receptionist', 'admin']
     },
     {
       featureKey: 'reports',
       label: 'Reportes',
       icon: BarChart,
       route: '/sistemas/citas/reportes',
-      roles: ['root', 'owner', 'admin', 'staff']
+      roles: ['root', 'owner', 'admin', 'receptionist', 'staff']
     },
     {
       featureKey: 'team',
       label: 'Equipo',
       icon: UsersRound,
       route: '/sistemas/citas/equipo',
-      roles: ['root', 'owner', 'admin', 'staff']
+      roles: ['root', 'owner', 'admin', 'receptionist', 'staff']
     },
     {
       featureKey: 'settings',
       label: 'Configuración',
       icon: Settings,
       route: '/sistemas/citas/configuracion',
-      roles: ['root', 'owner', 'admin', 'staff'],
+      roles: ['root', 'owner', 'admin', 'receptionist', 'staff'],
       core: true
     }
   ],

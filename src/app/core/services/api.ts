@@ -2,13 +2,17 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
+type LoaderType = 'global' | 'none';
+
 @Injectable({
   providedIn: 'root',
 })
+
 export class Api {
   private readonly API_URL = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
+
 
   // ========================
   // GET
@@ -18,6 +22,7 @@ export class Api {
     options?: {
       params?: Record<string, any>;
       headers?: HttpHeaders;
+      loader?: LoaderType; // tenia global antes
     }
   ) {
     let httpParams: HttpParams | undefined;
@@ -28,7 +33,7 @@ export class Api {
 
     return this.http.get<T>(`${this.API_URL}/${endpoint}`, {
       params: httpParams,
-      headers: options?.headers,
+      headers: this.buildHeaders(options),
     });
   }
 
@@ -40,13 +45,14 @@ export class Api {
     body: any,
     options?: {
       headers?: HttpHeaders;
+      loader?: LoaderType;
     }
   ) {
     return this.http.post<T>(
       `${this.API_URL}/${endpoint}`,
       body,
       {
-        headers: options?.headers,
+        headers: this.buildHeaders(options),
       }
     );
   }
@@ -59,13 +65,14 @@ export class Api {
     body: any,
     options?: {
       headers?: HttpHeaders;
+      loader?: LoaderType;
     }
   ) {
     return this.http.put<T>(
       `${this.API_URL}/${endpoint}`,
       body,
       {
-        headers: options?.headers,
+        headers: this.buildHeaders(options),
       }
     );
   }
@@ -79,6 +86,7 @@ export class Api {
     options?: {
       params?: Record<string, any>;
       headers?: HttpHeaders;
+      loader?: LoaderType;
     }
   ) {
     let httpParams: HttpParams | undefined;
@@ -92,7 +100,7 @@ export class Api {
       body,
       {
         params: httpParams,
-        headers: options?.headers,
+        headers: this.buildHeaders(options),
       }
     );
   }
@@ -104,13 +112,28 @@ export class Api {
     endpoint: string,
     options?: {
       headers?: HttpHeaders;
+      loader?: LoaderType;
     }
   ) {
     return this.http.delete<T>(
       `${this.API_URL}/${endpoint}`,
       {
-        headers: options?.headers,
+        headers: this.buildHeaders(options),
       }
     );
+  }
+
+
+  private buildHeaders(options?: {
+    headers?: HttpHeaders;
+    loader?: LoaderType;
+  }) {
+    let headers = options?.headers ?? new HttpHeaders();
+
+    if (options?.loader === 'global') {
+      headers = headers.set('x-loader', 'global');
+    }
+
+    return headers;
   }
 }

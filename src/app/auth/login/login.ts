@@ -53,7 +53,11 @@ export class Login {
     event.preventDefault();
 
     if (this.loginForm.invalid) {
-      this.notify.error("Algunos campos contienen información incorrecta o incompleta. Por favor, revísalos y vuelve a intentarlo.");
+      this.notify.error('Algunos campos contienen información incorrecta o incompleta.\n' +
+        'Por favor, revísalos y vuelve a intentarlo.\n'
+      );
+
+
       this.markAllAsTouched(this.loginForm);
       return; // Detener el envío si es inválido
     }
@@ -73,7 +77,7 @@ export class Login {
     // Llama al servicio 
     this.authService.login(payload).subscribe({
       next: (res) => {
-        this.notify.success('Acceso concedido!!!');
+        this.notify.success(`Bienvenido a CITARA, ${res.user.name} `);
       },
       error: (err) => {
         this.isSubmitting = false;

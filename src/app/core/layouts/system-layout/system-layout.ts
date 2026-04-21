@@ -13,6 +13,7 @@ import { ConfirmDialog } from '../../../shared/components/confirm-dialog/confirm
   templateUrl: './system-layout.html',
   styleUrl: './system-layout.css',
 })
+
 export class SystemLayout {
   currentSystem: any;
   

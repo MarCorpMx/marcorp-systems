@@ -1,194 +1,153 @@
-:root {
-   /* ======================
-     MARCORP – CORE BRAND
-  ====================== */
+/* =========================================================
+   🎯 CITARA DESIGN SYSTEM
+   - Dark / Light Theme
+   - Tokens semánticos
+   - No tocar --marcorp-* (compatibilidad)
+========================================================= */
 
+
+/* =========================================================
+   🌑 DARK THEME (DEFAULT)
+========================================================= */
+:root[data-theme="dark"] {
+
+   /* =========================
+     🎯 BRAND (GLOBAL)
+  ========================= */
    --brand-primary: #18C48F;
    --brand-primary-dark: #12A576;
    --brand-primary-light: #4FE3B3;
 
-   --marcorp-primary: #18C48F;
-   --marcorp-primary-dark: #12A576;
-   --marcorp-primary-light: #4FE3B3;
-
-   --marcorp-bg-dark: #0E1111;
-   --marcorp-bg-card: #151A1A;
-   --marcorp-bg-soft: #1E2424;
-
-   //--marcorp-border: #263131;
-
-   /* === TEXTO === */
-   --marcorp-text-main: #e5e7eb; // texto principal (claro)
-   --marcorp-text-muted: #9ca3af; // texto secundario
-
-   /* === SUPERFICIES === */
-   --surface: #0f172a; // dropdowns / cards (slate-900)
-   --surface-soft: #020617; // sidebar / fondo oscuro
-
-   /* === BORDES === */
-   --marcorp-border: rgba(255, 255, 255, .08);
-
-   /* === HOVER / ACTIVE === */
-   --hover: rgba(255, 255, 255, .08);
-   --active: rgba(16, 185, 129, .15);
-
-   /* === SHADOW === */
-   --shadow-soft: 0 10px 30px rgba(0, 0, 0, .35);
-
-   /* ======================
-   MARCORP UTILITIES
-====================== */
-
-   .bg-surface {
-      background-color: var(--bg-surface);
-   }
-
-   .bg-surface-soft {
-      background-color: var(--bg-surface-soft);
-   }
-
-   .text-primary {
-      color: var(--text-primary);
-   }
-
-   .text-secondary {
-      color: var(--text-secondary);
-   }
-
-   .border-default {
-      border: 1px solid var(--border-default);
-   }
-
-   .input-dark {
-      background-color: var(--bg-surface-soft);
-      color: var(--text-primary);
-      border: 1px solid var(--border-default);
-   }
-
-   .input-dark:focus {
-      outline: none;
-      border-color: var(--brand-primary);
-      box-shadow: 0 0 0 2px var(--state-focus);
-   }
-
-   .btn-primary {
-      background-color: var(--brand-primary);
-      color: #0E1111;
-   }
-
-   .btn-primary:hover {
-      background-color: var(--brand-primary-dark);
-   }
-
-
-   /**************************************************************************/
-   /* VERIFICAR ESTOS TEMAS */
-
-   /* ======================
-   THEME – DARK
-  ====================== */
-
+   /* =========================
+     🌑 BACKGROUNDS
+  ========================= */
    --bg-app: #0E1111;
-   /* fondo general */
    --bg-surface: #151A1A;
-   /* cards */
    --bg-surface-soft: #1E2424;
-   /* sidebar / panels */
 
-   /* ======================
-   TEXT
-====================== */
+   /* 🆕 niveles de profundidad */
+   --bg-elevated: #1A2020;
+   --bg-floating: #222929;
 
+   /* =========================
+     📦 SIDEBAR
+  ========================= */
+   --sidebar-bg: linear-gradient(180deg, #0b1110, #070a0a);
+
+   /* =========================
+     🔤 TEXT
+  ========================= */
    --text-primary: #EAFBF5;
    --text-secondary: #9FBEB4;
    --text-disabled: #6B8F82;
 
-   /* ======================
-   BORDERS
-====================== */
-
+   /* =========================
+     🧱 BORDERS
+  ========================= */
    --border-default: #263131;
-   --border-soft: rgba(255, 255, 255, .08);
+   --border-soft: rgba(255, 255, 255, 0.08);
 
-   /* ======================
-   STATES
-====================== */
+   /* =========================
+     ⚡ STATES
+  ========================= */
+   --state-hover: rgba(255, 255, 255, 0.08);
+   --state-active: rgba(24, 196, 143, 0.15);
+   --state-focus: rgba(24, 196, 143, 0.35);
 
-   --state-hover: rgba(255, 255, 255, .08);
-   --state-active: rgba(24, 196, 143, .15);
-   --state-focus: rgba(24, 196, 143, .35);
+   /* =========================
+     🌫️ SHADOW SYSTEM
+  ========================= */
+   --shadow-xs: 0 2px 6px rgba(0, 0, 0, 0.25);
+   --shadow-sm: 0 6px 16px rgba(0, 0, 0, 0.30);
+   --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.35);
 
-   /* ======================
-   SHADOWS
-====================== */
+   /* compatibilidad */
+   --shadow-soft: var(--shadow-sm);
 
-   --shadow-soft: 0 10px 30px rgba(0, 0, 0, .35);
+   /* =========================
+     🔁 COMPATIBILIDAD (NO TOCAR)
+  ========================= */
+   --marcorp-bg-dark: var(--bg-app);
+   --marcorp-bg-card: var(--bg-surface);
+   --marcorp-bg-soft: var(--bg-surface-soft);
 
-   /*
+   --marcorp-text-main: var(--text-primary);
+   --marcorp-text-muted: var(--text-secondary);
 
-4️⃣ ¿Dónde usar cada color? (esto evita caos)
-🟢 Verde (brand-primary)
-
-Usar SOLO para:
-
-Botones principales
-
-Toggles activos
-
-Links importantes
-
-CTA (comprar, activar módulo)
-
-❌ NO usarlo para:
-
-Texto normal
-
-Fondos grandes
-
-Sidebar completo
-
-⚫ Fondos oscuros
-
-bg-app → body
-
-bg-surface → cards, modals
-
-bg-surface-soft → sidebar, account menu
-
-⚪ Texto
-
-text-primary → títulos y contenido
-
-text-secondary → labels, hints
-
-text-disabled → features bloqueadas 🔒 (importante para vender)
-
-
-5️⃣ MUY importante para tu SaaS (ventas 💰)
-🔒 Features bloqueadas (premium)
-
-Te recomiendo un patrón visual consistente:
-
-.feature-locked {
-  color: var(--text-disabled);
-  opacity: .7;
-}
-
-.feature-locked::after {
-  content: "PRO";
-  color: var(--brand-primary);
+   --marcorp-border: var(--border-soft);
+   --marcorp-primary: var(--brand-primary);
 }
 
 
-Eso:
 
-No frustra
+/* =========================================================
+   ☀️ LIGHT THEME
+========================================================= */
+:root[data-theme="light"] {
 
-Comunica valor
+   /* =========================
+     🎯 BRAND (GLOBAL)
+  ========================= */
+   --brand-primary: #18C48F;
+   --brand-primary-dark: #12A576;
+   --brand-primary-light: #4FE3B3;
 
-Empuja a pagar
+   /* =========================
+     ☀️ BACKGROUNDS
+  ========================= */
+   --bg-app: #F8FAFC;
+   --bg-surface: #FFFFFF;
+   --bg-surface-soft: #F1F5F9;
 
-*/
+   /* 🆕 niveles de profundidad */
+   --bg-elevated: #FFFFFF;
+   --bg-floating: #FFFFFF;
 
+   /* =========================
+     📦 SIDEBAR
+  ========================= */
+   --sidebar-bg: #FFFFFF;
 
+   /* =========================
+     🔤 TEXT
+  ========================= */
+   --text-primary: #0f172a;
+   --text-secondary: #64748b;
+   --text-disabled: #94a3b8;
+
+   /* =========================
+     🧱 BORDERS
+  ========================= */
+   --border-default: #e5e7eb;
+   --border-soft: rgba(0, 0, 0, 0.06);
+
+   /* =========================
+     ⚡ STATES
+  ========================= */
+   --state-hover: rgba(0, 0, 0, 0.04);
+   --state-active: rgba(24, 196, 143, 0.12);
+   --state-focus: rgba(24, 196, 143, 0.25);
+
+   /* =========================
+     🌫️ SHADOW SYSTEM (CLAVE)
+  ========================= */
+   --shadow-xs: 0 2px 6px rgba(0, 0, 0, 0.04);
+   --shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.06);
+   --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.10);
+
+   /* compatibilidad */
+   --shadow-soft: var(--shadow-sm);
+
+   /* =========================
+     🔁 COMPATIBILIDAD (NO TOCAR)
+  ========================= */
+   --marcorp-bg-dark: var(--bg-app);
+   --marcorp-bg-card: var(--bg-surface);
+   --marcorp-bg-soft: var(--bg-surface-soft);
+
+   --marcorp-text-main: var(--text-primary);
+   --marcorp-text-muted: var(--text-secondary);
+
+   --marcorp-border: var(--border-soft);
+   --marcorp-primary: var(--brand-primary);
 }

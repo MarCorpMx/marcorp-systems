@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { tap, finalize, map, catchError } from 'rxjs/operators';
 import { Api } from './api';
 import { ThemeService } from './theme.service';
 import { HttpHeaders } from '@angular/common/http';
+import { LoadingService } from './loading.service';
 
 
 @Injectable({
@@ -15,30 +16,85 @@ export class AuthService {
 
   isLoggingOut = false;
 
-  constructor(
-    private api: Api,
-    private router: Router,
-    private theme: ThemeService
-  ) { }
+  private api = inject(Api);
+  private router = inject(Router);
+  private theme = inject(ThemeService);
+  private loadingService = inject(LoadingService);
+
+
+  private handleAuthSuccess(res: any) {
+    localStorage.setItem('auth_token', res.token);
+    localStorage.setItem('user', JSON.stringify(res.user));
+    localStorage.setItem('systems', JSON.stringify(res.systems));
+    localStorage.setItem('organization', JSON.stringify(res.organization));
+
+    //console.log('dataSystem:', JSON.stringify(res.systems, null, 2));
+    //console.log('dataUser:', JSON.stringify(res.user, null, 2));
+    console.log('dataOrganization :', JSON.stringify(res.organization, null, 2));
+    //console.log(res);
+
+    //this.redirectToSystem();
+    this.handlePostLoginRedirect(res.organization);
+  }
+
+  handlePostLoginRedirect(organization: any) {
+
+    // ONBOARDING PRIMERO
+    if (!organization?.onboarding_completed_at) {
+      const route = this.getOnboardingRoute(organization.onboarding_step);
+      this.router.navigate([route]);
+      return;
+    }
+
+    // si ya terminó - flujo normal
+    this.redirectToSystem();
+  }
+
+  // Mapeo de rutas para onboarding
+  getOnboardingRoute(step: string): string {
+
+    switch (step) {
+      case 'email_pending':
+        return '/onboarding/email';
+
+      case 'business_setup':
+        return '/onboarding/business';
+
+      case 'branch_setup':
+        return '/onboarding/branch';
+
+      case 'staff_confirmed':
+        return '/onboarding/branch';
+
+      case 'service_created':
+        return '/onboarding/service';
+
+      case 'availability_set':
+        return '/onboarding/availability';
+
+      case 'completed':
+        return '/onboarding/completed';
+
+      default:
+        return '/onboarding/email';
+    }
+  }
 
   // REGISTER
   register(data: any): Observable<any> {
-    return this.api.post('auth/register', data);
+    return this.api.post('auth/register', data, {
+      loader: 'global'
+    }).pipe(
+      tap(res => this.handleAuthSuccess(res)) // auto-login
+    );
   }
 
   // LOGIN (email o username)
-  login(data: { email?: string; username?: string; login?: string; password: string }) {
-    return this.api.post<any>('auth/login', data).pipe(
-      tap(res => {
-        localStorage.setItem('auth_token', res.token);
-        localStorage.setItem('user', JSON.stringify(res.user));
-        localStorage.setItem('systems', JSON.stringify(res.systems));
-
-        console.log("los sitemas carnal: ", JSON.stringify(res.systems));
-        console.log("el usuario:", res.user);
-
-        this.redirectToSystem();
-      })
+  login(data: { login?: string; password: string }) {
+    return this.api.post<any>('auth/login', data, {
+      loader: 'global'
+    }).pipe(
+      tap(res => this.handleAuthSuccess(res))
     );
   }
 
@@ -110,13 +166,54 @@ export class AuthService {
   }
 
   // LOGOUT
-  logout() {
-    return this.api.post('auth/logout', {}).pipe(
+  /*logout() {
+    const start = Date.now();
+    this.loadingService.showGlobal(true);
+
+    return this.api.post('auth/logout', {}, {
+      loader: 'none'
+    }).pipe(
       tap(() => {
-        this.clearSession();
-        this.redirectToLogin();
+        setTimeout(() => {
+          this.clearSession();
+          this.redirectToLogin();
+          this.loadingService.hide();
+        }, 600);
       })
     );
+  }*/
+
+  logout(): Observable<void> {
+    const start = Date.now();
+    const minTime = 500;
+
+    this.loadingService.showGlobal(true);
+
+    return this.api.post('auth/logout', {}, {
+      loader: 'none'
+    }).pipe(
+      finalize(() => {
+        const elapsed = Date.now() - start;
+        const remaining = Math.max(minTime - elapsed, 0);
+
+        setTimeout(() => {
+          this.finishLogout();
+          this.loadingService.showGlobal(false);
+          this.loadingService.hide();
+        }, remaining);
+      }),
+      map(() => void 0),
+      catchError(() => {
+        // aunque falle backend, seguimos logout
+        this.finishLogout();
+        return of(void 0);
+      })
+    );
+  }
+
+  private finishLogout() {
+    this.clearSession();
+    this.redirectToLogin();
   }
 
   redirectToLogin() {
@@ -128,6 +225,7 @@ export class AuthService {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');
     localStorage.removeItem('systems');
+    localStorage.removeItem('organization');
     localStorage.removeItem('current_system');
 
     this.theme.clearTheme();
@@ -144,6 +242,10 @@ export class AuthService {
 
   getSystems() {
     return JSON.parse(localStorage.getItem('systems') || '[]');
+  }
+
+  getOrganization() {
+    return JSON.parse(localStorage.getItem('organization') || 'null');
   }
 
   getCurrentSystem() {
@@ -196,6 +298,60 @@ export class AuthService {
     this.theme.setCurrentSystem(system);
     //document.body.setAttribute('data-system', system.subsystem_key);
   }
+
+  getAuthContext() {
+    const user = this.getUser();
+    const system = this.getCurrentSystemSafe();
+
+    if (!user || !system) return null;
+
+    return {
+      user,
+      organization_id: system.organization_id,
+      organization_name: system.organization_name,
+      subsystem: system.subsystem,
+      role: system.role,
+      plan: system.plan_key,
+      features: system.features
+    };
+  }
+
+  setCurrentBranch(branch: any) {
+    localStorage.setItem('current_branch', JSON.stringify(branch));
+  }
+
+  getCurrentBranch() {
+    return JSON.parse(localStorage.getItem('current_branch') || 'null');
+  }
+
+  canUseFeature(key: string): boolean {
+    const system = this.getCurrentSystemSafe();
+    if (!system?.features) return false;
+
+    const feature = system.features.find((f: any) => f.key === key);
+
+    return feature?.enabled ?? false;
+  }
+
+  canViewFeature(key: string): boolean {
+    const system = this.getCurrentSystemSafe();
+    if (!system?.features) return false;
+
+    const feature = system.features.find((f: any) => f.key === key);
+
+    return feature?.visible ?? false;
+  }
+
+  getFeatureLimit(key: string): number | null {
+    const system = this.getCurrentSystemSafe();
+    if (!system?.features) return null;
+
+    const feature = system.features.find((f: any) => f.key === key);
+
+    return feature?.limit ?? null;
+  }
+
+
 
 
 }

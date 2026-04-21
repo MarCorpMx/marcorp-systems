@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { ClienteDetalle } from './pages/clientes/cliente-detalle/cliente-detalle';
+import { featureGuard } from '../../core/guards/feature-guard';
 
 export const CITAS_ROUTES: Routes = [
   {
@@ -15,45 +16,31 @@ export const CITAS_ROUTES: Routes = [
       },
       {
         path: 'dashboard',
+        canActivate: [featureGuard],
         loadComponent: () =>
           import('./pages/dashboard/dashboard')
             .then(m => m.Dashboard),
         data: {
-          breadcrumb: 'Dashboard'
+          breadcrumb: 'Dashboard',
+          feature: 'dashboard'
         },
       },
       {
         path: 'agenda',
+        canActivate: [featureGuard],
         loadComponent: () =>
           import('./pages/agenda/agenda')
             .then(m => m.Agenda),
         data: {
-          breadcrumb: 'Agenda'
-        },
-      },
-
-      /*{
-        path: 'clientes',
-        loadComponent: () =>
-          import('./pages/clientes/clientes')
-            .then(m => m.Clientes),
-            data: {
-          breadcrumb: 'Clientes'
+          breadcrumb: 'Agenda',
+          feature: 'agenda'
         },
       },
       {
-        path: 'clientes/:id',
-        loadComponent: () =>
-          import('./pages/clientes/cliente-detalle/cliente-detalle')
-            .then(m => m.ClienteDetalle),
-            data: {
-        breadcrumb: 'Detalle'
-      }
-      },*/
-
-      {
         path: 'clientes',
-        data: { breadcrumb: 'Clientes' },
+        canActivate: [featureGuard],
+        canActivateChild: [featureGuard],
+        data: { breadcrumb: 'Clientes', feature: 'clients' },
         children: [
           {
             path: '',
@@ -73,53 +60,41 @@ export const CITAS_ROUTES: Routes = [
 
       {
         path: 'servicios',
+        canActivate: [featureGuard],
         loadComponent: () =>
           import('./pages/servicios/servicios')
             .then(m => m.Servicios),
         data: {
-          breadcrumb: 'Servicios'
+          breadcrumb: 'Servicios',
+          feature: 'services'
         }
       },
-      /*{
-        path: 'horarios',
-        loadComponent: () =>
-          import('./pages/horarios/horarios')
-            .then(m => m.Horarios),
-        data: {
-          breadcrumb: 'Horarios'
-        }
-      },*/
       {
         path: 'disponibilidad',
+        canActivate: [featureGuard],
         loadComponent: () =>
           import('./pages/disponibilidad/disponibilidad')
             .then(m => m.Disponibilidad),
         data: {
-          breadcrumb: 'Disponibilidad'
+          breadcrumb: 'Disponibilidad',
+          feature: 'schedule'
         }
       },
       {
         path: 'recordatorios',
+        canActivate: [featureGuard],
         loadComponent: () =>
           import('./pages/recordatorios/recordatorios')
             .then(m => m.Recordatorios),
         data: {
-          breadcrumb: 'Recordatorios'
+          breadcrumb: 'Recordatorios',
+          feature: 'reminders'
         }
       },
-
-      /*{
-        path: 'reportes',
-        loadComponent: () =>
-          import('./pages/reportes/reportes')
-            .then(m => m.Reportes),
-        data: {
-          breadcrumb: 'Reportes'
-        }
-      },*/
       {
         path: 'reportes',
-        data: { breadcrumb: 'Reportes' },
+        canActivate: [featureGuard],
+        data: { breadcrumb: 'Reportes', feature: 'reports' },
         children: [
           {
             path: '',
@@ -139,17 +114,20 @@ export const CITAS_ROUTES: Routes = [
 
       {
         path: 'equipo',
+        canActivate: [featureGuard],
         loadComponent: () =>
           import('./pages/equipo/equipo')
             .then(m => m.Equipo),
         data: {
-          breadcrumb: 'Equipo'
+          breadcrumb: 'Equipo',
+          feature: 'team'
         }
       },
 
       {
         path: 'configuracion',
-        data: { breadcrumb: 'Configuración' },
+        canActivate: [featureGuard],
+        data: { breadcrumb: 'Configuración', feature: 'settings' },
         children: [
           {
             path: '',
@@ -159,20 +137,26 @@ export const CITAS_ROUTES: Routes = [
           },
           {
             path: 'perfil',
+            canActivate: [featureGuard],
             loadComponent: () =>
               import('./pages/configuracion/perfil/perfil')
                 .then(m => m.Perfil),
-            data: { breadcrumb: 'Perfil del negocio' }
+            data: { breadcrumb: 'Perfil del negocio', feature: 'profile' }
           },
           {
             path: 'agenda',
+            canActivate: [featureGuard],
             loadComponent: () =>
               import('./pages/configuracion/agenda/agenda')
                 .then(m => m.Agenda),
-            data: { breadcrumb: 'Horario de atención' }
+            data: { breadcrumb: 'Horario de atención', feature: 'schedule_config' }
           }
         ]
       },
+
+      // branches - Sucursaales
+      // payments -> Pagos y facturación
+      // advanced - Avanzado
 
 
       /*{

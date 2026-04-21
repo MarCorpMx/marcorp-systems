@@ -13,7 +13,7 @@ export class Notification {
       duration,
       horizontalPosition: 'center',
       verticalPosition: 'top',
-      panelClass: ['snackbar-success']
+      panelClass: ['snackbar-success', 'multiline-snackbar']
     });
   }
 
@@ -22,7 +22,7 @@ export class Notification {
       duration,
       horizontalPosition: 'center',
       verticalPosition: 'top',
-      panelClass: ['snackbar-error']
+      panelClass: ['snackbar-error', 'multiline-snackbar']
     });
   }
 
@@ -31,7 +31,7 @@ export class Notification {
       duration,
       horizontalPosition: 'center',
       verticalPosition: 'top',
-      panelClass: ['snackbar-info']
+      panelClass: ['snackbar-info', 'multiline-snackbar']
     });
   }
 
@@ -40,7 +40,7 @@ export class Notification {
       duration,
       horizontalPosition: 'center',
       verticalPosition: 'top',
-      panelClass: ['snackbar-warning']
+      panelClass: ['snackbar-warning', 'multiline-snackbar']
     });
   }
 

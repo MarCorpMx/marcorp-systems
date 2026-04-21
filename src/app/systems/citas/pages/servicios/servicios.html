@@ -93,9 +93,9 @@
         <!-- <span class="w-4 h-4 rounded-full" [style.background]="service.color">
         </span> -->
 
-        <span class="w-4 h-4 rounded-full bg-[var(--system-primary)]" >
+        <span class="w-4 h-4 rounded-full bg-[var(--system-primary)]">
         </span>
-        
+
       </div>
 
       <!-- Meta -->
@@ -431,27 +431,11 @@
         <div class="p-6 border-t border-[var(--border-soft)]
                     flex justify-end gap-3 shrink-0">
 
-          <button type="button" (click)="closeModal()" class="px-4 py-2 rounded-lg
-                         border border-[var(--border-soft)]
-                         text-[var(--text-secondary)]
-                         hover:bg-[var(--bg-base)] cursor-pointer">
+          <button type="button" (click)="closeModal()" class="mar-btn-secondary">
             Cancelar
           </button>
 
-          <button type="submit" [disabled]="form.invalid" class="px-4 py-2 rounded-lg
-         bg-[var(--system-primary)]
-         text-white
-         transition-all duration-150 ease-out
-         hover:bg-[var(--system-secondary)]
-         active:scale-95
-         focus:outline-none
-         focus:ring-2
-         focus:ring-[var(--system-primary)]
-         focus:ring-offset-2
-         focus:ring-offset-[var(--bg-surface)]
-         disabled:opacity-50
-         disabled:cursor-not-allowed
-         enabled:cursor-pointer">
+          <button type="submit" [disabled]="form.invalid" class="mar-btn-primary">
 
             {{ editingService ? 'Actualizar' : 'Guardar' }}
           </button>

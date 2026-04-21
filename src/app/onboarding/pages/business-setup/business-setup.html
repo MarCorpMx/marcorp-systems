@@ -1,0 +1,143 @@
+<div class="w-full max-w-2xl mx-auto">
+
+    <!-- CARD -->
+    <div class="bg-[var(--bg-surface)] 
+                border border-[var(--border-soft)] 
+                shadow-[var(--shadow-soft)] 
+                rounded-2xl p-6 md:p-8">
+
+        <!-- HEADER -->
+        <div class="text-center mb-6">
+            <h2 class="text-xl md:text-2xl font-semibold text-[var(--text-primary)]">
+                Cuéntanos sobre tu negocio
+            </h2>
+
+            <p class="text-sm text-[var(--text-secondary)] mt-1">
+                Solo necesitamos lo básico para empezar
+            </p>
+        </div>
+
+        <!-- LOADING -->
+        @if (loading) {
+        <div class="space-y-4 animate-pulse">
+            <div class="h-4 w-1/2 mx-auto bg-[var(--bg-surface-soft)] rounded"></div>
+
+            <div class="space-y-3">
+                <div class="h-10 bg-[var(--bg-surface-soft)] rounded-xl"></div>
+                <div class="h-10 bg-[var(--bg-surface-soft)] rounded-xl"></div>
+                <div class="h-10 bg-[var(--bg-surface-soft)] rounded-xl"></div>
+            </div>
+        </div>
+        }
+
+        <!-- FORM -->
+        @if (!loading) {
+        <form [formGroup]="form" (ngSubmit)="save()" class="space-y-5">
+
+            <!-- GRID RESPONSIVE -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <!-- NAME -->
+                <div class="md:col-span-2">
+                    <label class="text-sm text-[var(--text-secondary)]">
+                        Nombre del negocio *
+                    </label>
+
+                    <input type="text" formControlName="name" class="input-primary">
+
+                    @if (getError('name')) {
+                    <small class="text-red-400 text-xs mt-1 block">
+                        {{ getError('name') }}
+                    </small>
+                    }
+                </div>
+
+                <!-- PHONE -->
+                <div>
+                    <label class="text-sm text-[var(--text-secondary)]">
+                        Teléfono *
+                    </label>
+
+                    <ngx-intl-tel-input [cssClass]="'input-primary'"
+                        [preferredCountries]="[CountryISO.Mexico, CountryISO.UnitedStates]"
+                        [enableAutoCountrySelect]="false" [enablePlaceholder]="true" [searchCountryFlag]="true"
+                        [selectFirstCountry]="false" [selectedCountryISO]="CountryISO.Mexico" [phoneValidation]="true"
+                        formControlName="phone">
+                    </ngx-intl-tel-input>
+
+                    @if (getError('phone')) {
+                    <small class="text-red-400 text-xs mt-1 block">
+                        {{ getError('phone') }}
+                    </small>
+                    }
+                </div>
+
+                <!-- COUNTRY -->
+                <div>
+                    <label class="text-sm text-[var(--text-secondary)]">
+                        País
+                    </label>
+
+                    <select formControlName="country" class="input-primary">
+                        <option *ngFor="let c of countries" [value]="c.code">
+                            {{ c.name }}
+                        </option>
+                    </select>
+
+                    @if (getError('country')) {
+                    <small class="text-red-400 text-xs mt-1 block">
+                        {{ getError('country') }}
+                    </small>
+                    }
+                </div>
+
+                <!-- STATE -->
+                <div>
+                    <label class="text-sm text-[var(--text-secondary)]">
+                        Estado
+                    </label>
+
+                    <input type="text" formControlName="state" placeholder="Ej: Morelos" class="input-primary">
+
+                    @if (getError('state')) {
+                    <small class="text-red-400 text-xs mt-1 block">
+                        {{ getError('state') }}
+                    </small>
+                    }
+                </div>
+
+                <!-- CITY -->
+                <div>
+                    <label class="text-sm text-[var(--text-secondary)]">
+                        Ciudad
+                    </label>
+
+                    <input type="text" formControlName="city" placeholder="Ej: Cuernavaca" class="input-primary">
+
+                    @if (getError('city')) {
+                    <small class="text-red-400 text-xs mt-1 block">
+                        {{ getError('city') }}
+                    </small>
+                    }
+                </div>
+
+            </div>
+
+            <!-- ACTION -->
+            <div class="pt-2">
+                <button type="submit" [disabled]="saving" class="w-full md:w-auto md:ml-auto block 
+                           bg-[var(--brand-primary)] 
+                           hover:bg-[var(--brand-primary-dark)] 
+                           text-[var(--text-primary)]
+                           transition px-6 py-2.5 rounded-xl font-medium cursor-pointer">
+
+                    {{ saving ? 'Guardando...' : 'Continuar' }}
+
+                </button>
+            </div>
+
+        </form>
+        }
+
+    </div>
+</div>

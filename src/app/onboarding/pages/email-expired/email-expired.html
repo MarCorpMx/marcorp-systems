@@ -1,0 +1,142 @@
+<div class="min-h-screen flex flex-col justify-center bg-[#050505] px-4">
+
+    <!-- BRAND -->
+
+    <div class="text-center mb-6 animate-in fade-in duration-700">
+        <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+            CIT<span class="text-[#10b981]">ARA</span>
+        </h1>
+        <p class="text-[11px] text-gray-500 tracking-wide">
+            by Marcorp
+        </p>
+    </div>
+
+    <!-- CARD -->
+    <div class="w-full max-w-md mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+
+        <div class="bg-white/[0.02] border border-white/10 rounded-2xl p-6 md:p-8 backdrop-blur-xl shadow-inner">
+
+            <!-- SUCCESS STATE -->
+            @if(success()){
+            <div class="text-center space-y-4 animate-in fade-in">
+
+                <div
+                    class="w-14 h-14 mx-auto rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+                    <lucide-icon [name]="MailCheck" class="text-emerald-400" size="26"></lucide-icon>
+                </div>
+
+                <h3 class="text-white font-semibold text-lg">
+                    Revisa tu correo
+                </h3>
+
+                <p class="text-gray-400 text-sm">
+                    Si el correo existe, te enviamos un enlace para continuar.
+                </p>
+
+                <p class="text-xs text-gray-500">
+                    Puede tardar unos segundos. Tip: revisa spam si no lo ves.
+                </p>
+
+                <button type="button" (click)="goToLogin()"
+                    class="text-[#10b981] font-semibold hover:underline transition-all">
+                    Volver al inicio de sesión
+                </button>
+
+            </div>
+            }
+
+            <!-- NORMAL STATE -->
+            @else {
+
+            <!-- ICON -->
+            <div class="flex justify-center mb-4">
+                <div
+                    class="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">
+                    <lucide-icon [name]="MailX" class="text-red-400" size="26"></lucide-icon>
+                </div>
+            </div>
+
+            <!-- HEADER -->
+            <header class="mb-6 text-center">
+                <h2 class="text-xl md:text-2xl font-bold text-white mb-2">
+                    Este enlace ya expiró
+                </h2>
+
+                <p class="text-gray-400 text-sm leading-relaxed">
+                    A veces pasa cuando el correo se abre tarde.
+                    Te enviamos uno nuevo en segundos.
+                </p>
+            </header>
+
+            <!-- FORM -->
+            <form [formGroup]="expiredForm" (ngSubmit)="onSubmit($event)" class="space-y-5">
+
+                <div class="space-y-1">
+                    <label class="block text-sm font-medium text-gray-300">
+                        Correo electrónico
+                    </label>
+
+
+                    <input formControlName="website" type="text" name="website" autocomplete="off" tabindex="-1"
+                        style="position:absolute; left:-9999px; opacity:0;" />
+
+                    <input formControlName="email" name="email" type="email" placeholder="correo@ejemplo.com" class="w-full bg-white/5 border border-white/10 rounded-lg py-3 px-4 text-white placeholder-gray-500 
+            focus:outline-none focus:ring-2 focus:ring-[#10b981]/40 focus:border-[#10b981] 
+            transition-all backdrop-blur-md hover:border-white/20"
+                        [attr.aria-required]="email?.invalid && (email?.dirty || email?.touched)" required />
+
+                    <!-- ERROR -->
+                    @if(email?.invalid && (email?.dirty || email?.touched)){
+                    <div class="mt-1 animate-in fade-in duration-200">
+
+                        @if (email?.hasError('required')) {
+                        <p class="text-[12px] text-red-400/90">
+                            El correo es obligatorio
+                        </p>
+                        }
+
+                        @if (email?.hasError('email') || email?.hasError('pattern')) {
+                        <p class="text-[12px] text-red-400/90">
+                            Ingresa un correo válido
+                        </p>
+                        }
+
+                    </div>
+                    }
+
+                </div>
+
+                <button type="submit" [disabled]="isSending()" class="w-full bg-[#10b981] hover:bg-[#0da271] text-black font-bold py-3.5 px-6 rounded-lg 
+        transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] 
+        flex items-center justify-center disabled:opacity-70">
+
+                    {{ isSending() ? 'Enviando...' : 'Reenviar correo' }}
+                </button>
+
+            </form>
+
+            <!-- <p class="text-xs text-gray-500 text-center mt-4">
+                Tip: revisa spam si no lo ves.
+            </p> -->
+
+            <footer class="mt-6 text-center text-sm">
+                <button type="button" (click)="goToLogin()"
+                    class="text-[#10b981] font-semibold hover:underline transition-all">
+                    Volver al inicio de sesión
+                </button>
+            </footer>
+
+            }
+
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <!-- <footer class="mt-6 text-center text-sm">
+        <button type="button" (click)="goToLogin()" style="cursor: pointer;"
+            class="text-[#10b981] font-semibold hover:underline transition-all">
+            Volver al inicio de sesión
+        </button>
+    </footer> -->
+
+</div>
