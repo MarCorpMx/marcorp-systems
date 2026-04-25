@@ -1,163 +1,338 @@
-<div class="p-6 max-w-5xl mx-auto">
+<!-- <div class="max-w-5xl mx-auto px-6 pb-6 space-y-6"> -->
+<div class="max-w-5xl mx-auto px-3 sm:px-4 md:px-6 pb-6 space-y-6">
 
-    <h1 class="text-2xl font-semibold text-[var(--text-primary)] mb-6">
-        Perfil del negocio
-    </h1>
+    <!-- ================= HEADER ================= -->
+    <div>
+        <h2 class="text-2xl font-semibold text-[var(--text-primary)]">
+            Perfil del negocio
+        </h2>
 
-    <!-- class="bg-zinc-900 rounded-2xl p-6 shadow-lg border border-zinc-800" -->
+        <p class="text-sm text-[var(--text-secondary)] mt-1">
+            Información general de tu negocio. Se usa para administración y facturación.
+        </p>
+    </div>
+
+    <!-- ================= CARD ================= -->
     <div class="bg-[var(--bg-surface)] 
-border border-[var(--border-soft)] 
-shadow-[var(--shadow-soft)]
-rounded-2xl p-6">
+            border border-[var(--border-soft)] 
+            rounded-2xl
+            p-4 sm:p-5 md:p-8
+            space-y-8">
 
         @if (loading) {
-        <div class="space-y-4 animate-pulse">
+        <div class="animate-pulse space-y-6">
             <div class="h-6 w-1/3 bg-[var(--bg-surface-soft)] rounded"></div>
-
-            <div class="bg-[var(--bg-surface)] p-6 rounded-2xl space-y-4 border border-[var(--border-soft)]">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="h-10 bg-[var(--bg-surface-soft)] rounded-xl"></div>
-                    <div class="h-10 bg-[var(--bg-surface-soft)] rounded-xl"></div>
-                    <div class="h-10 bg-[var(--bg-surface-soft)] rounded-xl"></div>
-                    <div class="h-10 bg-[var(--bg-surface-soft)] rounded-xl"></div>
-                </div>
-            </div>
+            <div class="h-32 bg-[var(--bg-surface-soft)] rounded"></div>
+            <div class="h-32 bg-[var(--bg-surface-soft)] rounded"></div>
         </div>
         }
 
         @if (!loading) {
-        <form [formGroup]="form" (ngSubmit)="save()" class="space-y-6">
+        <form [formGroup]="form" (ngSubmit)="save()" class="space-y-10">
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
+            <!-- ================= INFO GENERAL ================= -->
+            <div class="space-y-4">
                 <div>
-                    <label class="text-sm text-[var(--text-secondary)]">Nombre comercial *</label>
-                    <input type="text" formControlName="name" class="input-primary">
-                    @if (getError('name')) {
-                    <small class="text-red-400 text-xs mt-1 block">
-                        {{ getError('name') }}
-                    </small>
-                    }
+                    <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+                        Información general
+                    </h3>
                 </div>
 
-                <div>
-                    <label class="text-sm text-[var(--text-secondary)]">Email</label>
-                    <input type="email" formControlName="email" class="input-primary">
-                    @if (getError('email')) {
-                    <small class="text-red-400 text-xs mt-1 block">
-                        {{ getError('email') }}
-                    </small>
-                    }
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <div>
+                        <label class="text-sm text-[var(--text-secondary)]">Nombre *</label>
+                        <input formControlName="name" class="input-primary" placeholder="Ej. Punto de Calma">
+                        @if (getError('name')) {
+                        <small class="text-red-400">{{ getError('name') }}</small>
+                        }
+                    </div>
+
+                    <div>
+                        <!-- <label class="text-sm text-[var(--text-secondary)]">Enlace público de reservas *</label> -->
+                        <label class="text-sm text-[var(--text-secondary)] flex items-center gap-2">
+                            Enlace público de reservas *
+
+                            <span class="relative group cursor-pointer">
+                                <lucide-icon [name]="HelpCircle" class="w-4 h-4 cursor-pointer text-gray-400 transition-colors duration-200 group-hover:text-emerald-500"
+                                    (click)="showSlugHelp = !showSlugHelp">
+                                </lucide-icon>
+
+                                <!-- Tooltip -->
+
+                            </span>
+                        </label>
+
+
+                        <input formControlName="slug" class="input-primary" placeholder="Ej. punto-de-calma">
+                        @if (getError('slug')) {
+                        <small class="text-red-400">{{ getError('slug') }}</small>
+                        }
+                    </div>
+
+                    <div>
+                        <!-- <label class="text-sm text-[var(--text-secondary)]">Prefijo de citas *</label> -->
+                        <label class="text-sm text-[var(--text-secondary)] flex items-center gap-2">
+                            Prefijo de citas *
+
+                            <span class="relative group cursor-pointer">
+                                <lucide-icon [name]="HelpCircle" class="w-4 h-4 cursor-pointer text-gray-400 transition-colors duration-200 group-hover:text-emerald-500"
+                                    (click)="showReferencePrefixHelp = !showReferencePrefixHelp">
+                                </lucide-icon>
+
+                                <!-- Tooltip -->
+
+                            </span>
+                        </label>
+
+                        <input formControlName="reference_prefix" class="input-primary uppercase" placeholder="Ej. PDC"
+                            maxlength="5">
+                        @if (getError('reference_prefix')) {
+                        <small class="text-red-400">{{ getError('reference_prefix') }}</small>
+                        }
+                    </div>
+
+                    <div>
+                        <label class="text-sm text-[var(--text-secondary)]">Email</label>
+                        <input formControlName="email" class="input-primary" placeholder="Ej. sucursal@empresa.com">
+                        @if (getError('email')) {
+                        <small class="text-red-400">{{ getError('email') }}</small>
+                        }
+                    </div>
+
+                    <div>
+                        <label class="text-sm text-[var(--text-secondary)]">Teléfono</label>
+                        <ngx-intl-tel-input [cssClass]="'input-primary'"
+                            [preferredCountries]="[CountryISO.Mexico, CountryISO.UnitedStates]"
+                            [enableAutoCountrySelect]="false" [enablePlaceholder]="true" [searchCountryFlag]="true"
+                            [selectFirstCountry]="false" [selectedCountryISO]="CountryISO.Mexico"
+                            [phoneValidation]="true" formControlName="phone">
+                        </ngx-intl-tel-input>
+                        @if (getError('phone')) {
+                        <small class="text-red-400">{{ getError('phone') }}</small>
+                        }
+                    </div>
+
+                    <div>
+                        <label class="text-sm text-[var(--text-secondary)]">Sitio web</label>
+                        <input formControlName="website" class="input-primary" placeholder="Ej. https://miempresa.com">
+                        @if (getError('website')) {
+                        <small class="text-red-400">{{ getError('website') }}</small>
+                        }
+                    </div>
+
+                    <!--<div>
+                        <label class="text-sm text-[var(--text-secondary)]">
+                            Zona horaria del negocio
+                        </label>
+
+                        <select formControlName="timezone" class="input-primary">
+                            <option *ngFor="let tz of timezones" [value]="tz">
+                                {{ tz }}
+                            </option>
+                        </select>
+
+                        <small class="text-xs text-[var(--text-secondary)]">
+                            Usada para calcular horarios de citas y disponibilidad
+                        </small>
+                    </div>-->
+
                 </div>
-
-                <div>
-                    <label class="text-sm text-[var(--text-secondary)]">Teléfono</label>
-                    <!--<input type="text" formControlName="phone" class="input-primary">
-                    @if (getError('phone')) {
-                    <small class="text-red-400 text-xs mt-1 block">
-                        {{ getError('phone') }}
-                    </small>
-                }-->
-                    <!-- [searchCountryField]="['name', 'dialCode', 'iso2']" -->
-                    <ngx-intl-tel-input [cssClass]="'input-primary'"
-                        [preferredCountries]="[CountryISO.Mexico, CountryISO.UnitedStates]"
-                        [enableAutoCountrySelect]="false" [enablePlaceholder]="true" [searchCountryFlag]="true"
-                        [selectFirstCountry]="false" [selectedCountryISO]="CountryISO.Mexico" [phoneValidation]="true"
-                        formControlName="phone">
-                    </ngx-intl-tel-input>
-                    @if (getError('phone')) {
-                    <small class="text-red-400 text-xs mt-1 block">
-                        {{ getError('phone') }}
-                    </small>
-                    }
-
-                </div>
-
-                <div>
-                    <label class="text-sm text-[var(--text-secondary)]">Sitio web</label>
-                    <input type="text" formControlName="website" class="input-primary">
-                    @if (getError('website')) {
-                    <small class="text-red-400 text-xs mt-1 block">
-                        {{ getError('website') }}
-                    </small>
-                    }
-                </div>
-
             </div>
 
-            <hr class="border-zinc-800">
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
+            <!-- ================= DIRECCIÓN ================= -->
+            <div class="space-y-4">
                 <div>
-                    <label class="text-sm text-[var(--text-secondary)]">País</label>
-                    <!--<input type="text" formControlName="country" class="input-primary">
-                    @if (getError('country')) {
-                    <small class="text-red-400 text-xs mt-1 block">
-                        {{ getError('country') }}
-                    </small>
-                }-->
-
-                    <select formControlName="country" class="input-primary">
-                        <option *ngFor="let c of countries" [value]="c.code">
-                            {{ c.name }}
-                        </option>
-                    </select>
+                    <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+                        Dirección
+                    </h3>
                 </div>
 
-                <div>
-                    <label class="text-sm text-[var(--text-secondary)]">Estado</label>
-                    <input type="text" formControlName="state" class="input-primary">
-                    @if (getError('state')) {
-                    <small class="text-red-400 text-xs mt-1 block">
-                        {{ getError('state') }}
-                    </small>
-                    }
-                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                <div>
-                    <label class="text-sm text-[var(--text-secondary)]">Ciudad</label>
-                    <input type="text" formControlName="city" class="input-primary">
-                    @if (getError('city')) {
-                    <small class="text-red-400 text-xs mt-1 block">
-                        {{ getError('city') }}
-                    </small>
-                    }
-                </div>
+                    <div>
+                        <label class="text-sm text-[var(--text-secondary)]">País</label>
+                        <select formControlName="country" class="input-primary">
+                            <option *ngFor="let c of countries" [value]="c.code">
+                                {{ c.name }}
+                            </option>
+                        </select>
 
-                <div>
-                    <label class="text-sm text-[var(--text-secondary)]">Código postal</label>
-                    <input type="text" formControlName="zip_code" class="input-primary">
-                    @if (getError('zip_code')) {
-                    <small class="text-red-400 text-xs mt-1 block">
-                        {{ getError('zip_code') }}
-                    </small>
-                    }
-                </div>
+                        @if (getError('country')) {
+                        <small class="text-red-400">{{ getError('country') }}</small>
+                        }
+                    </div>
 
-                <div class="md:col-span-2">
-                    <label class="text-sm text-[var(--text-secondary)]">Dirección</label>
-                    <input type="text" formControlName="address" class="input-primary">
-                    @if (getError('address')) {
-                    <small class="text-red-400 text-xs mt-1 block">
-                        {{ getError('address') }}
-                    </small>
-                    }
-                </div>
+                    <div>
+                        <label class="text-sm text-[var(--text-secondary)]">Estado</label>
+                        <input formControlName="state" class="input-primary" placeholder="Ej. Morelos">
+                        @if (getError('state')) {
+                        <small class="text-red-400">{{ getError('state') }}</small>
+                        }
+                    </div>
 
+                    <div>
+                        <label class="text-sm text-[var(--text-secondary)]">Ciudad</label>
+                        <input formControlName="city" class="input-primary" placeholder="Ej. Cuernavaca">
+                        @if (getError('city')) {
+                        <small class="text-red-400">{{ getError('city') }}</small>
+                        }
+                    </div>
+
+                    <div>
+                        <label class="text-sm text-[var(--text-secondary)]">Código postal</label>
+                        <input formControlName="zip_code" class="input-primary" placeholder="Ej. 06000">
+                        @if (getError('zip_code')) {
+                        <small class="text-red-400">{{ getError('zip_code') }}</small>
+                        }
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="text-sm text-[var(--text-secondary)]">Dirección</label>
+                        <input formControlName="address" class="input-primary" placeholder="Ej. Av. Reforma 123">
+                        @if (getError('address')) {
+                        <small class="text-red-400">{{ getError('address') }}</small>
+                        }
+                    </div>
+
+                </div>
             </div>
 
-            <div class="flex justify-end">
-                <button type="submit" [disabled]="saving" class="bg-[var(--brand-primary)] 
-       hover:bg-[var(--brand-primary-dark)] 
-       text-[var(--text-primary)]
-       transition px-6 py-2 rounded-xl font-medium cursor-pointer">
+            <!-- ================= FACTURACIÓN ================= -->
+            @if(billingEnabled){
+            <div class="space-y-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+                        Datos fiscales
+                    </h3>
+                    <p class="text-xs text-[var(--text-secondary)] mt-1">
+                        Información utilizada para facturación electrónica (SAT). Opcional.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <div class="md:col-span-2">
+                        <label class="text-sm text-[var(--text-secondary)]">Razón social</label>
+                        <input formControlName="legal_name" class="input-primary">
+                    </div>
+
+                    <div>
+                        <label class="text-sm text-[var(--text-secondary)]">RFC</label>
+                        <input formControlName="tax_id" class="input-primary">
+                    </div>
+
+                    <div>
+                        <label class="text-sm text-[var(--text-secondary)]">Régimen fiscal</label>
+                        <input formControlName="tax_regime" class="input-primary">
+                    </div>
+
+                    <div>
+                        <label class="text-sm text-[var(--text-secondary)]">Código postal fiscal</label>
+                        <input formControlName="invoice_zip_code" class="input-primary">
+                    </div>
+
+                    <div>
+                        <label class="text-sm text-[var(--text-secondary)]">Email de facturación</label>
+                        <input formControlName="cfdi_email" class="input-primary">
+                    </div>
+
+                </div>
+            </div>
+            }
+
+            <!-- ================= FOOTER ================= -->
+            <div class="p-6 border-t border-[var(--border-soft)]
+                        flex flex-col sm:flex-row
+                        justify-end gap-3 shrink-0">
+
+                <!-- botón -->
+
+                <button type="submit" [disabled]="saving" class="mar-btn-primary">
+
                     {{ saving ? 'Guardando...' : 'Guardar cambios' }}
                 </button>
+
+
             </div>
 
         </form>
+
+
+        @if (showSlugHelp) {
+
+        <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+
+            <!-- backdrop -->
+              <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showSlugHelp = false">
+            </div>
+            <!-- <div class="absolute inset-0 bg-black/40" (click)="showSlugHelp = false"></div> -->
+
+            <!-- modal -->
+            <div class="relative w-full max-w-sm p-4 text-xs
+              bg-[var(--bg-surface)] border border-[var(--border-soft)]
+              rounded-2xl shadow-xl">
+
+                <p class="font-semibold mb-1">¿Para qué sirve?</p>
+                <p>Es el enlace público donde tus clientes reservarán citas.</p>
+
+                <p class="mt-2 font-semibold">Ejemplo:</p>
+                <p class="text-green-400">citara.com/punto-de-calma</p>
+
+                <p class="mt-2 font-semibold">Reglas:</p>
+                <ul class="list-disc ml-4">
+                    <li>Solo minúsculas</li>
+                    <li>Usa guiones (-)</li>
+                    <li>Sin espacios ni símbolos</li>
+                </ul>
+
+                <button class="mt-4 w-full text-sm text-green-400" (click)="showSlugHelp = false">
+                    Entendido
+                </button>
+
+            </div>
+
+        </div>
+
+        }
+
+        @if (showReferencePrefixHelp) {
+        <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+
+            <!-- Overlay -->
+            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showReferencePrefixHelp = false">
+            </div>
+
+            <!-- modal -->
+            <div class="relative w-full max-w-sm p-4 text-xs
+              bg-[var(--bg-surface)] border border-[var(--border-soft)]
+              rounded-2xl shadow-xl">
+
+                <p class="font-semibold mb-1">¿Para qué sirve?</p>
+                <p>Se usa para generar códigos de citas.</p>
+
+                <p class="mt-2 font-semibold">Ejemplo:</p>
+                <p class="text-green-400">PDC-2404-AB12</p>
+
+                <p class="mt-2 font-semibold">Reglas:</p>
+                <ul class="list-disc ml-4">
+                    <li>Solo mayúsculas</li>
+                    <li>Sin espacios ni símbolos</li>
+                    <li>2 a 5 caracteres</li>
+                </ul>
+
+                <button class="mt-4 w-full text-sm text-green-400" (click)="showReferencePrefixHelp = false">
+                    Entendido
+                </button>
+
+            </div>
+
+        </div>
+        }
+
+
         }
 
     </div>
+
 </div>

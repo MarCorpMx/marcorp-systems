@@ -89,11 +89,15 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
     @for (section of sections; track section.key) {
-    <div class="bg-[var(--bg-surface)]
+    <div (click)="section.enabled ? goTo(section) : handleBlocked(section)" class="bg-[var(--bg-surface)]
               border border-[var(--border-soft)]
               rounded-xl p-6
               hover:shadow-soft transition
-              flex flex-col justify-between" [class.opacity-50]="!section.enabled">
+              flex flex-col justify-between" 
+              [class.cursor-pointer]="section.enabled"
+      [class.cursor-not-allowed]="!section.enabled" 
+      [class.hover:bg-[var(--bg-base)]]="section.enabled"
+      [class.opacity-50]="!section.enabled">
 
       <div class="space-y-3">
         <div class="w-10 h-10 rounded-lg

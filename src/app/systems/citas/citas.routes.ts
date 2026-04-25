@@ -144,12 +144,36 @@ export const CITAS_ROUTES: Routes = [
             data: { breadcrumb: 'Perfil del negocio', feature: 'profile' }
           },
           {
+            path: 'sucursales',
+            canActivate: [featureGuard],
+            loadComponent: () =>
+              import('./pages/configuracion/sucursales/sucursales')
+                .then(m => m.Sucursales),
+            data: { breadcrumb: 'Sucursales', feature: 'branches' }
+          },
+          {
             path: 'agenda',
             canActivate: [featureGuard],
             loadComponent: () =>
               import('./pages/configuracion/agenda/agenda')
                 .then(m => m.Agenda),
             data: { breadcrumb: 'Horario de atención', feature: 'schedule_config' }
+          },
+          {
+            path: 'pagos',
+            canActivate: [featureGuard],
+            loadComponent: () =>
+              import('./pages/configuracion/pagos/pagos')
+                .then(m => m.Pagos),
+            data: { breadcrumb: 'Pagos y Facturación', feature: 'payments' }
+          },
+          {
+            path: 'avanzado',
+            canActivate: [featureGuard],
+            loadComponent: () =>
+              import('./pages/configuracion/avanzado/avanzado')
+                .then(m => m.Avanzado),
+            data: { breadcrumb: 'Avanzado', feature: 'advanced' }
           }
         ]
       },

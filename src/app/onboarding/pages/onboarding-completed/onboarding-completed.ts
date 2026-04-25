@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { LucideAngularModule, CheckCircle } from 'lucide-angular';
 
+import { AuthService } from '../../../core/services/auth.service';
 import { OnboardingService } from '../../services/onboarding.service';
 
 @Component({
@@ -13,6 +14,8 @@ import { OnboardingService } from '../../services/onboarding.service';
 export class OnboardingCompleted implements OnInit {
 
   readonly CheckCircle = CheckCircle;
+
+  auth = inject(AuthService);
 
   onboardingService = inject(OnboardingService);
   router = inject(Router);
@@ -26,21 +29,24 @@ export class OnboardingCompleted implements OnInit {
     }, 400);
   }
 
+
   goToDashboard() {
 
     this.loading = true;
 
     this.onboardingService.completeOnboarding().subscribe({
-      next: (res: any) => {
+      next: () => {
 
-        this.loading = false;
+        this.auth.refreshAuthContext().subscribe({
+          next: () => {
+            //this.loading = false;
+            this.router.navigate(['/sistemas/citas/dashboard']);
+          },
+          error: () => {
+            this.loading = false;
+          }
+        });
 
-        // avanzar SaaS
-        if (res.organization) {
-          localStorage.setItem('organization', JSON.stringify(res.organization));
-        }
-
-        this.router.navigate(['/sistemas/citas/dashboard']);
       },
       error: () => {
         this.loading = false;

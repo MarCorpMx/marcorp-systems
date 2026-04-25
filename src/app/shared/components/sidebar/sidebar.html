@@ -1,4 +1,3 @@
-
 <!-- @if(open){
 <div class="overlay" 
      [class.closing]="isClosing"
@@ -17,26 +16,34 @@
             <div class="branch-selector">
 
                 <!-- SOLO TEXTO (1 sucursal) -->
-                @if(branches.length === 1){
+                @if(branches().length === 1){
                 <span class="branch-single">
-                    {{ branches[0].name }}
+                    Sucursal: {{ branches()[0].branch_name }}
                 </span>
                 }
 
                 <!-- DROPDOWN (más de 1) -->
-                @if(branches.length > 1){
+                @if(branches().length > 1){
+
                 <div class="branch-dropdown-trigger" (click)="toggleBranchMenu()">
-                    <span>{{ currentBranch.name }}</span>
+                    <span>{{ currentBranch()?.branch_name }}</span>
                     <lucide-icon [name]="ICON_MAP.ChevronDown" size="14"></lucide-icon>
                 </div>
 
                 @if(branchMenuOpen){
                 <div class="branch-dropdown">
 
-                    @for (branch of branches; track branch.id) {
-                    <button (click)="selectBranch(branch)" [class.active]="branch.id === currentBranch.id">
+                    @for (branch of branches(); track branch.branch_id) {
+                    <button (click)="selectBranch(branch)"
+                        [class.active]="branch.branch_id === currentBranch()?.branch_id"
+                        [class.opacity-40]="!branch.branch_is_active"
+                        [class.cursor-not-allowed]="!branch.branch_is_active"
+                        [class.pointer-events-none]="!branch.branch_is_active">
 
-                        {{ branch.name }}
+                        {{ branch.branch_name }}
+                        <span *ngIf="!branch.branch_is_active" class="text-xs text-yellow-400">
+                            (Inactiva)
+                        </span>
                     </button>
                     }
 

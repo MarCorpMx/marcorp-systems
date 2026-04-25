@@ -1,0 +1,855 @@
+<section class="relative space-y-6 max-w-5xl mx-auto">
+
+    <!-- ===============================
+       HEADER
+  =============================== -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+        <div>
+            <h2 class="text-2xl font-semibold text-[var(--text-primary)]">
+                Sucursales
+            </h2>
+
+            <p class="text-sm text-[var(--text-secondary)] mt-1">
+                Administra las ubicaciones físicas de tu negocio.
+            </p>
+        </div>
+
+        <!-- !canCreateBranches -->
+        <div *ngIf="isFreePlan && !loading" class="bg-yellow-500/10 p-3 rounded-xl">
+            <p class="text-sm">
+                <ng-container *ngIf="isFreePlan; else paidPlan">
+                    Tu plan permite {{ branchesLimit }} sucursal.
+                </ng-container>
+
+                <ng-template #paidPlan>
+                    Has alcanzado el límite de {{ branchesLimit }} sucursales activas.
+                </ng-template>
+            </p>
+
+            <button class="inline-flex items-center gap-2 text-green-400 font-medium cursor-pointer"
+                (click)="goToPlans()">
+                <lucide-icon [name]="Sparkles" class="w-4 h-4"></lucide-icon>
+
+                <ng-container *ngIf="isFreePlan; else paidBtn">
+                    Actualizar plan
+                </ng-container>
+
+                <ng-template #paidBtn>
+                    Ver opciones
+                </ng-template>
+            </button>
+        </div>
+
+        @if (!noAccess) {
+        <button (click)="openCreate()" class="inline-flex items-center justify-center gap-2
+             px-4 py-2 rounded-xl
+             bg-[var(--system-primary)]
+             text-white text-sm font-medium
+             hover:brightness-110
+             transition cursor-pointer">
+
+            <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
+
+            Nueva sucursal
+        </button>
+        }
+
+    </div>
+
+    <!-- ===============================
+     NO ACCESS
+    ================================ -->
+    @if (noAccess && !loading) {
+
+    <div class="bg-[var(--bg-surface)]
+            border border-dashed border-[var(--border-soft)]
+            rounded-2xl p-10 text-center space-y-5">
+
+        <!-- Icon -->
+        <div class="mx-auto w-16 h-16 rounded-2xl
+                bg-[var(--system-accent)]
+                flex items-center justify-center">
+
+            <lucide-icon [name]="Lock" class="w-8 h-8 text-[var(--system-secondary)]">
+            </lucide-icon>
+
+        </div>
+
+        <!-- Title -->
+        <div class="space-y-2">
+
+            <h3 class="text-xl font-semibold text-[var(--text-primary)]">
+                Módulo no disponible
+            </h3>
+
+            <p class="text-sm text-[var(--text-secondary)] max-w-lg mx-auto">
+                Las sucursales te permiten administrar múltiples ubicaciones,
+                equipos y disponibilidad independiente.
+            </p>
+
+        </div>
+
+        <!-- Features -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl mx-auto pt-2">
+
+            <div class="rounded-xl border border-[var(--border-soft)]
+                    bg-[var(--bg-base)]
+                    p-4 text-left">
+
+                <p class="font-medium text-sm text-[var(--text-primary)]">
+                    Multi ubicación
+                </p>
+
+                <p class="text-xs text-[var(--text-secondary)] mt-1">
+                    Administra varias sucursales desde una sola cuenta.
+                </p>
+
+            </div>
+
+            <div class="rounded-xl border border-[var(--border-soft)]
+                    bg-[var(--bg-base)]
+                    p-4 text-left">
+
+                <p class="font-medium text-sm text-[var(--text-primary)]">
+                    Personal independiente
+                </p>
+
+                <p class="text-xs text-[var(--text-secondary)] mt-1">
+                    Configura horarios y equipos por sucursal.
+                </p>
+
+            </div>
+
+            <div class="rounded-xl border border-[var(--border-soft)]
+                    bg-[var(--bg-base)]
+                    p-4 text-left">
+
+                <p class="font-medium text-sm text-[var(--text-primary)]">
+                    Reportes separados
+                </p>
+
+                <p class="text-xs text-[var(--text-secondary)] mt-1">
+                    Analiza rendimiento por ubicación.
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- CTA -->
+        <!--<div class="pt-2">
+
+            <button class="inline-flex items-center gap-2
+                       px-5 py-3 rounded-xl
+                       bg-[var(--system-primary)]
+                       text-white text-sm font-medium
+                       hover:brightness-110
+                       transition cursor-pointer">
+
+                <lucide-icon [name]="Sparkles" class="w-4 h-4"></lucide-icon>
+
+                Actualizar plan
+
+            </button>
+
+        </div>-->
+
+    </div>
+
+    }
+    @else {
+
+    <!-- ===============================
+       SKELETON
+  =============================== -->
+    @if (loading) {
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 animate-pulse">
+
+        @for (_ of [1,2,3]; track _) {
+
+        <div class="bg-[var(--bg-surface)]
+                border border-[var(--border-soft)]
+                rounded-2xl p-5 space-y-4">
+
+            <div class="flex items-center justify-between">
+
+                <div class="space-y-2">
+                    <div class="h-5 w-36 rounded bg-[var(--border-soft)]"></div>
+                    <div class="h-4 w-24 rounded bg-[var(--border-soft)]"></div>
+                </div>
+
+                <div class="w-10 h-10 rounded-xl bg-[var(--border-soft)]"></div>
+
+            </div>
+
+            <div class="space-y-3">
+                <div class="h-4 w-full rounded bg-[var(--border-soft)]"></div>
+                <div class="h-4 w-2/3 rounded bg-[var(--border-soft)]"></div>
+                <div class="h-4 w-1/2 rounded bg-[var(--border-soft)]"></div>
+            </div>
+
+            <div class="flex justify-between pt-4">
+                <div class="h-8 w-20 rounded bg-[var(--border-soft)]"></div>
+                <div class="h-8 w-20 rounded bg-[var(--border-soft)]"></div>
+            </div>
+
+        </div>
+
+        }
+
+    </div>
+
+    }
+
+    <!-- ===============================
+       EMPTY STATE
+  =============================== -->
+    @else if (!loading && branches.length === 0) {
+
+    <div class="bg-[var(--bg-surface)]
+              border border-dashed border-[var(--border-soft)]
+              rounded-2xl p-10 text-center space-y-4">
+
+        <div class="mx-auto w-14 h-14 rounded-full
+                bg-[var(--system-accent)]
+                flex items-center justify-center">
+
+            <lucide-icon [name]="Building2" class="w-7 h-7 text-[var(--system-secondary)]">
+            </lucide-icon>
+
+        </div>
+
+        <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+            Aún no tienes sucursales
+        </h3>
+
+        <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+            Crea sucursales para administrar diferentes ubicaciones y equipos.
+        </p>
+
+        <button (click)="openCreate()" class="inline-flex items-center gap-2
+             px-4 py-2 rounded-xl
+             bg-[var(--system-primary)]
+             text-white
+             hover:brightness-110
+             transition cursor-pointer">
+
+            <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
+
+            Crear primera sucursal
+        </button>
+
+    </div>
+
+    }
+
+    <!-- ===============================
+       GRID
+  =============================== -->
+    @else {
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+
+        @for (branch of branches; track branch.id) {
+
+        <div class="bg-[var(--bg-surface)]
+        border rounded-2xl p-5
+        transition-all duration-200
+        space-y-5
+        hover:shadow-soft" [class.opacity-60]="!branch.is_active" [class.border-yellow-500/40]="branch.is_primary"
+            [class.shadow-yellow-500/10]="branch.is_primary" [class.shadow-lg]="branch.is_primary"
+            [class.border-[var(--border-soft)]]="!branch.is_primary"
+            [class.opacity-60]="processingBranchId === branch.id">
+
+            <!-- TOP -->
+            <div class="flex items-start justify-between gap-3">
+
+                <div class="min-w-0">
+
+                    <div class="flex items-center flex-wrap gap-2">
+
+                        <h3 class="font-semibold text-[var(--text-primary)] truncate">
+                            {{ branch.name }}
+                        </h3>
+
+                        <!-- PRINCIPAL -->
+                        @if (branch.is_primary) {
+                        <span class="px-2.5 py-1 rounded-full
+           text-[10px] font-semibold
+           bg-yellow-500/15
+           text-yellow-400
+           border border-yellow-500/30">
+
+                            Principal
+                        </span>
+                        }
+
+                        <!-- ACTIVA -->
+                        @if (branch.is_active) {
+                        <span class="px-2.5 py-1 rounded-full
+           text-[10px] font-semibold
+           bg-green-500/10
+           text-green-500
+           border border-green-500/20">
+
+                            Activa
+                        </span>
+                        }
+
+                        <!-- INACTIVA -->
+                        @else {
+                        <span class="px-2.5 py-1 rounded-full
+           text-[10px] font-semibold
+           bg-red-500/10
+           text-red-400
+           border border-red-500/20">
+
+                            Inactiva
+                        </span>
+                        }
+
+                    </div>
+
+
+                    <!-- <p class="text-xs text-[var(--text-secondary)] mt-1">
+                        Responsable: {{ branch.manager }}
+                    </p> -->
+
+                </div>
+
+                <div class="w-11 h-11 rounded-xl
+                    bg-[var(--system-accent)]
+                    flex items-center justify-center shrink-0">
+
+                    <lucide-icon [name]="Store" class="w-5 h-5"
+                        [class.text-[var(--system-secondary)]]="branch.is_active"
+                        [class.text-gray-400]="!branch.is_active">
+                    </lucide-icon>
+
+                </div>
+
+            </div>
+
+            <!-- INFO -->
+            <div class="space-y-3 text-sm text-[var(--text-secondary)]">
+
+                <div class="flex items-start gap-2">
+
+                    <lucide-icon [name]="MapPin" class="w-4 h-4 mt-0.5 shrink-0"></lucide-icon>
+
+                    <span>
+                        {{ branch.address || 'Sin dirección'}}
+                    </span>
+
+                </div>
+
+                <div class="flex items-center gap-2">
+
+                    <lucide-icon [name]="Phone" class="w-4 h-4 shrink-0"></lucide-icon>
+
+                    <span>
+                        <!-- {{ branch.phone }} -->
+                        {{ (branch?.phone | appPhone) || 'Sin teléfono'}}
+                    </span>
+
+                </div>
+
+                <div class="flex items-center gap-2">
+
+                    <lucide-icon [name]="Mail" class="w-4 h-4 shrink-0"></lucide-icon>
+
+                    <span class="truncate">
+                        {{ branch.email || 'Sin correo' }}
+                    </span>
+
+                </div>
+
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="pt-4 border-t border-[var(--border-soft)]
+     flex flex-col sm:flex-row
+     sm:items-center sm:justify-between
+     gap-3">
+
+                <!-- ACTIONS -->
+                <div class="flex flex-wrap items-center gap-3 sm:gap-4">
+
+                    <!-- Edit -->
+                    @if (branch.is_active) {
+                    <button (click)="openEdit(branch)" class="inline-flex items-center gap-2
+                   text-sm font-medium
+                   text-[var(--system-primary)]
+                   hover:text-[var(--system-secondary)]
+                   transition cursor-pointer">
+
+                        <lucide-icon [name]="Pencil" class="w-4 h-4"></lucide-icon>
+
+                        <span>Editar</span>
+                    </button>
+                    }
+
+                    <!-- TOGGLE -->
+                    @if (!branch.is_primary) {
+
+                    <button (click)="toggleBranchStatus(branch)" [disabled]="processingBranchId === branch.id" class="inline-flex items-center gap-2
+                   text-sm font-medium
+                   transition cursor-pointer" [class.text-amber-500]="branch.is_active"
+                        [class.hover:text-amber-600]="branch.is_active" [class.text-green-500]="!branch.is_active"
+                        [class.hover:text-green-600]="!branch.is_active"
+                        [class.opacity-50]="processingBranchId === branch.id">
+
+                        @if (processingBranchId === branch.id) {
+
+                        <div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin">
+                        </div>
+
+                        <span>Procesando...</span>
+
+                        }
+
+                        @else {
+
+                        <lucide-icon [name]="branch.is_active ? PauseCircle : PlayCircle" class="w-4 h-4">
+                        </lucide-icon>
+
+                        <span>
+                            {{ branch.is_active ? 'Desactivar' : 'Activar' }}
+                        </span>
+
+                        }
+
+                    </button>
+
+                    }
+
+                    <span *ngIf="isLockedByPlan(branch)" class="text-xs text-red-400">
+                        Bloqueada por tu plan
+                    </span>
+
+                    <!-- DELETE -->
+                    <!-- @if (!branch.is_primary) {
+
+                    <button (click)="deleteBranch(branch)" class="inline-flex items-center gap-2
+                   text-sm font-medium
+                   text-red-500
+                   hover:text-red-600
+                   transition cursor-pointer">
+
+                        <lucide-icon [name]="Trash2" class="w-4 h-4"></lucide-icon>
+
+                        <span>Eliminar</span>
+                    </button>
+
+                    } -->
+
+                </div>
+
+            </div>
+
+        </div>
+
+        }
+
+    </div>
+
+    }
+
+
+    <!-- ===============================
+       MODAL
+  =============================== -->
+    @if (showModal) {
+
+    <div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64
+        z-50 flex items-end sm:items-center justify-center
+        p-0 sm:p-4">
+
+        <!-- Overlay -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeModal()">
+        </div>
+
+        <!-- Modal -->
+        <div class="relative w-full h-full sm:h-auto
+        sm:max-w-3xl
+        bg-[var(--bg-surface)]
+        border-0 sm:border border-[var(--border-soft)]
+        rounded-none sm:rounded-2xl
+        shadow-xl
+        flex flex-col
+        max-h-screen sm:max-h-[90vh]">
+
+            <!-- ================= HEADER ================= -->
+            <div class="p-4 sm:p-6 border-b border-[var(--border-soft)]
+        flex items-center justify-between shrink-0">
+
+                <div>
+                    <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+                        {{ editingBranch ? 'Editar sucursal' : 'Nueva sucursal' }}
+                    </h3>
+
+                    <p class="hidden sm:block text-sm text-[var(--text-secondary)] mt-1">
+                        Configura la información de la sucursal.
+                    </p>
+                </div>
+
+                <button (click)="closeModal()" class="text-[var(--text-secondary)]
+                           hover:text-[var(--text-primary)]
+                           transition cursor-pointer">
+
+                    ✕
+
+                </button>
+
+            </div>
+
+            <!-- ================= FORM ================= -->
+            <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col flex-1 min-h-0">
+
+                <!-- ================= SCROLLABLE BODY ================= -->
+                <div class="flex-1 overflow-y-auto p-6 space-y-8">
+
+                    <!-- ================= INFO GENERAL ================= -->
+                    <div class="space-y-4">
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+                                Información general
+                            </h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                            <!-- Nombre -->
+                            <div>
+                                <label class="text-sm text-[var(--text-secondary)]">
+                                    Nombre *
+                                </label>
+
+                                <input formControlName="name" class="input-primary" placeholder="Ej. Sucursal Centro">
+
+                                @if (getError('name')) {
+                                <small class="text-red-400">
+                                    {{ getError('name') }}
+                                </small>
+                                }
+                            </div>
+
+                            <!-- Slug -->
+                            <div>
+                                <label class="text-sm text-[var(--text-secondary)] flex items-center gap-2">
+                                    Enlace público de reservas *
+                                    <span class="relative group cursor-pointer">
+                                        <lucide-icon [name]="HelpCircle"
+                                            class="w-4 h-4 cursor-pointer text-gray-400 transition-colors duration-200 group-hover:text-emerald-500"
+                                            (click)="showSlugHelp = !showSlugHelp">
+                                        </lucide-icon>
+
+                                        <!-- Tooltip -->
+
+                                    </span>
+                                </label>
+                                <input formControlName="slug" class="input-primary" placeholder="Ej. sucursal-centro">
+
+
+
+                                @if (getError('slug')) {
+                                <small class="text-red-400">
+                                    {{ getError('slug') }}
+                                </small>
+                                }
+                            </div>
+
+                            <!-- Reference prefix -->
+                            <div>
+                                <!-- <label class="text-sm text-[var(--text-secondary)]">Prefijo de citas *</label> -->
+                                <label class="text-sm text-[var(--text-secondary)] flex items-center gap-2">
+                                    Prefijo de citas *
+
+                                    <span class="relative group cursor-pointer">
+                                        <lucide-icon [name]="HelpCircle"
+                                            class="w-4 h-4 cursor-pointer text-gray-400 transition-colors duration-200 group-hover:text-emerald-500"
+                                            (click)="showReferencePrefixHelp = !showReferencePrefixHelp">
+                                        </lucide-icon>
+
+                                        <!-- Tooltip -->
+
+                                    </span>
+                                </label>
+
+                                <input formControlName="reference_prefix" class="input-primary uppercase"
+                                    placeholder="Ej. PDC" maxlength="5">
+                                @if (getError('reference_prefix')) {
+                                <small class="text-red-400">{{ getError('reference_prefix') }}</small>
+                                }
+                            </div>
+
+                            <!-- Email -->
+                            <div>
+                                <label class="text-sm text-[var(--text-secondary)]">
+                                    Email
+                                </label>
+
+                                <input formControlName="email" class="input-primary"
+                                    placeholder="Ej. sucursal@empresa.com">
+
+                                @if (getError('email')) {
+                                <small class="text-red-400">
+                                    {{ getError('email') }}
+                                </small>
+                                }
+                            </div>
+
+                            <!-- Teléfono -->
+                            <div>
+                                <label class="text-sm text-[var(--text-secondary)]">
+                                    Teléfono
+                                </label>
+
+                                <ngx-intl-tel-input [cssClass]="'input-primary'"
+                                    [preferredCountries]="[CountryISO.Mexico, CountryISO.UnitedStates]"
+                                    [enableAutoCountrySelect]="false" [enablePlaceholder]="true"
+                                    [searchCountryFlag]="true" [selectFirstCountry]="false"
+                                    [selectedCountryISO]="CountryISO.Mexico" [phoneValidation]="true"
+                                    formControlName="phone">
+
+                                </ngx-intl-tel-input>
+
+                                @if (getError('phone')) {
+                                <small class="text-red-400">
+                                    {{ getError('phone') }}
+                                </small>
+                                }
+                            </div>
+
+                            <!-- Website -->
+                            <div class="md:col-span-2">
+                                <label class="text-sm text-[var(--text-secondary)]">
+                                    Sitio web
+                                </label>
+
+                                <input formControlName="website" class="input-primary"
+                                    placeholder="Ej. https://miempresa.com">
+
+                                @if (getError('website')) {
+                                <small class="text-red-400">
+                                    {{ getError('website') }}
+                                </small>
+                                }
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ================= DIRECCIÓN ================= -->
+                    <div class="space-y-4">
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+                                Dirección
+                            </h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                            <!-- País -->
+                            <div>
+                                <label class="text-sm text-[var(--text-secondary)]">
+                                    País
+                                </label>
+
+                                <select formControlName="country" class="input-primary">
+
+                                    <option value="">
+                                        Selecciona un país
+                                    </option>
+
+                                    <option *ngFor="let c of countries" [value]="c.code">
+
+                                        {{ c.name }}
+
+                                    </option>
+
+                                </select>
+
+                                @if (getError('country')) {
+                                <small class="text-red-400">
+                                    {{ getError('country') }}
+                                </small>
+                                }
+                            </div>
+
+                            <!-- Estado -->
+                            <div>
+                                <label class="text-sm text-[var(--text-secondary)]">
+                                    Estado
+                                </label>
+
+                                <input formControlName="state" class="input-primary" placeholder="Ej. Morelos">
+
+                                @if (getError('state')) {
+                                <small class="text-red-400">
+                                    {{ getError('state') }}
+                                </small>
+                                }
+                            </div>
+
+                            <!-- Ciudad -->
+                            <div>
+                                <label class="text-sm text-[var(--text-secondary)]">
+                                    Ciudad
+                                </label>
+
+                                <input formControlName="city" class="input-primary" placeholder="Ej. Cuernavaca">
+
+                                @if (getError('city')) {
+                                <small class="text-red-400">
+                                    {{ getError('city') }}
+                                </small>
+                                }
+                            </div>
+
+                            <!-- ZIP -->
+                            <div>
+                                <label class="text-sm text-[var(--text-secondary)]">
+                                    Código postal
+                                </label>
+
+                                <input formControlName="zip_code" class="input-primary" placeholder="Ej. 06000">
+
+                                @if (getError('zip_code')) {
+                                <small class="text-red-400">
+                                    {{ getError('zip_code') }}
+                                </small>
+                                }
+                            </div>
+
+                            <!-- Dirección -->
+                            <div class="md:col-span-2">
+                                <label class="text-sm text-[var(--text-secondary)]">
+                                    Dirección
+                                </label>
+
+                                <input formControlName="address" class="input-primary"
+                                    placeholder="Ej. Av. Reforma 123">
+
+                                @if (getError('address')) {
+                                <small class="text-red-400">
+                                    {{ getError('address') }}
+                                </small>
+                                }
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ================= FOOTER ================= -->
+                <div class="p-6 border-t border-[var(--border-soft)]
+                        flex flex-col sm:flex-row
+                        justify-end gap-3 shrink-0">
+
+                    <button type="button" (click)="closeModal()" class="mar-btn-secondary">
+                        Cancelar
+                    </button>
+
+                    <!-- [disabled]="saving || form.invalid" -->
+                    <button type="submit" [disabled]="saving" class="mar-btn-primary">
+
+                        {{ saving
+                        ? 'Guardando...'
+                        : (editingBranch ? 'Actualizar' : 'Guardar') }}
+
+                    </button>
+
+
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    @if (showSlugHelp) {
+
+    <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+
+        <!-- backdrop -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showSlugHelp = false">
+        </div>
+        <!-- <div class="absolute inset-0 bg-black/40" (click)="showSlugHelp = false"></div> -->
+
+        <!-- modal -->
+        <div class="relative w-full max-w-sm p-4 text-xs
+              bg-[var(--bg-surface)] border border-[var(--border-soft)]
+              rounded-2xl shadow-xl">
+
+            <p class="font-semibold mb-1">¿Para qué sirve?</p>
+            <p>Es el enlace público donde tus clientes reservarán citas.</p>
+
+            <p class="mt-2 font-semibold">Ejemplo:</p>
+            <p class="text-green-400">citara.com/punto-de-calma</p>
+
+            <p class="mt-2 font-semibold">Reglas:</p>
+            <ul class="list-disc ml-4">
+                <li>Solo minúsculas</li>
+                <li>Usa guiones (-)</li>
+                <li>Sin espacios ni símbolos</li>
+            </ul>
+
+            <button class="mt-4 w-full text-sm text-green-400" (click)="showSlugHelp = false">
+                Entendido
+            </button>
+
+        </div>
+
+    </div>
+
+    }
+
+    @if (showReferencePrefixHelp) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+
+        <!-- Overlay -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showReferencePrefixHelp = false">
+        </div>
+
+        <!-- modal -->
+        <div class="relative w-full max-w-sm p-4 text-xs
+              bg-[var(--bg-surface)] border border-[var(--border-soft)]
+              rounded-2xl shadow-xl">
+
+            <p class="font-semibold mb-1">¿Para qué sirve?</p>
+            <p>Se usa para generar códigos de citas.</p>
+
+            <p class="mt-2 font-semibold">Ejemplo:</p>
+            <p class="text-green-400">PDC-2404-AB12</p>
+
+            <p class="mt-2 font-semibold">Reglas:</p>
+            <ul class="list-disc ml-4">
+                <li>Solo mayúsculas</li>
+                <li>Sin espacios ni símbolos</li>
+                <li>2 a 5 caracteres</li>
+            </ul>
+
+            <button class="mt-4 w-full text-sm text-green-400" (click)="showReferencePrefixHelp = false">
+                Entendido
+            </button>
+
+        </div>
+
+    </div>
+    }
+
+    }
+    } <!-- FIN DE SIN ACCESO -->
+</section>

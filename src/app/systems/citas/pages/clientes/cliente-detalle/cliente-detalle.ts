@@ -32,7 +32,7 @@ interface Note {
 
 @Component({
   selector: 'app-cliente-detalle',
-  imports: [LucideAngularModule, TitleCasePipe, AppDatePipe, AppPhonePipe, CommonModule],
+  imports: [LucideAngularModule, AppDatePipe, AppPhonePipe, CommonModule],
   templateUrl: './cliente-detalle.html',
   styleUrl: './cliente-detalle.css',
 })

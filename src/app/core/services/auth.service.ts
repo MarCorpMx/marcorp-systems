@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { tap, finalize, map, catchError } from 'rxjs/operators';
@@ -16,6 +16,10 @@ export class AuthService {
 
   isLoggingOut = false;
 
+  private currentSystem = signal<any>(
+    JSON.parse(localStorage.getItem('current_system') || 'null')
+  );
+
   private api = inject(Api);
   private router = inject(Router);
   private theme = inject(ThemeService);
@@ -28,10 +32,12 @@ export class AuthService {
     localStorage.setItem('systems', JSON.stringify(res.systems));
     localStorage.setItem('organization', JSON.stringify(res.organization));
 
+
+
     //console.log('dataSystem:', JSON.stringify(res.systems, null, 2));
     //console.log('dataUser:', JSON.stringify(res.user, null, 2));
-    console.log('dataOrganization :', JSON.stringify(res.organization, null, 2));
-    //console.log(res);
+    //console.log('dataOrganization :', JSON.stringify(res.organization, null, 2));
+    console.log('dataBackend :', JSON.stringify(res, null, 2));
 
     //this.redirectToSystem();
     this.handlePostLoginRedirect(res.organization);
@@ -216,6 +222,28 @@ export class AuthService {
     this.redirectToLogin();
   }
 
+  refreshAuthContext(): Observable<any> {
+    //this.loadingService.showGlobal(true);
+
+    return this.api.get<any>('me', {
+      //loader: 'none'
+    }).pipe(
+      tap((res) => {
+        localStorage.setItem('user', JSON.stringify(res.user));
+        localStorage.setItem('systems', JSON.stringify(res.systems));
+        localStorage.setItem('organization', JSON.stringify(res.organization));
+
+        if (res.systems?.length) {
+          this.setCurrentSystem(res.systems[0]);
+        }
+      }),
+      finalize(() => {
+        this.loadingService.showGlobal(false);
+        this.loadingService.hide();
+      })
+    );
+  }
+
   redirectToLogin() {
     this.router.navigate(['/auth/login']);
   }
@@ -248,8 +276,11 @@ export class AuthService {
     return JSON.parse(localStorage.getItem('organization') || 'null');
   }
 
-  getCurrentSystem() {
+  /*getCurrentSystem() {
     return JSON.parse(localStorage.getItem('current_system') || 'null');
+  }*/
+  getCurrentSystem() {
+    return this.currentSystem();
   }
 
   getToken(): string | null {
@@ -293,10 +324,22 @@ export class AuthService {
     return this.getRole() === 'receptionist';
   }
 
-  setCurrentSystem(system: any) {
+  /*setCurrentSystem(system: any) {
     localStorage.setItem('current_system', JSON.stringify(system));
     this.theme.setCurrentSystem(system);
     //document.body.setAttribute('data-system', system.subsystem_key);
+  }*/
+
+  setCurrentSystem(system: any) {
+
+    if (!system) return;
+
+    localStorage.setItem('current_system', JSON.stringify(system));
+
+    // ESTO ES LO IMPORTANTE
+    this.currentSystem.set(system);
+
+    this.theme.setCurrentSystem(system);
   }
 
   getAuthContext() {
@@ -316,13 +359,30 @@ export class AuthService {
     };
   }
 
+  private currentBranchSignal = signal<any>(
+    JSON.parse(localStorage.getItem('current_branch') || 'null')
+  );
+
+  currentBranch$ = this.currentBranchSignal.asReadonly();
+
+  // rombi implemando 25/04/26
+  getCurrentBranch() {
+    return this.currentBranchSignal();
+  }
+
+  // rombi implemando 25/04/26
   setCurrentBranch(branch: any) {
+    localStorage.setItem('current_branch', JSON.stringify(branch));
+    this.currentBranchSignal.set(branch);
+  }
+
+  /*setCurrentBranch(branch: any) {
     localStorage.setItem('current_branch', JSON.stringify(branch));
   }
 
   getCurrentBranch() {
     return JSON.parse(localStorage.getItem('current_branch') || 'null');
-  }
+  }*/
 
   canUseFeature(key: string): boolean {
     const system = this.getCurrentSystemSafe();

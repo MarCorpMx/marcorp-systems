@@ -86,8 +86,8 @@ export class AppPhonePipe implements PipeTransform {
   // FORMATOS
   // ------------------------
 
-  private formatInternational(n: string): string {
-    return `+52 ${n.slice(0, 3)} ${n.slice(3, 6)} ${n.slice(6)}`;
+  private formatInternational(n: string, dialCode = '+52'): string {
+    return `${dialCode} ${n.slice(0, 3)} ${n.slice(3, 6)} ${n.slice(6)}`;
   }
 
   private formatNational(n: string): string {

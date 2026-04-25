@@ -1,7 +1,5 @@
-/* Phone Number */
-
 /* Fuerza que ngx-intl-tel-input ocupe todo el ancho */
 :host ::ng-deep ngx-intl-tel-input,
 :host ::ng-deep .iti {
-  width: 100%;
+    width: 100%;
 }

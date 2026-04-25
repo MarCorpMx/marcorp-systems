@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, inject } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { LucideAngularModule, Eye, EyeOff } from 'lucide-angular';
@@ -25,15 +25,17 @@ export class Register implements OnInit {
   itemsSystems: any[] = [];
   itemDefault: any;
 
+  timezone = Intl.DateTimeFormat().resolvedOptions().timeZone as string;
+
   PhoneNumberFormat = PhoneNumberFormat;
   CountryISO = CountryISO;
   preferredCountries: CountryISO[] = [CountryISO.Mexico, CountryISO.UnitedStates];
 
-  constructor(
-    private router: Router,
-    public nav: AuthNavigation,
-    private notify: Notification,
-    private authService: AuthService) { }
+
+  private router = inject(Router);
+  public nav = inject(AuthNavigation);
+  private notify = inject(Notification);
+  private authService = inject(AuthService);
 
   registrationForm = new FormGroup({
     first_name: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(100), Validators.pattern(this.pattern)]),
@@ -52,7 +54,7 @@ export class Register implements OnInit {
     return this.registrationForm.get('password');
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {}
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
@@ -75,6 +77,8 @@ export class Register implements OnInit {
     this.sendDataToBackend(null);
   }
 
+
+
   // Se estableción con token: string | null para posteriormente implementar re-captcha
   private sendDataToBackend(token: string | null) {
     if (this.isSubmitting) {
@@ -83,21 +87,19 @@ export class Register implements OnInit {
     this.isSubmitting = true;
 
     const payload = {
-      first_name: this.registrationForm.value.first_name ?? undefined,
-      email: this.registrationForm.value.email ?? undefined,
-      password: this.registrationForm.value.password ?? '',
+      first_name: this.registrationForm.value.first_name,
+      email: this.registrationForm.value.email,
+      password: this.registrationForm.value.password,
+      timezone: this.timezone,
       subsystem: 'citas'
     };
 
     // Llama al servicio para enviar los datos
     this.authService.register(payload).subscribe({
       next: (res) => {
-        this.notify.success('Bienvenido a CITARA\nTu espacio ya está listo');
+        //this.notify.success('Bienvenido a CITARA\nTu espacio ya está listo');
+        this.notify.success('Bienvenido a CITARA');
         this.isSubmitting = false;
-        /*this.notify.success('Registro exitoso');
-        this.isSubmitting = false;
-        this.registrationForm.reset();
-        this.nav.goToLogin();*/
       },
       error: (err) => {
         this.isSubmitting = false;

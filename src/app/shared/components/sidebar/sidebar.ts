@@ -1,4 +1,4 @@
-import { Component, computed, EventEmitter, inject, Input, Output, signal, HostListener, ElementRef } from '@angular/core';
+import { Component, computed, EventEmitter, inject, Input, Output, signal, HostListener, ElementRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { LucideAngularModule, LogOut, X } from 'lucide-angular';
@@ -33,7 +33,7 @@ import { ConfirmDialogService } from '../../services/confirm-dialog.service';
   styleUrls: ['./sidebar.css'],
 })
 
-export class Sidebar {
+export class Sidebar implements OnInit {
   readonly LogOut = LogOut;
   readonly X = X;
 
@@ -59,7 +59,8 @@ export class Sidebar {
 
   user = this.auth.getUser();
   systems = this.auth.getSystems();
-  currentSystem = this.theme.getCurrentSystem();
+  //currentSystem = this.theme.getCurrentSystem();
+  currentSystem = computed(() => this.auth.getCurrentSystem());
 
   isClosing = false;
 
@@ -67,10 +68,20 @@ export class Sidebar {
   @Output() close = new EventEmitter<void>();
 
 
-  menu = computed(() => {
+  /*menu = computed(() => {
     if (!this.currentSystem?.features) return [];
 
     return this.currentSystem.features
+      .filter((f: any) => f.visible && !f.parent)
+      .sort((a: any, b: any) => a.sort_order - b.sort_order);
+  });*/
+
+  menu = computed(() => {
+    const system = this.currentSystem();
+
+    if (!system?.features) return [];
+
+    return system.features
       .filter((f: any) => f.visible && !f.parent)
       .sort((a: any, b: any) => a.sort_order - b.sort_order);
   });
@@ -84,6 +95,84 @@ export class Sidebar {
     if (!clickedInside) {
       this.branchMenuOpen = false;
     }
+  }
+
+  // Sucursales
+  //branches = computed(() => this.currentSystem?.branches ?? []);
+  branches = computed(() => {
+    return this.currentSystem()?.branches ?? [];
+  });
+
+  // sucursal actual
+  //currentBranch = signal<any>(null);
+  currentBranch = this.auth.currentBranch$;
+
+  // estado dropdown
+  branchMenuOpen = false;
+
+  ngOnInit() {
+    //const branches = this.currentSystem?.branches ?? [];
+    const branches = this.currentSystem()?.branches ?? [];
+
+    console.log('branches:', JSON.stringify(branches, null, 2));
+
+    if (!branches.length) return;
+
+    const saved = this.auth.getCurrentBranch();
+
+    // 1. si hay sucursal guardada y sigue existiendo - úsarla
+    if (saved) {
+      const exists = branches.find(
+        (b: any) => b.branch_id === saved.branch_id
+      );
+
+      if (exists) {
+        //this.currentBranch.set(exists);
+        this.auth.setCurrentBranch(exists);
+        return;
+      }
+    }
+
+    // 2. si no hay saved - usar default
+    /*const defaultBranch = branches.find(
+      (b: any) => b.branch_id === this.currentSystem?.default_branch_id
+    );*/
+    const defaultBranch = branches.find(
+      (b: any) => b.branch_id === this.currentSystem()?.default_branch_id
+    );
+
+    const finalBranch = defaultBranch ?? branches[0];
+
+    //this.currentBranch.set(finalBranch);
+
+    // guardar para futuras recargas
+    this.auth.setCurrentBranch(finalBranch);
+  }
+
+  // toggle
+  toggleBranchMenu() {
+    this.branchMenuOpen = !this.branchMenuOpen;
+  }
+
+  // seleccionar sucursal
+  selectBranch(branch: any) {
+
+    if (!branch.branch_is_active) {
+      return; // no seleccionar
+    }
+
+    //this.currentBranch.set(branch);
+    this.branchMenuOpen = false;
+
+    // persistir en auth/localStorage
+    this.auth.setCurrentBranch(branch);
+
+    this.router.navigate(['/sistemas/citas/dashboard']);
+
+    if (window.innerWidth <= 768) {
+      this.closeSidebar();
+    }
+
   }
 
   closeSidebar() {
@@ -110,7 +199,6 @@ export class Sidebar {
     this.router.navigate(['/seleccionar-sistema']);
   }
 
-
   logout() {
     this.confirm.open(
       'Cerrar sesión',
@@ -129,40 +217,10 @@ export class Sidebar {
       return;
     }
 
-    // 👉 cerrar sidebar SOLO en móvil
+    // cerrar sidebar SOLO en móvil
     if (window.innerWidth <= 768) {
       this.closeSidebar();
     }
   }
 
-
-  // 🔹 Simulación de sucursales
-  branches = [
-    { id: 1, name: 'Sucursal Centro' },
-    { id: 2, name: 'Sucursal Norte' },
-    { id: 3, name: 'Sucursal Sur' }
-  ];
-
-  // 🔹 sucursal actual
-  currentBranch = this.branches[0];
-
-  // 🔹 estado dropdown
-  branchMenuOpen = false;
-
-  // 🔹 toggle
-  toggleBranchMenu() {
-    this.branchMenuOpen = !this.branchMenuOpen;
-  }
-
-  // 🔹 seleccionar sucursal
-  selectBranch(branch: any) {
-    this.currentBranch = branch;
-    this.branchMenuOpen = false;
-
-    if (window.innerWidth <= 768) {
-      this.closeSidebar();
-    }
-
-    console.log('Sucursal cambiada:', branch);
-  }
 }

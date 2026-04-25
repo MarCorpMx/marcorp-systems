@@ -22,6 +22,7 @@ import {
   templateUrl: './topbar.html',
   styleUrl: './topbar.css',
 })
+
 export class Topbar {
   readonly LogOut = LogOut;
   readonly ChevronRight = ChevronRight;
