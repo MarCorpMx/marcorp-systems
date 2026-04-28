@@ -39,9 +39,7 @@ export class CitasServicesService {
     return this.api.get<ServiceModel>(`${this.endpoint}/${id}`);
   }
 
-  /*create(data: CreateServiceDto) {
-    return this.api.post<ServiceModel>(this.endpoint, data);
-  }*/
+
   create<T = ServiceModel>(data: CreateServiceDto) {
     return this.api.post<T>(this.endpoint, data);
   }

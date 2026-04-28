@@ -39,6 +39,21 @@ export class AuthService {
     //console.log('dataOrganization :', JSON.stringify(res.organization, null, 2));
     console.log('dataBackend :', JSON.stringify(res, null, 2));
 
+    // SETEAR SYSTEM (ultra mega necesario para onboarding)
+    if (res.systems?.length) {
+      const system = res.systems[0];
+      this.setCurrentSystem(system);
+
+      // SETEAR BRANCH (AQUÍ ESTÁ EL FIX)
+      if (system.branches?.length) {
+        const defaultBranch =
+          system.branches.find((b: any) => b.branch_id === system.default_branch_id)
+          || system.branches[0];
+
+        this.setCurrentBranch(defaultBranch);
+      }
+    }
+
     //this.redirectToSystem();
     this.handlePostLoginRedirect(res.organization);
   }
@@ -283,6 +298,11 @@ export class AuthService {
     return this.currentSystem();
   }
 
+  getCurrentSubsystemId(): number | null {
+    const system = this.getCurrentSystemSafe();
+    return system?.subsystem?.id || null;
+  }
+
   getToken(): string | null {
     return localStorage.getItem('auth_token');
   }
@@ -359,7 +379,12 @@ export class AuthService {
     };
   }
 
-  private currentBranchSignal = signal<any>(
+  getPlanKey(): string | null {
+    const user = this.getAuthContext();
+    return user?.plan || null;
+  }
+
+  public currentBranchSignal = signal<any>(
     JSON.parse(localStorage.getItem('current_branch') || 'null')
   );
 
@@ -409,6 +434,19 @@ export class AuthService {
     const feature = system.features.find((f: any) => f.key === key);
 
     return feature?.limit ?? null;
+  }
+
+  getBranches(): any[] {
+    const system = this.getCurrentSystemSafe();
+    return system?.branches || [];
+  }
+
+  getBranchCount(): number {
+    return this.getBranches().length;
+  }
+
+  hasMultipleBranches(): boolean {
+    return this.getBranchCount() > 1;
   }
 
 

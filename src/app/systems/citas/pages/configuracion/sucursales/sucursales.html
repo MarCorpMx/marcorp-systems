@@ -793,20 +793,39 @@
               bg-[var(--bg-surface)] border border-[var(--border-soft)]
               rounded-2xl shadow-xl">
 
-            <p class="font-semibold mb-1">¿Para qué sirve?</p>
-            <p>Es el enlace público donde tus clientes reservarán citas.</p>
+            <p class="font-semibold text-base mb-2">
+                ¿Para qué sirve?
+            </p>
 
-            <p class="mt-2 font-semibold">Ejemplo:</p>
-            <p class="text-green-400">citara.com/punto-de-calma</p>
+            <p class="text-[var(--text-muted)] leading-relaxed">
+                Es el enlace público donde tus clientes reservarán citas.
+            </p>
 
-            <p class="mt-2 font-semibold">Reglas:</p>
-            <ul class="list-disc ml-4">
-                <li>Solo minúsculas</li>
-                <li>Usa guiones (-)</li>
-                <li>Sin espacios ni símbolos</li>
-            </ul>
+            <div class="mt-4 space-y-3">
 
-            <button class="mt-4 w-full text-sm text-green-400" (click)="showSlugHelp = false">
+                <p class="font-semibold text-[var(--text-secondary)]">
+                    Ejemplo:
+                </p>
+
+                <div class="rounded-xl border border-[var(--border-soft)]
+                bg-[var(--bg-muted)] p-3 space-y-1">
+
+                    <p class="text-green-400">citara.com/punto-de-calma</p>
+
+                    <p class="mt-2 font-semibold">Reglas:</p>
+                    <ul class="list-disc ml-4">
+                        <li>Solo minúsculas</li>
+                        <li>Usa guiones (-)</li>
+                        <li>Sin espacios ni símbolos</li>
+                    </ul>
+
+
+                </div>
+
+            </div>
+
+
+            <button class="mar-btn-help" (click)="showSlugHelp = false">
                 Entendido
             </button>
 
@@ -828,21 +847,43 @@
               bg-[var(--bg-surface)] border border-[var(--border-soft)]
               rounded-2xl shadow-xl">
 
-            <p class="font-semibold mb-1">¿Para qué sirve?</p>
-            <p>Se usa para generar códigos de citas.</p>
 
-            <p class="mt-2 font-semibold">Ejemplo:</p>
-            <p class="text-green-400">PDC-2404-AB12</p>
+            <p class="font-semibold text-base mb-2">
+                ¿Para qué sirve?
+            </p>
 
-            <p class="mt-2 font-semibold">Reglas:</p>
-            <ul class="list-disc ml-4">
-                <li>Solo mayúsculas</li>
-                <li>Sin espacios ni símbolos</li>
-                <li>2 a 5 caracteres</li>
-            </ul>
+            <p class="text-[var(--text-muted)] leading-relaxed">
+                Se usa para generar códigos de citas.
+            </p>
 
-            <button class="mt-4 w-full text-sm text-green-400" (click)="showReferencePrefixHelp = false">
+            <div class="mt-4 space-y-3">
+
+                <p class="font-semibold text-[var(--text-secondary)]">
+                    Ejemplo:
+                </p>
+
+                <div class="rounded-xl border border-[var(--border-soft)]
+                bg-[var(--bg-muted)] p-3 space-y-1">
+
+                    <p class="text-green-400">PDC-2404-AB12</p>
+
+                    <p class="mt-2 font-semibold">Reglas:</p>
+                    <ul class="list-disc ml-4">
+                        <li>Solo mayúsculas</li>
+                        <li>Sin espacios ni símbolos</li>
+                        <li>2 a 5 caracteres</li>
+                    </ul>
+
+
+                </div>
+
+            </div>
+
+
+            <button class="mar-btn-help" (click)="showReferencePrefixHelp = false">
+
                 Entendido
+
             </button>
 
         </div>

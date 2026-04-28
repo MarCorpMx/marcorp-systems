@@ -3,3 +3,32 @@
 :host ::ng-deep .iti {
   width: 100%;
 }
+
+/* Password Eye-icon */
+.password-container {
+  position: relative;
+}
+
+.password-container input {
+  padding-right: 42px;
+}
+
+.toggle-icon {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+
+  width: 18px;
+  height: 18px;
+
+  cursor: pointer;
+
+  color: var(--text-secondary);
+
+  transition: color 0.2s ease;
+}
+
+.toggle-icon:hover {
+  color: var(--system-primary);
+}

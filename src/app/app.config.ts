@@ -5,7 +5,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 import { loadingInterceptor } from './core/interceptors/loading-interceptor';
-
+import { branchInterceptor } from './core/interceptors/branch-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -14,7 +14,11 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideAnimations(),
     provideHttpClient(
-      withInterceptors([authInterceptor, loadingInterceptor])
+      withInterceptors([
+        authInterceptor, 
+        loadingInterceptor,
+        branchInterceptor
+      ])
     )
   ]
 };

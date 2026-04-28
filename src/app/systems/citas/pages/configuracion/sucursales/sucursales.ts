@@ -541,7 +541,7 @@ No podrás crear nuevas hasta reducirlas o actualizar tu plan.”*/
 
   handleError(err: any, fallbackMessage: string) {
 
-    console.error(err);
+    //console.error(err);
 
     if (err?.error?.message) {
       this.notify.error(err.error.message);

@@ -1,4 +1,3 @@
-
 <section class="relative space-y-8 max-w-5xl mx-auto" [class.pb-40]="hasChanges">
 
   <!-- ================= HEADER ================= -->
@@ -14,28 +13,34 @@
       </p>
     </div>
 
+    @if (!loading) {
     <div class="flex items-center gap-3">
 
-      <label class="text-xs text-[var(--text-secondary)]">
+
+      <!-- <label class="text-xs text-[var(--text-secondary)]">
         Profesional
-      </label>
+      </label> -->
 
       <!-- STAFF: no puede cambiar -->
-      @if (role === 'staff') {
+      @if (role === 'staff' || isFree) {
 
-      <div class="px-4 py-2 rounded-xl
+      <!-- <div class="px-4 py-2 rounded-xl
                 bg-[var(--bg-base)]
                 border border-[var(--border-soft)]
                 text-sm text-[var(--text-secondary)]">
 
         {{ selectedProfessionalName }}
 
-      </div>
+      </div> -->
 
       }
 
       <!-- ADMIN / OWNER / RECEPTIONIST -->
       @else {
+
+      <label class="text-xs text-[var(--text-secondary)]">
+        Profesional
+      </label>
 
       <select [(ngModel)]="selectedProfessionalId" (change)="selectProfessional(selectedProfessionalId)" class="px-4 py-2 rounded-xl
              bg-[var(--bg-surface)]
@@ -53,6 +58,7 @@
       }
 
     </div>
+    }
 
   </div>
 
@@ -154,40 +160,98 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         <div class="space-y-1">
-          <label class="text-xs text-[var(--text-secondary)]">
-            Duración por cita (min)
+          <label class="flex items-center gap-2
+              text-xs text-[var(--text-secondary)]">
+            Intervalo entre horarios
+
+            <span class="relative group cursor-pointer">
+              <lucide-icon [name]="HelpCircle"
+                class="w-4 h-4 text-gray-400 transition-colors duration-200 group-hover:text-emerald-500"
+                (click)="showAppoDurHelp = !showAppoDurHelp">
+              </lucide-icon>
+            </span>
           </label>
-          <input type="number" [(ngModel)]="settings.appointment_duration" (ngModelChange)="detectChanges()"
-            class="input-primary">
+
+          <select [(ngModel)]="settings.appointment_duration" class="input-primary" (ngModelChange)="detectChanges()">
+
+            @if(isFree){
+            <option [ngValue]="15">Cada 15 minutos</option>
+            <option [ngValue]="30">Cada 30 minutos</option>
+            <option [ngValue]="60">Cada 60 minutos</option>
+            }
+            @else{
+            <option [ngValue]="5">Cada 5 minutos</option>
+            <option [ngValue]="10">Cada 10 minutos</option>
+            <option [ngValue]="15">Cada 15 minutos</option>
+            <option [ngValue]="20">Cada 20 minutos</option>
+            <option [ngValue]="30">Cada 30 minutos</option>
+            <option [ngValue]="45">Cada 45 minutos</option>
+            <option [ngValue]="60">Cada 60 minutos</option>
+            <option [ngValue]="90">Cada 90 minutos</option>
+            <option [ngValue]="120">Cada 120 minutos</option>
+            }
+          </select>
+
         </div>
 
-        <div class="space-y-1">
-          <label class="text-xs text-[var(--text-secondary)]">
-            Descanso entre citas (min)
-          </label>
-          <input type="number" [(ngModel)]="settings.break_between_appointments" (ngModelChange)="detectChanges()"
-            class="input-primary">
-        </div>
+
 
         <div class="space-y-1">
+          <label class="flex items-center gap-2
+              text-xs text-[var(--text-secondary)]">
+            Descanso entre citas
+
+            <span class="relative group cursor-pointer">
+              <lucide-icon [name]="HelpCircle"
+                class="w-4 h-4 text-gray-400 transition-colors duration-200 group-hover:text-emerald-500"
+                (click)="showBreakAppoHelp = !showBreakAppoHelp">
+              </lucide-icon>
+            </span>
+
+          </label>
+          <select [(ngModel)]="settings.break_between_appointments" (ngModelChange)="detectChanges()"
+            class="input-primary">
+
+            @if(isFree){
+            <option [ngValue]="0">Sin espacio</option>
+            <option [ngValue]="5">5 minutos</option>
+            <option [ngValue]="10">10 minutos</option>
+            <option [ngValue]="15">15 minutos</option>
+            }
+            @else{
+            <option [ngValue]="0">Sin espacio</option>
+            <option [ngValue]="5">5 minutos</option>
+            <option [ngValue]="10">10 minutos</option>
+            <option [ngValue]="15">15 minutos</option>
+            <option [ngValue]="20">20 minutos</option>
+            <option [ngValue]="30">30 minutos</option>
+            <option [ngValue]="45">45 minutos</option>
+            <option [ngValue]="60">60 minutos</option>
+            }
+          </select>
+
+
+        </div>
+
+        <!-- <div class="space-y-1">
           <label class="text-xs text-[var(--text-secondary)]">
             Anticipación mínima (horas)
           </label>
           <input type="number" [(ngModel)]="settings.minimum_notice_hours" (ngModelChange)="detectChanges()"
             class="input-primary">
-        </div>
+        </div> -->
 
-        <div class="space-y-1">
+        <!-- <div class="space-y-1">
           <label class="text-xs text-[var(--text-secondary)]">
             Límite de cancelación (horas)
           </label>
           <input type="number" [(ngModel)]="settings.cancellation_limit_hours" (ngModelChange)="detectChanges()"
             class="input-primary">
-        </div>
+        </div> -->
 
       </div>
 
-      <div class="flex flex-wrap gap-8 pt-4 border-t border-[var(--border-soft)]">
+      <!-- <div class="flex flex-wrap gap-8 pt-4 border-t border-[var(--border-soft)]">
 
         <label class="flex items-center gap-3 text-sm text-[var(--text-primary)] cursor-pointer">
           <input type="checkbox" [(ngModel)]="settings.allow_online_booking" (ngModelChange)="detectChanges()"
@@ -201,7 +265,7 @@
           Permitir cancelaciones
         </label>
 
-      </div>
+      </div> -->
 
     </div>
 
@@ -435,6 +499,127 @@
     </div>
     }
   </div>
+  }
+
+  @if (showAppoDurHelp) {
+
+  <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+
+    <!-- backdrop -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showAppoDurHelp = false">
+    </div>
+
+    <!-- modal -->
+    <div class="relative w-full max-w-sm p-5 text-sm
+        bg-[var(--bg-surface)]
+        border border-[var(--border-soft)]
+        rounded-2xl shadow-xl">
+
+      <p class="font-semibold text-base mb-2">
+        Intervalo entre horarios
+      </p>
+
+      <p class="text-[var(--text-muted)] leading-relaxed">
+        Define cada cuánto tiempo aparecerán horarios para reservar en tu agenda pública.
+      </p>
+
+      <div class="mt-4 space-y-3">
+
+        <p class="font-semibold text-[var(--text-secondary)]">
+          Ejemplo:
+        </p>
+
+        <div class="rounded-xl border border-[var(--border-soft)]
+                bg-[var(--bg-muted)] p-3 space-y-1">
+
+          <p class="text-[var(--text-primary)]">
+            15 min: <span class="font-medium">9:00, 9:15, 9:30...</span>
+          </p>
+
+          <p class="text-[var(--text-primary)]">
+            30 min: <span class="font-medium">9:00, 9:30, 10:00...</span>
+          </p>
+
+          <p class="text-[var(--text-primary)]">
+            60 min: <span class="font-medium">9:00, 10:00, 11:00...</span>
+          </p>
+
+
+        </div>
+
+      </div>
+
+
+      <button class="mar-btn-help" (click)="showAppoDurHelp = false">
+
+        Entendido
+
+      </button>
+
+    </div>
+
+  </div>
+
+  }
+
+  @if (showBreakAppoHelp) {
+
+  <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+
+    <!-- backdrop -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showBreakAppoHelp = false">
+    </div>
+
+    <!-- modal -->
+    <div class="relative w-full max-w-sm p-5 text-sm
+        bg-[var(--bg-surface)]
+        border border-[var(--border-soft)]
+        rounded-2xl shadow-xl">
+
+      <p class="font-semibold text-base mb-2 text-[var(--text-primary)]">
+        Espacio entre citas
+      </p>
+
+      <p class="text-[var(--text-muted)] leading-relaxed">
+        Agrega unos minutos libres entre una cita y la siguiente.
+        Ideal para limpieza, preparar material o descansar.
+      </p>
+
+      <div class="mt-4 space-y-3">
+
+        <p class="font-semibold text-[var(--text-secondary)]">
+          Ejemplo:
+        </p>
+
+        <div class="rounded-xl border border-[var(--border-soft)]
+                bg-[var(--bg-muted)] p-3 space-y-1">
+
+          <p class="text-[var(--text-primary)]">
+            Cita termina: <span class="font-medium">10:00</span>
+          </p>
+
+          <p class="text-[var(--text-primary)]">
+            Espacio elegido: <span class="font-medium">15 min</span>
+          </p>
+
+          <p class="text-emerald-400 font-medium">
+            Próxima cita disponible: 10:15
+          </p>
+
+        </div>
+
+      </div>
+
+      <button class="mar-btn-help" (click)="showBreakAppoHelp = false">
+
+        Entendido
+
+      </button>
+
+    </div>
+
+  </div>
+
   }
 
 </section>

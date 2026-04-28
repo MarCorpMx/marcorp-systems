@@ -114,8 +114,6 @@ export class Sidebar implements OnInit {
     //const branches = this.currentSystem?.branches ?? [];
     const branches = this.currentSystem()?.branches ?? [];
 
-    console.log('branches:', JSON.stringify(branches, null, 2));
-
     if (!branches.length) return;
 
     const saved = this.auth.getCurrentBranch();

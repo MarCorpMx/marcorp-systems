@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { LucideAngularModule, HelpCircle } from 'lucide-angular';
 
 import { AuthService } from '../../../core/services/auth.service';
 import { CitasServicesService } from '../../../core/services/citas-services.service';
@@ -20,12 +21,14 @@ interface WeekDay {
 
 @Component({
   selector: 'app-availability-setup',
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule],
   templateUrl: './availability-setup.html',
   styleUrl: './availability-setup.css',
 })
 
 export class AvailabilitySetup implements OnInit {
+
+  readonly HelpCircle = HelpCircle;
 
   private auth = inject(AuthService);
   private citasService = inject(CitasServicesService);
@@ -36,16 +39,21 @@ export class AvailabilitySetup implements OnInit {
   loading = true;
   saving = false;
 
+  showAppoDurHelp = false;
+  showBreakAppoHelp = false;
+
   staffId: number | null = null;
+
+
 
   // Configuración por defecto
   settings: AgendaSettings = {
-    appointment_duration: 60,
+    appointment_duration: 15,
     break_between_appointments: 0,
     minimum_notice_hours: 0,
     cancellation_limit_hours: 0,
-    allow_online_booking: false,
-    allow_cancellation: false
+    allow_online_booking: true,
+    allow_cancellation: true
   };
 
   weekDays: WeekDay[] = this.getDefaultWeekDays();
@@ -77,7 +85,7 @@ export class AvailabilitySetup implements OnInit {
     this.weekDays = this.getDefaultWeekDays();
 
     this.settings = {
-      appointment_duration: 50,
+      appointment_duration: 15,
       break_between_appointments: 0,
       minimum_notice_hours: 0,
       cancellation_limit_hours: 0,
@@ -95,7 +103,7 @@ export class AvailabilitySetup implements OnInit {
     const payload = {
       ...this.settings,
 
-      timezone: 'America/Mexico_City',
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone as string,
 
       weekly_schedule: activeDays.map(d => ({
         day_of_week: d.value,
@@ -128,12 +136,31 @@ export class AvailabilitySetup implements OnInit {
         }
 
       },
-      error: (res) => {
+      error: (err) => {
         this.saving = false;
-        this.notify.error('Error al guardar');
+
+        this.handleError(err, 'Error al guardar');
       }
     });
 
+  }
+
+  handleError(err: any, fallbackMessage: string) {
+
+    //console.error(err);
+
+    if (err?.error?.message) {
+      this.notify.error(err.error.message);
+      return;
+    }
+
+    if (err?.error?.errors) {
+      const firstError = Object.values(err.error.errors)[0] as string[];
+      this.notify.error(firstError[0]);
+      return;
+    }
+
+    this.notify.error(fallbackMessage);
   }
 
 

@@ -65,11 +65,9 @@ export class Clientes implements OnInit {
   SearchCountryField = SearchCountryField;
 
   confirm = inject(ConfirmDialogService);
-  constructor(
-    private clientService: ClientService,
-    private fb: FormBuilder,
-    private notify: Notification
-  ) { }
+  private clientService = inject(ClientService);
+  private fb = inject(FormBuilder);
+  private notify = inject(Notification);
 
   ngOnInit() {
     this.initForm();
@@ -84,7 +82,6 @@ export class Clientes implements OnInit {
         Validators.maxLength(100)
       ]],
       last_name: ['', [
-        Validators.required,
         Validators.minLength(3),
         Validators.maxLength(100)
       ]],
@@ -93,31 +90,11 @@ export class Clientes implements OnInit {
         Validators.email,
         Validators.maxLength(150)
       ]],
-      phone: [null, Validators.required],
-      birth_date: ['', Validators.required]
+      phone: [null],
+      birth_date: ['']
     });
   }
 
-  /*loadClients(page: number = 1) {
-    this.loading = true;
-
-    this.clientService.getClients(page).subscribe({
-      next: (response) => {
-        this.clients = response.data;
-
-        this.currentPage = response.current_page;
-        this.lastPage = response.last_page;
-        this.perPage = response.per_page;
-        this.total = response.total;
-
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.loading = false;
-      }
-    });
-  }*/
 
   loadClients(page: number = 1) {
     this.loading = true;
@@ -229,23 +206,49 @@ export class Clientes implements OnInit {
   }
 
   save() {
-    if (this.form.invalid) return;
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.notify.error('Revisa los campos.');
+      return;
+    }
+
+    this.submitted = true;
+    this.saving = true;
+
 
     const data = this.form.value;
 
     if (this.editingClient) {
-      this.clientService.updateClient(this.editingClient.id, data)
+
+      this.notify.info('andamos en la actualizacion man');
+      /*this.clientService.updateClient(this.editingClient.id, data)
         .subscribe(() => {
           this.notify.success('Cliente actualizado correctamente');
           this.loadClients(this.currentPage);
           this.closeModal();
-        });
+        });*/
     } else {
+      //this.notify.info('gardando a chico che');
       this.clientService.createClient(data)
-        .subscribe(() => {
-          this.notify.success('Cliente creado correctamente');
-          this.loadClients(this.currentPage);
-          this.closeModal();
+        .subscribe({
+          next: (res) => {
+            this.notify.success('Cliente creado correctamente');
+            
+            this.submitted = false;
+            this.saving = false;
+            
+            this.loadClients(this.currentPage);
+            this.closeModal();
+          },
+          error: (err) => {
+            this.submitted = false;
+            this.saving = false;
+
+
+            this.handleError(err, 'Error al guardar');
+          }
+
         });
     }
   }
@@ -273,6 +276,40 @@ export class Clientes implements OnInit {
       inactivo: 'bg-gray-500/10 text-gray-400',
       riesgo: 'bg-yellow-500/10 text-yellow-400'
     }[status];
+  }
+
+
+  getError(controlName: string): string | null {
+    const control = this.form.get(controlName);
+    if (!control || !control.errors) return null;
+
+    if (!control.touched && !this.submitted) return null;
+
+    if (control.errors['required']) return 'Obligatorio';
+    if (control.errors['email']) return 'Email inválido';
+    if (control.errors['maxlength']) return 'Muy largo';
+    if (control.errors['minlength']) return 'Muy corto';
+    if (control.errors['pattern']) return 'Formato inválido';
+
+    return 'Campo inválido';
+  }
+
+  handleError(err: any, fallbackMessage: string) {
+
+    //console.error(err);
+
+    if (err?.error?.message) {
+      this.notify.error(err.error.message);
+      return;
+    }
+
+    if (err?.error?.errors) {
+      const firstError = Object.values(err.error.errors)[0] as string[];
+      this.notify.error(firstError[0]);
+      return;
+    }
+
+    this.notify.error(fallbackMessage);
   }
 
 }

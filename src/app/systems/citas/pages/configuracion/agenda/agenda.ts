@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { LucideAngularModule, Briefcase } from 'lucide-angular';
+import { LucideAngularModule, Briefcase, HelpCircle } from 'lucide-angular';
 import { ProfessionalsService, Professional } from '../../../../../core/services/professionals.service';
 import { AgendaSettingsService, AgendaSettings } from '../../../../../core/services/citas-agenda-settings.service';
 import { NonWorkingDayService, NonWorkingDay } from '../../../../../core/services/non-working-day.service';
@@ -19,6 +19,52 @@ interface WeekDay {
   end: string;
 }
 
+    /*
+    |--------------------------------------------------------------------------
+    | rombi - pendientes
+    | - Descomentar "Permitir reservas online" y "Permitir cancelaciones" para que funcione chingon el sistema
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    Tambien descomentar  
+    minimum_notice_hours: 0, // Reserva inmediata permitida
+    cancellation_limit_hours: 0, // Cancelación libre 
+    hacer pruebas y lanzar como Feature Upgrade
+
+    Cómo anunciarlo en futuro
+    Card elegante
+
+    ✨ Nuevo: Reglas avanzadas de reservas
+      Controla anticipación mínima y políticas de cancelación.
+
+    Botón:
+
+    Configurar ahora
+
+    ***
+    Cuando Free intente abrir:
+    Disponible en plan Pro. - esto genera intencion
+    ****
+    
+    
+    minimum_notice_hours: Anticipación mínima para reservar.
+    Ejemplo:
+    0 = pueden reservar ahorita mismo
+    2 = mínimo 2 horas antes
+    24 = solo con un día de anticipación
+    */
+
+    /*
+    cancellation_limit_hours
+    Ejemplo:
+    0 = cancelar hasta el momento
+    2 = mínimo 2 horas antes
+    24 = cancelar un día antes
+    */
+
+
+
 
 @Component({
   selector: 'app-agenda',
@@ -29,12 +75,23 @@ interface WeekDay {
 
 export class Agenda implements OnInit {
   readonly Briefcase = Briefcase;
+  readonly HelpCircle = HelpCircle;
+
+  private auth = inject(AuthService);
+  private professionalsService = inject(ProfessionalsService);
+  private agendaService = inject(AgendaSettingsService);
+  private nonWorkingDayService = inject(NonWorkingDayService);
+  private citasService = inject(CitasServicesService);
+  private notify = inject(Notification);
 
   hasChanges = false;
   saving = false;
 
   private originalState: any;
   loading = true;
+
+  showAppoDurHelp = false;
+  showBreakAppoHelp = false;
 
   professionals: Professional[] = [];
   serviceVariants: any[] = [];
@@ -46,12 +103,12 @@ export class Agenda implements OnInit {
 
   // Configuración por defecto
   settings: AgendaSettings = {
-    appointment_duration: 50,
+    appointment_duration: 15,
     break_between_appointments: 0,
-    minimum_notice_hours: 0,
-    cancellation_limit_hours: 0,
-    allow_online_booking: false,
-    allow_cancellation: false
+    minimum_notice_hours: 0, // Reserva inmediata permitida
+    cancellation_limit_hours: 0, // Cancelación libre 
+    allow_online_booking: true, 
+    allow_cancellation: true
   };
 
   // Días de la semana
@@ -65,22 +122,20 @@ export class Agenda implements OnInit {
     { value: 0, label: 'Domingo', active: false, start: '09:00', end: '14:00' }
   ];
 
-  constructor(
-    private auth: AuthService,
-    private professionalsService: ProfessionalsService,
-    private agendaService: AgendaSettingsService,
-    private nonWorkingDayService: NonWorkingDayService,
-    private citasService: CitasServicesService,
-    private notify: Notification
-  ) { }
-
   role: string | null = null;
+  planKey: string | null = null;
   staffId: number | null = null;
+  isFree = false;
 
   ngOnInit() {
 
     this.role = this.auth.getRole();
     this.staffId = this.auth.getStaffId();
+    this.planKey = this.auth.getPlanKey();
+
+    if(this.planKey == 'free' || this.planKey == null){
+      this.isFree = true;
+    }
 
     if (!this.role) {
       console.warn('No hay rol definido');

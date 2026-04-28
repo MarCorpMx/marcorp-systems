@@ -1,14 +1,17 @@
 import { Component, OnInit, inject, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Users } from 'lucide-angular';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { LucideAngularModule, Users, HelpCircle, PlayCircle, PauseCircle, Building2, Pencil, EyeOff, Eye } from 'lucide-angular';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl, FormsModule } from '@angular/forms';
 import { NgxIntlTelInputModule, CountryISO, PhoneNumberFormat } from 'ngx-intl-tel-input';
 
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+
+import { AuthService } from '../../../../core/services/auth.service';
 import { CitasTeamService } from '../../../../core/services/citas-team.service';
 import { Notification } from '../../../../services/notification.service';
 import { ConfirmDialogService } from '../../../../shared/services/confirm-dialog.service';
 
-type MemberStatus = 'Activo' | 'Invitado' | 'Suspendido';
+type MemberStatus = 'Activo' | 'Invitado' | 'Suspendido' | 'Inactivo';
 type MemberRole = 'Administrador' | 'Terapeuta' | 'Recepción';
 
 interface TeamMember {
@@ -29,7 +32,7 @@ interface TeamMember {
   bio?: string;
 
   // Estado del sistema
-  status: 'Activo' | 'Invitado' | 'Suspendido';
+  status: 'Activo' | 'Invitado' | 'Suspendido' | 'Inactivo';
   is_active?: boolean;
   is_public?: boolean;
 
@@ -42,22 +45,85 @@ interface TeamMember {
     key: 'root' | 'owner' | 'admin' | 'staff' | 'receptionist' | string;
     name: string;
   };
+
+  branch_names?: string;
 }
+
+
+/*
+|--------------------------------------------------------------------------
+| rombi - PENDIENTES
+| - Tenemos que migrar a sistema de invitación
+| - Avisarles que han alcanzado el límite de creación de usuarios cuando quieran crear usuarios
+| - Cuando realicemos el sistema de invitación, tenemos que verificar los contadores de límites para que tomen en cuenta a miembros pendientes de verificar aunque esten en la tabla de staff_members
+| - Ver cómo controlar cuando el usuario ya existe en otra orga
+| - Verificar bien los limites, más cuando tienen un plan superior y lo bajan a uno inferior
+| - Colocar upgrades cuando se les acabe los miembros osea colocar "Sube tu plan si quieres disponer de más personal"
+| - Existe un problema al activar/desactivar cuando el miembro es solo staff sin acceso al sistema
+| - Falta mostrar/activar el botón "Añadir sucursal"
+| - Falta validar chingón los límites (ahorita si tienen 5 vatos trabajando y desactivan pueden estar creando más)
+| - Hacer boton la card para ver los datos del vato
+|--------------------------------------------------------------------------
+*/
+
+/*
+1.-sm.is_active (staff_members)
+“puede atender citas”
+2.-bua.is_active (branch_user_access)
+“tiene acceso en esta sucursal + subsystem”
+3.-ou.status (organization_users)
+“puede entrar al sistema”
+*/
 
 @Component({
   selector: 'app-equipo',
-  imports: [CommonModule, LucideAngularModule, ReactiveFormsModule, NgxIntlTelInputModule],
+  imports: [CommonModule, LucideAngularModule, ReactiveFormsModule, NgxIntlTelInputModule, FormsModule],
   templateUrl: './equipo.html',
   styleUrl: './equipo.css',
 })
 
 export class Equipo implements OnInit {
   readonly Users = Users;
+  readonly HelpCircle = HelpCircle;
+  readonly PlayCircle = PlayCircle;
+  readonly PauseCircle = PauseCircle;
+  readonly Building2 = Building2;
+  readonly Pencil = Pencil;
+  readonly EyeOff = EyeOff;
+  readonly Eye = Eye;
+
+  private auth = inject(AuthService);
+  private teamService = inject(CitasTeamService);
+  private notify = inject(Notification);
+  private confirm = inject(ConfirmDialogService);
+  private fb = inject(FormBuilder);
+
+  role: string | null = null;
 
   loading = true;
   showModal = false;
   members: TeamMember[] = [];
   openMenuId: string | null = null;
+
+  showPassword = false;
+
+  showAccesHelp = false;
+  showIsPublicHelp = false;
+
+  processingStaffId: string | null = null;
+
+  search = '';
+  searchControl = new FormControl('');
+  viewAll = false;
+
+  isOwnerOrRoot = false;
+
+  onSearch(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.search = value;
+    this.loadTeam();
+  }
+
 
   form!: FormGroup;
   submitted = false;
@@ -65,10 +131,6 @@ export class Equipo implements OnInit {
   editingMember = false;
   currentMemberId: string | null = null;
 
-  private teamService = inject(CitasTeamService);
-  private notify = inject(Notification);
-  private confirm = inject(ConfirmDialogService);
-  private fb = inject(FormBuilder);
 
   // Configuración ngx-intl-tel-input
   PhoneNumberFormat = PhoneNumberFormat;
@@ -90,22 +152,30 @@ export class Equipo implements OnInit {
   }
 
   ngOnInit() {
+    this.role = this.auth.getRole();
+
+    if(this.role == 'owner'){this.isOwnerOrRoot = true;} 
+    
     this.initForm();
+    this.loadTeam();
 
-    this.teamService.getMembers().subscribe({
-      next: (res) => {
-        console.log(res);
-        this.members = res.data.map((m: any) => ({
-          ...m,
-          status: this.normalizeStatus(m.status),
-        }));
+    
 
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      }
+    this.searchControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(value => {
+
+      this.search = value || '';
+
+      this.loadTeam();
     });
+
+  }
+
+  // rombi
+  openBranchAssignModal(valor: any) {
+
   }
 
   initForm() {
@@ -125,8 +195,8 @@ export class Equipo implements OnInit {
       has_access: [false],
       role: ['staff'],
 
-      username: [''],
-      password: [''],
+      username: ['', [Validators.minLength(4), Validators.maxLength(50)]],
+      password: ['', [Validators.minLength(8), Validators.maxLength(15)]],
     });
 
     this.form.get('has_access')?.valueChanges.subscribe((hasAccess) => {
@@ -140,8 +210,8 @@ export class Equipo implements OnInit {
 
         // SOLO requerido si NO está editando
         if (!this.editingMember) {
-          password?.setValidators([Validators.required, Validators.minLength(6)]);
-          username?.setValidators([Validators.required, Validators.minLength(3)]);
+          password?.setValidators([Validators.required, Validators.minLength(8)]);
+          username?.setValidators([Validators.required, Validators.minLength(4)]);
         } else {
           password?.clearValidators();
           username?.clearValidators();
@@ -163,9 +233,59 @@ export class Equipo implements OnInit {
     });
   }
 
+  loadTeam() {
+
+    this.loading = true;
+
+    this.teamService.getMembers({
+      search: this.search,
+      view_all: this.viewAll
+    }).subscribe({
+
+      next: (res) => {
+
+        console.log('miembros al aire:', JSON.stringify(res, null, 2));
+
+        this.members = res.data.map((m: any) => ({
+          ...m,
+          status: this.normalizeStatus(m.status),
+        }));
+
+        this.loading = false;
+      },
+
+      error: (err) => {
+
+        console.error(err);
+
+        this.loading = false;
+      }
+    });
+
+  }
+
   toggleMenu(id: string) {
     this.openMenuId = this.openMenuId === id ? null : id;
   }
+
+  toggleAccessHelp(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.showAccesHelp = !this.showAccesHelp;
+  }
+
+  toggleIsPublicHelp(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.showIsPublicHelp = !this.showIsPublicHelp;
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
 
   // member: TeamMember
   edit(member: TeamMember) {
@@ -174,7 +294,7 @@ export class Equipo implements OnInit {
     this.currentMemberId = member.id;
     this.resetForm();
 
-    // Cargamos los datos del miembro en el formulario
+    // Cargamos los datos del personal en el formulario
     this.form.patchValue({
       first_name: member.first_name || '',
       last_name: member.last_name || '',
@@ -193,36 +313,57 @@ export class Equipo implements OnInit {
     this.form.get('has_access')?.updateValueAndValidity();
   }
 
-  suspend(member: any) {
-    this.teamService.suspendMember(member.id).subscribe({
-      next: () => {
-        this.notify.success('Miembro suspendido');
-        // evitar reload inmediato
-        this.members = this.members.map(m =>
-          m.id === member.id
-            ? { ...m, status: 'Suspendido', has_access: false }
-            : m
-        );
+  toggleStaffStatus(staff: any) {
+    if (this.processingStaffId) return;
 
-      },
-      error: (error) => {
-        console.log(error);
-        this.notify.error('No se pudo suspender');
-      }
-    });
+    // Solo confirmar si se va a desactivar
+    if (staff.is_active) {
+      this.confirm.open(
+        'Desactivar personal',
+        'Este integrante dejará de recibir citas en esta sucursal. ¿Deseas continuar?',
+        () => {
+          this.executeToggle(staff);
+        },
+        'Cancelar',
+        'Desactivar'
+      );
+    } else {
+      this.executeToggle(staff);
+    }
+
+
   }
 
-  activate(member: any) {
-    this.teamService.activateMember(member.id).subscribe({
-      next: () => {
-        this.notify.success('Miembro activado');
-        this.ngOnInit();
-      },
-      error: () => {
-        this.notify.error('No se pudo activar');
-      }
-    });
+  executeToggle(staff: any) {
+    this.processingStaffId = staff.id;
+
+    const prev = staff.is_active;
+
+    const payload = {
+      is_active: !staff.is_active
+    };
+
+
+    this.teamService
+      .toggleAccess(staff.id, payload)
+      .subscribe({
+        next: (res: any) => {
+
+          this.notify.success(res.message);
+
+          //console.log(res.data.message);
+          this.processingStaffId = null;
+          this.ngOnInit();
+        },
+
+        error: (err) => {
+          staff.is_active = prev; // rollback
+          this.processingStaffId = null;
+          this.handleError(err, 'No se pudo actualizar la sucursal');
+        }
+      });
   }
+
 
   openModal() {
     this.showModal = true;
@@ -285,7 +426,7 @@ export class Equipo implements OnInit {
   createMember(payload: any) {
     this.teamService.createMember(payload).subscribe({
       next: () => {
-        this.notify.success('Miembro del equipo creado correctamente');
+        this.notify.success('Personal del equipo creado correctamente');
         this.saving = false;
         this.closeModal();
         this.ngOnInit();
@@ -323,16 +464,15 @@ export class Equipo implements OnInit {
     });
   }
 
-
   updateMember(payload: any) {
     if (!this.currentMemberId) {
-      this.notify.error('No se pudo identificar el miembro');
+      this.notify.error('No se pudo identificar el personal');
       return;
     }
 
     this.teamService.updateMember(this.currentMemberId, payload).subscribe({
       next: () => {
-        this.notify.success('Miembro actualizado correctamente');
+        this.notify.success('Personal actualizado correctamente');
         this.saving = false;
         this.closeModal();
         this.ngOnInit();
@@ -369,7 +509,6 @@ export class Equipo implements OnInit {
       }
     });
   }
-
 
   resetForm() {
     this.form.reset({
@@ -404,11 +543,12 @@ export class Equipo implements OnInit {
     return null;
   }
 
-  normalizeStatus(status: string): 'Activo' | 'Invitado' | 'Suspendido' {
+  normalizeStatus(status: string): 'Activo' | 'Invitado' | 'Suspendido' | 'Inactivo' {
     switch (status) {
       case 'active': return 'Activo';
       case 'invited': return 'Invitado';
       case 'suspended': return 'Suspendido';
+      case 'inactive': return 'Inactivo';
       default: return 'Activo';
     }
   }
@@ -419,6 +559,7 @@ export class Equipo implements OnInit {
       owner: 'Dueño',
       admin: 'Administrador',
       staff: 'Profesional',
+      noAccess: 'Profesional',
       receptionist: 'Recepción',
     }[role.key] || role.name; // fallback
   }
@@ -437,7 +578,24 @@ export class Equipo implements OnInit {
       'Activo': 'bg-green-500/10 text-green-400',
       'Invitado': 'bg-yellow-500/10 text-yellow-400',
       'Suspendido': 'bg-red-500/10 text-red-400',
+      'Inactivo': 'bg-red-500/10 text-red-400',
     }[status];
+  }
+
+  handleError(err: any, fallbackMessage: string) {
+
+    if (err?.error?.message) {
+      this.notify.error(err.error.message);
+      return;
+    }
+
+    if (err?.error?.errors) {
+      const firstError = Object.values(err.error.errors)[0] as string[];
+      this.notify.error(firstError[0]);
+      return;
+    }
+
+    this.notify.error(fallbackMessage);
   }
 
 }

@@ -188,14 +188,6 @@
           Editar
         </button>
 
-        <!-- Delete -->
-        <button (click)="delete(service)" class="text-sm font-medium
-           text-red-500
-           hover:text-red-600
-           transition cursor-pointer">
-          Eliminar
-        </button>
-
       </div>
 
     </div>
@@ -245,13 +237,8 @@
             <label class="text-sm text-[var(--text-secondary)]">
               Nombre del servicio
             </label>
-            <input type="text" formControlName="name" class="w-full px-3 py-2 rounded-lg
-                   bg-[var(--bg-base)]
-                   border border-[var(--border-soft)]
-                   focus:outline-none
-                   focus:ring-2
-                   focus:ring-[var(--system-primary)]
-                   text-[var(--text-primary)]" />
+            <input type="text" formControlName="name" class="input-primary"
+              placeholder="Ej: Psicoterapia, Corte de cabello, Consulta nutricional" />
           </div>
 
           <!-- Descripción -->
@@ -260,23 +247,55 @@
               Descripción
             </label>
 
-            <textarea rows="3" formControlName="description" class="w-full px-3 py-2 rounded-lg
-           bg-[var(--bg-base)]
-           border border-[var(--border-soft)]
-           focus:outline-none
-           focus:ring-2
-           focus:ring-[var(--system-primary)]
-           text-[var(--text-primary)]
-           resize-none">
+            <textarea rows="3" formControlName="description" class="input-primary" placeholder="Descripción general">
           </textarea>
           </div>
+
+          @if (!editingService && showAllBranchesOption) {
+
+          <div class="rounded-xl border border-[var(--border-soft)]
+            bg-[var(--bg-base)]
+            px-4 py-3 space-y-2">
+
+            <label class="flex items-start gap-3 cursor-pointer">
+
+              <input type="checkbox" formControlName="create_all_branches"
+                class="mt-1 w-4 h-4 rounded border-[var(--border-soft)]">
+
+              <div class="space-y-1">
+
+                <p class="text-sm font-medium text-[var(--text-primary)]">
+                  Crear también en todas las sucursales activas
+                </p>
+
+                <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+                  Disponible en {{ branchCount }} sucursales activas.
+                  Las sucursales inactivas no se incluirán.
+                </p>
+
+              </div>
+
+            </label>
+
+          </div>
+
+          }
 
           <!-- VARIANTS -->
           <div formArrayName="variants" class="space-y-4">
             <!-- Header -->
             <div class="flex items-center justify-between">
-              <label class="text-sm text-[var(--text-secondary)]">
+              <label class="text-sm text-[var(--text-secondary)] flex items-center gap-2">
                 Modalidades
+
+                <span class="relative group cursor-pointer">
+                  <lucide-icon [name]="HelpCircle"
+                    class="w-4 h-4 cursor-pointer text-gray-400 transition-colors duration-200 group-hover:text-emerald-500"
+                    (click)="showVariantHelp = !showVariantHelp">
+                  </lucide-icon>
+                  <!-- Tooltip -->
+                </span>
+
               </label>
 
               <button type="button" (click)="addVariant()"
@@ -288,11 +307,11 @@
             @for (variant of variants.controls; track $index; let i = $index) {
 
             <div [formGroupName]="i" class="rounded-xl border border-[var(--border-soft)]
-              bg-[var(--bg-base)] overflow-hidden">
+              bg-[var(--bg-base)] overflow-hidden ">
 
               <!-- Accordion Header -->
               <button type="button" (click)="toggleVariant(i)" class="w-full flex items-center justify-between
-                   px-4 py-3 text-left">
+                   px-4 py-3 text-left ">
 
                 <div>
                   <p class="text-sm font-medium text-[var(--text-primary)]">
@@ -314,11 +333,18 @@
               <!-- Accordion Body -->
               @if (expandedIndex === i) {
 
-              <div class="p-4 border-t border-[var(--border-soft)] space-y-4">
+              <div class="p-4 border-t border-[var(--border-soft)] space-y-4 ">
 
                 <!-- Nombre -->
-                <input type="text" formControlName="name" placeholder="Nombre modalidad"
-                  class="w-full px-3 py-2 rounded-lg border border-[var(--border-soft)]">
+                <label class="text-sm text-[var(--text-secondary)]">
+                  Nombre de la modalidad
+                </label>
+                <input type="text" formControlName="name" placeholder="Ej: Sesión individual, Premium, Online, Express"
+                  class="input-primary">
+
+                <textarea rows="2" formControlName="description" placeholder="Detalles de esta modalidad"
+                  class="input-primary">
+                </textarea>
 
                 <!-- Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -328,8 +354,7 @@
                     <label class="text-xs text-[var(--text-secondary)]">
                       Duración
                     </label>
-                    <input type="number" formControlName="duration_minutes"
-                      class="w-full px-3 py-2 rounded-lg border border-[var(--border-soft)]">
+                    <input type="number" formControlName="duration_minutes" class="input-primary">
                   </div>
 
                   <!-- Precio -->
@@ -337,8 +362,7 @@
                     <label class="text-xs text-[var(--text-secondary)]">
                       Precio
                     </label>
-                    <input type="number" formControlName="price"
-                      class="w-full px-3 py-2 rounded-lg border border-[var(--border-soft)]">
+                    <input type="number" formControlName="price" class="input-primary">
                   </div>
 
                   <!-- Capacidad -->
@@ -346,8 +370,7 @@
                     <label class="text-xs text-[var(--text-secondary)]">
                       Capacidad máxima
                     </label>
-                    <input type="number" formControlName="max_capacity"
-                      class="w-full px-3 py-2 rounded-lg border border-[var(--border-soft)]">
+                    <input type="number" formControlName="max_capacity" class="input-primary">
                   </div>
 
                   <!-- Incluye material -->
@@ -437,12 +460,83 @@
 
           <button type="submit" [disabled]="form.invalid" class="mar-btn-primary">
 
-            {{ editingService ? 'Actualizar' : 'Guardar' }}
+            {{ editingService ? 'Actualizar servicio' : 'Crear servicio' }}
           </button>
 
         </div>
 
       </form>
+
+      @if (showVariantHelp) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+
+        <!-- Overlay -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showVariantHelp = false">
+        </div>
+
+        <!-- Modal -->
+        <div class="relative w-full max-w-sm p-4 text-sm
+      bg-[var(--bg-surface)]
+      border border-[var(--border-soft)]
+      rounded-2xl shadow-xl">
+
+          <p class="font-semibold text-base mb-2 text-[var(--text-primary)]">
+            ¿Qué son las modalidades?
+          </p>
+
+          <p class="text-[var(--text-secondary)] leading-relaxed">
+            Son diferentes versiones del mismo servicio.
+            Te permiten ofrecer opciones con distinto precio,
+            duración, capacidad o formato.
+          </p>
+
+          <div class="mt-4 space-y-3">
+
+            <p class="font-semibold text-[var(--text-primary)]">
+              Ejemplos:
+            </p>
+
+            <div class="rounded-xl border border-[var(--border-soft)]
+          bg-[var(--bg-base)] p-3 space-y-2 text-xs">
+
+              <div>
+                <p class="font-medium">Psicoterapia</p>
+                <p class="text-[var(--text-secondary)]">
+                  Individual · Pareja · Online
+                </p>
+              </div>
+
+              <div>
+                <p class="font-medium">Corte de cabello</p>
+                <p class="text-[var(--text-secondary)]">
+                  Básico · Premium · A domicilio
+                </p>
+              </div>
+
+              <div>
+                <p class="font-medium">Masaje</p>
+                <p class="text-[var(--text-secondary)]">
+                  30 min · 60 min · En pareja
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+          <p class="mt-4 text-xs text-[var(--text-secondary)]">
+            Si solo manejas una opción, crea una sola modalidad.
+          </p>
+
+          <button class="mar-btn-help mt-4" (click)="showVariantHelp = false">
+            Entendido
+          </button>
+
+        </div>
+
+      </div>
+      }
+
 
     </div>
   </div>

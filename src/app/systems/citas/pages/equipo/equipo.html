@@ -1,20 +1,59 @@
-<section class="space-y-6">
+<section class="relative space-y-6 max-w-5xl mx-auto">
 
   <!-- ===============================
        HEADER
   =============================== -->
-  <div class="flex items-center justify-between">
-    <h2 class="text-xl font-semibold text-[var(--text-primary)]">
-      Equipo
-    </h2>
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
-    <button (click)="openModal()" class="px-4 py-2 rounded-lg
-           bg-[var(--system-primary)]
-           text-white text-sm
-           hover:bg-[var(--system-secondary)]
-           transition cursor-pointer">
-      + Agregar miembro
+    <div>
+      <h2 class="text-2xl font-semibold text-[var(--text-primary)]">
+        Equipo
+      </h2>
+
+      <p class="text-sm text-[var(--text-secondary)] mt-1">
+        Administra profesionales y personal de tu negocio.
+      </p>
+    </div>
+
+    <button (click)="openModal()" class="mar-btn-primary">
+      + Agregar personal
     </button>
+  </div>
+
+  <!-- ===============================
+     SEARCH
+================================ -->
+  <div class="flex flex-col gap-3
+            sm:flex-row sm:items-center sm:justify-between">
+
+    <!-- SEARCH -->
+    <div class="relative w-full sm:max-w-md">
+
+      <input type="text" [formControl]="searchControl" placeholder="Buscar personal..." class="input-primary w-full" />
+
+    </div>
+
+    <!-- VIEW ALL -->
+    @if (isOwnerOrRoot) {
+
+    <label class="flex items-start sm:items-center
+                gap-2
+                text-sm
+                min-w-0">
+
+      <input type="checkbox" [(ngModel)]="viewAll" (change)="loadTeam()" class="mt-0.5 sm:mt-0 shrink-0" />
+
+      <span class="text-[var(--text-secondary)]
+                 leading-tight break-words">
+
+        Ver toda la organización
+
+      </span>
+
+    </label>
+
+    }
+
   </div>
 
   <!-- ===============================
@@ -42,32 +81,19 @@
   <!-- ===============================
        EMPTY STATE
   =============================== -->
-  @else if (!loading && members.length === 0) {
+  @else if (!loading && members.length === 0 && search){
   <div class="bg-[var(--bg-surface)]
-                border border-dashed border-[var(--border-soft)]
-                rounded-xl p-10 text-center space-y-4">
-
-    <div class="mx-auto w-12 h-12 rounded-full
-           bg-[var(--system-accent)]
-           flex items-center justify-center">
-      <lucide-icon [name]="Users" class="w-6 h-6 text-[var(--system-secondary)]">
-      </lucide-icon>
-    </div>
+            border border-dashed border-[var(--border-soft)]
+            rounded-xl p-10 text-center space-y-4">
 
     <h3 class="text-lg font-semibold text-[var(--text-primary)]">
-      No hay miembros en el equipo
+      No encontramos resultados
     </h3>
 
-    <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
-      Invita colaboradores para gestionar citas, clientes y reportes.
+    <p class="text-sm text-[var(--text-secondary)]">
+      Intenta con otro nombre, correo o especialidad.
     </p>
 
-    <button (click)="openModal()" class="px-4 py-2 rounded-lg
-             bg-[var(--system-primary)]
-             text-white hover:bg-[var(--system-secondary)]
-             transition">
-      + Agregar miembro
-    </button>
   </div>
   }
 
@@ -75,103 +101,180 @@
        EQUIPO
   =============================== -->
   @else {
-  <div class="bg-[var(--bg-surface)]
-                border border-[var(--border-soft)]
-                rounded-xl divide-y divide-[var(--border-soft)]">
+
+  <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-5">
 
     @for (member of members; track member.id) {
-    <div class="px-6 py-4
-            flex flex-col gap-3
-            sm:flex-row sm:items-center sm:justify-between
-            hover:bg-[var(--state-hover)]
-            transition">
+    <div class="bg-[var(--bg-surface)]
+            border border-[var(--border-soft)]
+            rounded-2xl p-5
+            space-y-5
+            transition-all duration-200
+            hover:shadow-soft" 
+            [class.opacity-60]="member.status === 'Suspendido'"
+            [class.opacity-60]="member.status === 'Inactivo'"
+            
+            >
 
-      <!-- INFO -->
-      <div class="flex items-center gap-4 min-w-0">
+      <!-- TOP -->
+      <div class="flex items-start justify-between gap-3">
 
-        <!-- Avatar -->
-        <div class="w-10 h-10 flex-shrink-0 rounded-full
-                bg-[var(--system-accent)]
-                flex items-center justify-center
-                text-[var(--system-secondary)]
-                font-medium">
-          {{ getInitial(member.name) }}
+        <div class="flex items-center gap-4 min-w-0">
+
+          <!-- Avatar -->
+          <div class="w-12 h-12 rounded-full
+                  bg-[var(--system-accent)]
+                  flex items-center justify-center
+                  text-[var(--system-secondary)]
+                  font-semibold shrink-0">
+
+            {{ getInitial(member.name) }}
+
+          </div>
+
+          <!-- INFO -->
+          <div class="min-w-0">
+
+            <h3 class="font-semibold text-[var(--text-primary)] truncate">
+              {{ member.name }}
+            </h3>
+
+            <p class="text-sm text-[var(--text-secondary)] truncate">
+              {{ member.email }}
+            </p>
+
+            <p class="text-xs text-[var(--text-secondary)] mt-1">
+              {{ member.is_staff ? 'Atiende citas' : 'Acceso al sistema' }}
+            </p>
+
+          </div>
+
         </div>
 
-        <!-- Text -->
-        <div class="min-w-0">
-          <p class="font-medium text-[var(--text-primary)] truncate">
-            {{ member.name }}
-          </p>
-
-          <p class="text-xs text-[var(--text-secondary)]">
-            {{ member.is_staff ? 'Atiende citas' : 'Acceso al sistema' }}
-          </p>
-
-          <p class="text-sm text-[var(--text-secondary)] truncate">
-            {{ member.email }}
-          </p>
-        </div>
       </div>
+
+      <!-- BRANCHES -->
+      @if (viewAll && member.branch_names) {
+
+      <div class="flex flex-wrap gap-2">
+
+        @for (branch of member.branch_names.split(', '); track branch) {
+
+        <span class="px-2.5 py-1 rounded-full
+                 text-[10px]
+                 bg-[var(--state-hover)]
+                 text-[var(--text-secondary)]">
+
+          {{ branch }}
+
+        </span>
+
+        }
+
+      </div>
+
+      }
 
       <!-- BADGES -->
-      <div class="flex flex-wrap gap-2 sm:justify-end">
+      <div class="flex flex-wrap gap-2">
 
-        <span class="px-3 py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap"
-          [ngClass]="getRoleClasses(member.role.key)">
+        <span class="px-3 py-1 rounded-full
+                 text-xs font-medium whitespace-nowrap" [ngClass]="getRoleClasses(member.role.key)">
+
           {{ getRoleLabel(member.role) }}
+
         </span>
 
-        <span class="px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap"
-          [ngClass]="getStatusClasses(member.status)">
+        <span class="px-3 py-1 rounded-full
+                 text-xs whitespace-nowrap" [ngClass]="getStatusClasses(member.status)">
+
           {{ member.status }}
+
         </span>
 
-        <span *ngIf="!member.has_access" class="px-3 py-1 rounded-full text-xs sm:text-sm font-medium  whitespace-nowrap
+        <span *ngIf="!member.has_access" class="px-3 py-1 rounded-full
+                 text-xs font-medium
                  bg-yellow-500/10 text-yellow-400">
-          Sin acceso
+
+          Sin acceso a CITARA
+
         </span>
 
+      </div>
 
-        <!-- BOTÓN MENÚ -->
-        <div class="relative" *ngIf="member.role.key !== 'owner'">
-          <div class="relative">
-            <button (click)="toggleMenu(member.id); $event.stopPropagation()" class="px-2 py-1 rounded-full text-xs
-         bg-[var(--bg-surface)]
-         border border-[var(--border-soft)]
-         text-[var(--text-secondary)]
-         hover:bg-[var(--state-hover)] transition cursor-pointer">
-              ⋯
-            </button>
+      <!-- ACTIONS -->
+      <!-- @if (member.role.key !== 'owner') { -->
 
-            <!-- DROPDOWN -->
-            <div *ngIf="openMenuId === member.id" (click)="$event.stopPropagation()" class="absolute right-0 mt-2 w-40
-            bg-[var(--bg-surface)]
-            border border-[var(--border-soft)]
-            rounded-lg shadow-lg z-10">
+      <div class="pt-4 border-t border-[var(--border-soft)]
+              flex flex-col sm:flex-row
+              sm:items-center sm:justify-between
+              gap-3">
 
-              <button (click)="edit(member)" class="w-full text-left px-3 py-2 text-sm
-             hover:bg-[var(--state-hover)] cursor-pointer">
-                Editar
-              </button>
+        <div class="flex flex-wrap items-center gap-4">
 
-              <button *ngIf="member.status !== 'Suspendido'" (click)="suspend(member)" class="w-full text-left px-3 py-2 text-sm
-             text-red-400 hover:bg-[var(--state-hover)] cursor-pointer">
-                Suspender
-              </button>
+          <!-- EDIT -->
+          <button (click)="edit(member)" class="inline-flex items-center gap-2
+                     text-sm font-medium
+                     text-[var(--system-primary)]
+                     hover:text-[var(--system-secondary)]
+                     transition cursor-pointer">
 
-              <button *ngIf="member.status === 'Suspendido'" (click)="activate(member)" class="w-full text-left px-3 py-2 text-sm
-             text-green-400 hover:bg-[var(--state-hover)] cursor-pointer">
-                Activar
-              </button>
+            <lucide-icon [name]="Pencil" class="w-4 h-4"></lucide-icon>
 
+            <span>Editar</span>
+
+          </button>
+
+
+          <!-- TOGGLE -->
+          @if (member.role.key !== 'owner') {
+          <button (click)="toggleStaffStatus(member)" [disabled]="processingStaffId === member.id" class="inline-flex items-center gap-2
+                   text-sm font-medium
+                   transition cursor-pointer" [class.text-amber-500]="member.is_active"
+            [class.hover:text-amber-600]="member.is_active" [class.text-green-500]="!member.is_active"
+            [class.hover:text-green-600]="!member.is_active" [class.opacity-50]="processingStaffId === member.id">
+
+            @if (processingStaffId === member.id) {
+
+            <div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin">
             </div>
-          </div>
+
+            <span>Procesando...</span>
+
+            }
+
+            @else {
+
+            <lucide-icon [name]="member.is_active ? PauseCircle : PlayCircle" class="w-4 h-4">
+            </lucide-icon>
+
+            <span>
+              {{ member.is_active ? 'Desactivar' : 'Activar' }}
+            </span>
+
+            }
+
+          </button>
+          }
+
+          <!-- BRANCHES -->
+          <!-- <button (click)="openBranchAssignModal(member)" class="inline-flex items-center gap-2
+                     text-sm font-medium
+                     text-blue-400
+                     hover:text-blue-300
+                     transition cursor-pointer">
+
+            <lucide-icon [name]="Building2" class="w-4 h-4"></lucide-icon>
+
+            <span>Añadir sucursal</span>
+
+          </button> -->
+
         </div>
 
 
-
       </div>
+
 
     </div>
     }
@@ -183,237 +286,498 @@
 <!-- MODAL -->
 
 @if (showModal) {
-<div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64 
-            z-50 flex items-center justify-center
-            p-3 sm:p-4">
+
+<div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64
+    z-50 flex items-end sm:items-center justify-center
+    p-0 sm:p-4">
 
   <!-- Overlay -->
-  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeModal()"></div>
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeModal()">
+  </div>
 
   <!-- Modal -->
-  <div class="relative w-full max-w-2xl
-            max-h-[90vh]
-            bg-[var(--bg-surface)]
-            border border-[var(--border-soft)]
-            rounded-2xl shadow-xl
-            flex flex-col overflow-hidden">
+  <div class="relative w-full h-full sm:h-auto
+        sm:max-w-2xl
+        bg-[var(--bg-surface)]
+        border-0 sm:border border-[var(--border-soft)]
+        rounded-none sm:rounded-2xl
+        shadow-xl
+        flex flex-col
+        max-h-screen sm:max-h-[90vh]">
 
-    <!-- Header -->
-    <div class="p-6 border-b border-[var(--border-soft)]
-            flex items-center justify-between
-            sticky top-0 z-10
-            bg-[var(--bg-surface)]">
-      <h3 class="text-lg font-semibold text-[var(--text-primary)]">
-        {{ editingMember ? 'Editar miembro' : 'Nuevo miembro' }}
-      </h3>
+    <!-- ================= HEADER ================= -->
+    <div class="p-4 sm:p-6 border-b border-[var(--border-soft)]
+            flex items-center justify-between shrink-0">
 
-      <button (click)="closeModal()"
-        class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
+      <div>
+        <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+          {{ editingMember ? 'Editar personal' : 'Nuevo personal' }}
+        </h3>
+
+        <p class="hidden sm:block text-sm text-[var(--text-secondary)] mt-1">
+          Configura la información del personal.
+        </p>
+      </div>
+
+      <button (click)="closeModal()" class="text-[var(--text-secondary)]
+                hover:text-[var(--text-primary)]
+                transition cursor-pointer">
+
         ✕
+
       </button>
+
     </div>
 
-    <!-- FORM -->
-    <form [formGroup]="form" (ngSubmit)="saveMember()" class="p-6 space-y-4 overflow-y-auto">
+    <!-- ================= FORM ================= -->
+    <form [formGroup]="form" (ngSubmit)="saveMember()" class="flex flex-col flex-1 min-h-0">
 
+      <!-- ================= BODY ================= -->
+      <div class="flex-1 overflow-y-auto
+                p-4 sm:p-6
+                space-y-8">
 
-      <!-- ACCESO AL SISTEMA -->
-      <div class="space-y-3">
+        <!-- ================= ACCESO ================= -->
+        <div class="space-y-4">
 
-        <p class="text-sm font-medium text-[var(--text-primary)]">
-          Acceso al sistema
-        </p>
+          <!-- TITLE -->
+          <div>
+            <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+              Acceso al sistema
+            </h3>
 
-        <!-- Toggle -->
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" formControlName="has_access">
-          <span class="text-[var(--text-secondary)]">
-            Puede acceder al sistema
-          </span>
-        </label>
-
-        <!-- Mensajito UX -->
-        @if (form.get('has_access')?.value) {
-        <p class="text-xs text-[var(--text-secondary)]">
-          Se creará un usuario para que pueda iniciar sesión.
-        </p>
-        }
-
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-        <!-- Nombre -->
-        <div>
-          <label class="text-sm text-[var(--text-secondary)]">
-            Nombre *
-          </label>
-          <input type="text" formControlName="first_name" placeholder="Ej: Margarita" class="input-primary">
-          @if (getError('first_name')) {
-          <small class="text-red-400 text-xs">{{ getError('first_name') }}</small>
-          }
-        </div>
-
-        <!-- Apellido -->
-        <div>
-          <label class="text-sm text-[var(--text-secondary)]">
-            Apellido
-          </label>
-          <input type="text" formControlName="last_name" placeholder="Ej: Escobar" class="input-primary">
-        </div>
-
-        <!-- Email -->
-        <div>
-          <label class="text-sm text-[var(--text-secondary)]">
-            Email *
-          </label>
-          <input type="email" formControlName="email" placeholder="correo@ejemplo.com" class="input-primary">
-          @if (getError('email')) {
-          <small class="text-red-400 text-xs">{{ getError('email') }}</small>
-          }
-        </div>
-
-        <!-- Teléfono -->
-        <div class="flex flex-col gap-1 w-full">
-          <label class="text-sm text-[var(--text-secondary)]">
-            Teléfono
-          </label>
-
-          <div class="w-full">
-            <ngx-intl-tel-input class="w-full" [preferredCountries]="preferredCountries"
-              [selectedCountryISO]="CountryISO.Mexico" [phoneValidation]="true" formControlName="phone"
-              [cssClass]="'input-primary w-full'">
-            </ngx-intl-tel-input>
+            <p class="text-sm text-[var(--text-secondary)] mt-1">
+              Permite que este usuario inicie sesión y administre funciones según su rol.
+            </p>
           </div>
-        </div>
 
-        <!-- Título -->
-        <div>
-          <label class="text-sm text-[var(--text-secondary)]">
-            Título profesional
+          <!-- TOGGLE -->
+          <label class="flex items-start gap-3 ">
+
+            <input type="checkbox" formControlName="has_access" class="mt-1">
+
+            <div class="space-y-1">
+
+              <div class="flex items-center gap-2">
+
+                <span class="text-sm font-medium text-[var(--text-primary)]">
+                  Puede acceder al sistema
+                </span>
+
+                <!-- HELP -->
+                <span class="relative group cursor-pointer">
+
+                  <lucide-icon [name]="HelpCircle" (click)="toggleAccessHelp($event)"
+                    class="w-4 h-4 text-gray-400 transition-colors duration-200 group-hover:text-emerald-500">
+                  </lucide-icon>
+
+                  <!-- TOOLTIP -->
+
+
+                </span>
+
+              </div>
+
+              <p class="text-xs text-[var(--text-secondary)]">
+                Recomendado para administradores, recepción y profesionales.
+              </p>
+
+            </div>
+
           </label>
-          <input type="text" formControlName="title" placeholder="Ej: Tanatólogo" class="input-primary">
-        </div>
 
-        <!-- Especialidad -->
-        <div>
-          <label class="text-sm text-[var(--text-secondary)]">
-            Especialidad
-          </label>
-          <input type="text" formControlName="specialty" placeholder="Ej: Tanatología" class="input-primary">
-        </div>
+          <!-- ACTIVE INFO -->
+          @if (form.get('has_access')?.value) {
 
-      </div>
+          <div class="rounded-2xl
+        border border-emerald-500/20
+        bg-emerald-500/5
+        p-4 space-y-2">
 
-      <!-- CAMPOS DE ACCESO (CONDICIONAL) -->
-      @if (form.get('has_access')?.value) {
+            <div class="flex items-center gap-2">
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <lucide-icon [name]="HelpCircle" class="w-4 h-4 text-emerald-500">
+              </lucide-icon>
 
-        <!-- Username (SOLO CREAR) -->
-        @if (!editingMember) {
-        <div>
-          <label class="text-sm text-[var(--text-secondary)]">
-            Usuario *
-          </label>
-          <input type="text" formControlName="username" placeholder="Ej: margarita.escobar" class="input-primary">
+              <p class="text-sm font-medium text-emerald-500">
+                Se creará una cuenta de acceso
+              </p>
 
-          @if (getError('username')) {
-          <small class="text-red-400 text-xs">
-            {{ getError('username') }}
-          </small>
+            </div>
+
+            <p class="text-xs leading-relaxed text-[var(--text-secondary)]">
+
+              Este usuario podrá iniciar sesión usando las credenciales
+              configuradas más abajo.
+
+            </p>
+
+            <p class="text-xs leading-relaxed text-[var(--text-secondary)]">
+
+              Asegúrate de compartir estos datos de acceso con la persona correspondiente.
+
+            </p>
+
+          </div>
+
           }
+
         </div>
+
+        <!-- ================= INFORMACIÓN ================= -->
+        <div class="space-y-4">
+
+          <div>
+            <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+              Información general
+            </h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <!-- Nombre -->
+            <div>
+              <label class="text-sm text-[var(--text-secondary)]">
+                Nombre *
+              </label>
+
+              <input type="text" formControlName="first_name" placeholder="Ej. Margarita" class="input-primary">
+
+              @if (getError('first_name')) {
+              <small class="text-red-400 text-xs">
+                {{ getError('first_name') }}
+              </small>
+              }
+            </div>
+
+            <!-- Apellido -->
+            <div>
+              <label class="text-sm text-[var(--text-secondary)]">
+                Apellido
+              </label>
+
+              <input type="text" formControlName="last_name" placeholder="Ej. Escobar" class="input-primary">
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label class="text-sm text-[var(--text-secondary)]">
+                Email *
+              </label>
+
+              <input type="email" formControlName="email" placeholder="Ej. correo@empresa.com" class="input-primary">
+
+              @if (getError('email')) {
+              <small class="text-red-400 text-xs">
+                {{ getError('email') }}
+              </small>
+              }
+            </div>
+
+            <!-- Teléfono -->
+            <div>
+              <label class="text-sm text-[var(--text-secondary)]">
+                Teléfono
+              </label>
+
+              <ngx-intl-tel-input [cssClass]="'input-primary'" [preferredCountries]="preferredCountries"
+                [selectedCountryISO]="CountryISO.Mexico" [phoneValidation]="true" formControlName="phone">
+              </ngx-intl-tel-input>
+            </div>
+
+            <!-- Título -->
+            <div>
+              <label class="text-sm text-[var(--text-secondary)]">
+                Título profesional
+              </label>
+
+              <input type="text" formControlName="title" placeholder="Ej. Tanatólogo" class="input-primary">
+            </div>
+
+            <!-- Especialidad -->
+            <div>
+              <label class="text-sm text-[var(--text-secondary)]">
+                Especialidad
+              </label>
+
+              <input type="text" formControlName="specialty" placeholder="Ej. Tanatología" class="input-primary">
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ================= ACCESO CONDICIONAL ================= -->
+        @if (form.get('has_access')?.value) {
+
+        <div class="space-y-4">
+
+          <div>
+            <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+              Credenciales
+            </h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <!-- @if (!editingMember) { -->
+
+            <!-- Usuario -->
+            <div>
+              <label class="text-sm text-[var(--text-secondary)]">
+                Usuario *
+              </label>
+
+              <input type="text" formControlName="username" placeholder="Ej. margarita.escobar" class="input-primary">
+
+              @if (getError('username')) {
+              <small class="text-red-400 text-xs">
+                {{ getError('username') }}
+              </small>
+              }
+            </div>
+
+            <!-- Password -->
+            <div>
+
+              <label class="text-sm text-[var(--text-secondary)]">
+                Contraseña *
+              </label>
+
+              <!-- INPUT + ICON -->
+              <div class="password-container mt-1">
+
+                <input [type]="showPassword ? 'text' : 'password'" formControlName="password"
+                  placeholder="Mínimo 8 caracteres" class="input-primary w-full pr-10">
+
+                <lucide-angular [name]="showPassword ? EyeOff : Eye" class="toggle-icon"
+                  (click)="togglePasswordVisibility()">
+                </lucide-angular>
+
+              </div>
+
+              @if (getError('password')) {
+
+              <small class="text-red-400 text-xs mt-1 block">
+                {{ getError('password') }}
+              </small>
+
+              }
+
+            </div>
+
+            <!-- } -->
+
+            <!-- Role -->
+            <div class="md:col-span-2">
+              <label class="text-sm text-[var(--text-secondary)]">
+                Tipo de acceso
+              </label>
+
+              <select formControlName="role" class="input-primary">
+
+                <option value="admin">
+                  Administrador
+                </option>
+
+                <option value="staff">
+                  Profesional (gestiona sus citas)
+                </option>
+
+                <option value="receptionist">
+                  Recepción (agenda citas)
+                </option>
+
+              </select>
+            </div>
+
+          </div>
+
+        </div>
+
         }
 
-        <!-- Password (SOLO CREAR) -->
-        @if (!editingMember) {
-        <div>
-          <label class="text-sm text-[var(--text-secondary)]">
-            Contraseña *
-          </label>
-          <input type="password" formControlName="password" placeholder="Mínimo 6 caracteres" class="input-primary">
+        <!-- ================= BIO ================= -->
+        <div class="space-y-4">
 
-          @if (getError('password')) {
-          <small class="text-red-400 text-xs">
-            {{ getError('password') }}
-          </small>
-          }
-        </div>
-        }
+          <div>
+            <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+              Perfil público
+            </h3>
+          </div>
 
-        <!-- ROLE (SIEMPRE VISIBLE) -->
-        <div class="sm:col-span-2">
-          <label class="text-sm text-[var(--text-secondary)]">
-            Tipo de acceso
-          </label>
+          <div>
+            <label class="text-sm text-[var(--text-secondary)]">
+              Descripción
+            </label>
 
-          <select formControlName="role" class="input-primary">
-            <option value="admin">Administrador</option>
-            <option value="staff">Profesional (gestiona sus citas)</option>
-            <option value="receptionist">Recepción (agenda citas)</option>
-          </select>
+            <textarea formControlName="bio" rows="4" placeholder="Describe al profesional..." class="input-primary">
+                        </textarea>
+          </div>
+
         </div>
 
+        <!-- ================= ESTADO ================= -->
+        <div class="space-y-4">
+
+          <div>
+            <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+              Configuración
+            </h3>
+          </div>
+
+
+
+
+          <div class="flex flex-col gap-4">
+
+            <!-- <label class="flex items-center gap-3 cursor-pointer">
+
+              <input type="checkbox" formControlName="is_active">
+
+              <span class="text-sm text-[var(--text-secondary)]">
+                Personal activo
+              </span>
+
+            </label> -->
+
+            <label class="flex items-center gap-3 cursor-pointer">
+
+              <input type="checkbox" formControlName="is_public">
+
+              <span class="text-sm text-[var(--text-secondary)]">
+                Mostrar en página de citas
+              </span>
+
+              <span class="relative group cursor-pointer">
+
+                <lucide-icon [name]="HelpCircle" (click)="toggleIsPublicHelp($event)"
+                  class="w-4 h-4 text-gray-400 transition-colors duration-200 group-hover:text-emerald-500">
+                </lucide-icon>
+                <!-- TOOLTIP -->
+
+              </span>
+
+            </label>
+
+          </div>
+
+        </div>
+
       </div>
 
-      }
+      <!-- ================= FOOTER ================= -->
+      <div class="p-4 sm:p-6 border-t border-[var(--border-soft)]
+                flex flex-col sm:flex-row
+                justify-end gap-3 shrink-0">
 
-      <!-- Bio -->
-      <div>
-        <label class="text-sm text-[var(--text-secondary)]">
-          Descripción
-        </label>
-        <textarea formControlName="bio" rows="3" placeholder="Describe al profesional..."
-          class="input-primary"></textarea>
-      </div>
+        <button type="button" (click)="closeModal()" class="mar-btn-secondary">
 
-      <!-- Toggles -->
-      <div class="flex flex-wrap gap-4 text-sm">
-
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" formControlName="is_active">
-          <span class="text-[var(--text-secondary)]">Activo</span>
-        </label>
-
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" formControlName="is_public">
-          <span class="text-[var(--text-secondary)]">Mostrar en página de citas</span>
-        </label>
-
-
-      </div>
-
-      <!-- Footer -->
-      <div class="flex justify-end gap-3 pt-4">
-
-        <button type="button" (click)="closeModal()" class="px-4 py-2 rounded-lg
-                       border border-[var(--border-soft)]
-                       text-[var(--text-secondary)]
-                       cursor-pointer">
           Cancelar
+
         </button>
 
-        <button type="submit" [disabled]="form.invalid || saving" class="px-4 py-2 rounded-lg
-                       bg-[var(--system-primary)]
-                       text-white
-                       transition-all
-                       hover:bg-[var(--system-secondary)]
-                       cursor-pointer
-                       disabled:opacity-50
-                       disabled:cursor-not-allowed">
+        <button type="submit" [disabled]="form.invalid || saving" class="mar-btn-primary">
 
-          {{ saving ? 'Guardando...' : (editingMember ? 'Actualizar' : 'Guardar') }}
+          {{ saving
+          ? 'Guardando...'
+          : (editingMember ? 'Actualizar' : 'Guardar') }}
+
         </button>
 
       </div>
 
     </form>
 
+    @if (showAccesHelp) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+
+      <!-- backdrop -->
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showAccesHelp = false">
+      </div>
+      <!-- <div class="absolute inset-0 bg-black/40" (click)="showSlugHelp = false"></div> -->
+
+      <!-- modal -->
+      <div class="relative w-full max-w-sm p-4 text-xs
+              bg-[var(--bg-surface)] border border-[var(--border-soft)]
+              rounded-2xl shadow-xl">
+
+        <p class="font-semibold mb-1">¿Para qué sirve?</p>
+
+        <p class="text-xs leading-relaxed text-[var(--text-secondary)]">
+
+          Al activar esta opción se creará una cuenta de usuario
+          para que el miembro del equipo pueda iniciar sesión en la plataforma.
+
+        </p>
+
+        <p class="text-xs leading-relaxed text-[var(--text-secondary)] mt-2">
+
+          También deberás compartirle sus credenciales de acceso
+          (usuario y contraseña).
+
+        </p>
+
+        <button class="mt-4 w-full text-sm text-green-400" (click)="showAccesHelp = false">
+          Entendido
+        </button>
+
+      </div>
+
+    </div>
+    }
+
+    @if (showIsPublicHelp) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+
+      <!-- backdrop -->
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showIsPublicHelp = false">
+      </div>
+      <!-- <div class="absolute inset-0 bg-black/40" (click)="showSlugHelp = false"></div> -->
+
+      <!-- modal -->
+      <div class="relative w-full max-w-sm p-4 text-xs
+              bg-[var(--bg-surface)] border border-[var(--border-soft)]
+              rounded-2xl shadow-xl">
+
+        <p class="font-semibold mb-1">
+          ¿Para qué sirve?
+        </p>
+
+        <p class="text-xs leading-relaxed text-[var(--text-secondary)]">
+
+          Al activar esta opción, este integrante podrá aparecer
+          en tu página pública de reservas.
+
+        </p>
+
+        <p class="text-xs leading-relaxed text-[var(--text-secondary)] mt-2">
+
+          Los clientes podrán ver su perfil, especialidad
+          y agendar citas directamente con él o ella.
+
+        </p>
+
+        <p class="text-xs leading-relaxed text-[var(--text-secondary)] mt-2">
+
+          Ideal para profesionales, terapeutas, estilistas,
+          doctores y personal que atiende citas.
+
+        </p>
+
+        <button class="mt-4 w-full text-sm text-green-400" (click)="showIsPublicHelp = false">
+          Entendido
+        </button>
+
+      </div>
+
+    </div>
+    }
+
   </div>
+
 </div>
 }
-
 
 <!-- FUTURO -->
 <!-- <div class="pt-4 border-t border-[var(--border-soft)] text-xs text-[var(--text-secondary)]">

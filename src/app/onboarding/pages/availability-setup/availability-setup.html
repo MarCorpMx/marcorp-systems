@@ -38,17 +38,43 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                 <div>
-                    <label class="text-xs text-[var(--text-secondary)]">
-                        Duración de cita (minutos)
+                    <label class="text-sm text-[var(--text-secondary)] flex items-center gap-2">
+                        Intervalo entre horarios
+
+                        <span class="relative group cursor-pointer">
+                            <lucide-icon [name]="HelpCircle"
+                                class="w-4 h-4 text-gray-400 transition-colors duration-200 group-hover:text-emerald-500"
+                                (click)="showAppoDurHelp = !showAppoDurHelp">
+                            </lucide-icon>
+                        </span>
                     </label>
-                    <input type="number" [(ngModel)]="settings.appointment_duration" class="input-primary">
+
+                    <select [(ngModel)]="settings.appointment_duration" class="input-primary">
+                        <option [ngValue]="15">Cada 15 minutos</option>
+                        <option [ngValue]="30">Cada 30 minutos</option>
+                        <option [ngValue]="60">Cada 60 minutos</option>
+
+                    </select>
                 </div>
 
                 <div>
-                    <label class="text-xs text-[var(--text-secondary)]">
-                        Descanso entre citas (minutos)
+                    <label class="text-sm text-[var(--text-secondary)] flex items-center gap-2">
+                        Espacio entre citas
+
+                        <span class="relative group cursor-pointer">
+                            <lucide-icon [name]="HelpCircle"
+                                class="w-4 h-4 text-gray-400 transition-colors duration-200 group-hover:text-emerald-500"
+                                (click)="showBreakAppoHelp = !showBreakAppoHelp">
+                            </lucide-icon>
+                        </span>
+
                     </label>
-                    <input type="number" [(ngModel)]="settings.break_between_appointments" class="input-primary">
+                    <select [(ngModel)]="settings.break_between_appointments" class="input-primary">
+                        <option [ngValue]="0">Sin espacio</option>
+                        <option [ngValue]="5">5 minutos</option>
+                        <option [ngValue]="10">10 minutos</option>
+                        <option [ngValue]="15">15 minutos</option>
+                    </select>
                 </div>
 
             </div>
@@ -130,4 +156,127 @@
         }
 
     </div>
+
+    @if (showAppoDurHelp) {
+
+    <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+
+        <!-- backdrop -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showAppoDurHelp = false">
+        </div>
+
+        <!-- modal -->
+        <div class="relative w-full max-w-sm p-5 text-sm
+        bg-[var(--bg-surface)]
+        border border-[var(--border-soft)]
+        rounded-2xl shadow-xl">
+
+            <p class="font-semibold text-base mb-2">
+                Intervalo entre horarios
+            </p>
+
+            <p class="text-[var(--text-muted)] leading-relaxed">
+                Define cada cuánto tiempo aparecerán horarios para reservar en tu agenda pública.
+            </p>
+
+            <div class="mt-4 space-y-3">
+
+                <p class="font-semibold text-[var(--text-secondary)]">
+                    Ejemplo:
+                </p>
+
+                <div class="rounded-xl border border-[var(--border-soft)]
+                bg-[var(--bg-muted)] p-3 space-y-1">
+
+                    <p class="text-[var(--text-primary)]">
+                        15 min: <span class="font-medium">9:00, 9:15, 9:30...</span>
+                    </p>
+
+                    <p class="text-[var(--text-primary)]">
+                        30 min: <span class="font-medium">9:00, 9:30, 10:00...</span>
+                    </p>
+
+                    <p class="text-[var(--text-primary)]">
+                        60 min: <span class="font-medium">9:00, 10:00, 11:00...</span>
+                    </p>
+
+
+                </div>
+
+            </div>
+
+
+            <button class="mt-5 w-full py-2 rounded-xl
+            bg-green-500/10 text-green-400 font-medium" (click)="showAppoDurHelp = false">
+
+                Entendido
+
+            </button>
+
+        </div>
+
+    </div>
+
+    }
+
+    @if (showBreakAppoHelp) {
+
+    <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+
+        <!-- backdrop -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showBreakAppoHelp = false">
+        </div>
+
+        <!-- modal -->
+        <div class="relative w-full max-w-sm p-5 text-sm
+        bg-[var(--bg-surface)]
+        border border-[var(--border-soft)]
+        rounded-2xl shadow-xl">
+
+            <p class="font-semibold text-base mb-2 text-[var(--text-primary)]">
+                Espacio entre citas
+            </p>
+
+            <p class="text-[var(--text-muted)] leading-relaxed">
+                Agrega unos minutos libres entre una cita y la siguiente.
+                Ideal para limpieza, preparar material o descansar.
+            </p>
+
+            <div class="mt-4 space-y-3">
+
+                <p class="font-semibold text-[var(--text-secondary)]">
+                    Ejemplo:
+                </p>
+
+                <div class="rounded-xl border border-[var(--border-soft)]
+                bg-[var(--bg-muted)] p-3 space-y-1">
+
+                    <p class="text-[var(--text-primary)]">
+                        Cita termina: <span class="font-medium">10:00</span>
+                    </p>
+
+                    <p class="text-[var(--text-primary)]">
+                        Espacio elegido: <span class="font-medium">15 min</span>
+                    </p>
+
+                    <p class="text-emerald-400 font-medium">
+                        Próxima cita disponible: 10:15
+                    </p>
+
+                </div>
+
+            </div>
+
+            <button class="mt-5 w-full py-2 rounded-xl
+            bg-green-500/10 text-green-400 font-medium" (click)="showBreakAppoHelp = false">
+
+                Entendido
+
+            </button>
+
+        </div>
+
+    </div>
+
+    }
 </div>

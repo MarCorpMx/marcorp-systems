@@ -29,9 +29,17 @@ export class CitasTeamService {
 
   constructor(private api: Api) { }
 
-  getMembers(): Observable<TeamMemberResponse> {
-    return this.api.get<TeamMemberResponse>(this.endpoint);
+  getMembers(params?: {
+    search?: string;
+    view_all?: boolean;
+  }): Observable<TeamMemberResponse> {
+
+    return this.api.get<TeamMemberResponse>(
+      this.endpoint,
+      { params }
+    );
   }
+
 
   createMember(data: any) {
     return this.api.post(this.endpoint, data);
@@ -41,13 +49,17 @@ export class CitasTeamService {
     return this.api.put(`${this.endpoint}/${id}`, payload);
   }
 
-  suspendMember(id: string) {
+  toggleAccess(id: string, payload: any) {
+    return this.api.patch(`${this.endpoint}/${id}/toggle-access`, payload);
+  }
+
+  /*suspendMember(id: string) {
     return this.api.post(`${this.endpoint}/${id}/suspend`, {});
   }
 
   activateMember(id: string) {
     return this.api.post(`${this.endpoint}/${id}/activate`, {});
-  }
+  }*/
 
 
 }
