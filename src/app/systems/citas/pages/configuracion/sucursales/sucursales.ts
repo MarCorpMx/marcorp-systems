@@ -104,7 +104,7 @@ No podrás crear nuevas hasta reducirlas o actualizar tu plan.”*/
       name: 'Sucursal Centro',
       address: 'Av. Reforma 123, CDMX',
       phone: '+52 55 1234 5678',
-      email: 'centro@citara.mx',
+      email: 'centro@rombi.mx',
       manager: 'Ana López',
       active: true,
     }

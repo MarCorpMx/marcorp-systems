@@ -12,13 +12,13 @@ export const AUTH_ROUTES: Routes = [
         path: 'iniciar-sesion',
         loadComponent: () =>
           import('./login/login').then(m => m.Login),
-         data: { leftTitle: 'Administra tus citas y clientes desde un solo lugar.' }
+         data: { leftTitle: 'La forma inteligente de agendar.' }
       },
       {
         path: 'registrarse',
         loadComponent: () =>
           import('./register/register').then(m => m.Register),
-        data: { leftTitle: 'Administra tus citas y clientes desde un solo lugar.' }
+        data: { leftTitle: 'La forma inteligente de agendar.' }
       },
       {
         path: 'recuperar-contrasena',

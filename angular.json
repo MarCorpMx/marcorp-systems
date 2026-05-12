@@ -83,6 +83,17 @@
                   "with": "src/environments/environment.development.ts"
                 }
               ]
+            },
+            "network": {
+              "optimization": false,
+              "sourceMap": true,
+              "extractLicenses": false,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.network.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -95,6 +106,9 @@
             },
             "development": {
               "buildTarget": "marcorp-systems:build:development"
+            },
+            "network": {
+              "buildTarget": "marcorp-systems:build:network"
             }
           },
           "defaultConfiguration": "development"

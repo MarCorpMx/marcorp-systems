@@ -19,49 +19,49 @@ interface WeekDay {
   end: string;
 }
 
-    /*
-    |--------------------------------------------------------------------------
-    | rombi - pendientes
-    | - Descomentar "Permitir reservas online" y "Permitir cancelaciones" para que funcione chingon el sistema
-    |--------------------------------------------------------------------------
-    */
+/*
+|--------------------------------------------------------------------------
+| rombi - pendientes
+| - Descomentar "Permitir reservas online" y "Permitir cancelaciones" para que funcione chingon el sistema
+|--------------------------------------------------------------------------
+*/
 
-    /*
-    Tambien descomentar  
-    minimum_notice_hours: 0, // Reserva inmediata permitida
-    cancellation_limit_hours: 0, // Cancelación libre 
-    hacer pruebas y lanzar como Feature Upgrade
+/*
+Tambien descomentar  
+minimum_notice_hours: 0, // Reserva inmediata permitida
+cancellation_limit_hours: 0, // Cancelación libre 
+hacer pruebas y lanzar como Feature Upgrade
 
-    Cómo anunciarlo en futuro
-    Card elegante
+Cómo anunciarlo en futuro
+Card elegante
 
-    ✨ Nuevo: Reglas avanzadas de reservas
-      Controla anticipación mínima y políticas de cancelación.
+✨ Nuevo: Reglas avanzadas de reservas
+  Controla anticipación mínima y políticas de cancelación.
 
-    Botón:
+Botón:
 
-    Configurar ahora
+Configurar ahora
 
-    ***
-    Cuando Free intente abrir:
-    Disponible en plan Pro. - esto genera intencion
-    ****
-    
-    
-    minimum_notice_hours: Anticipación mínima para reservar.
-    Ejemplo:
-    0 = pueden reservar ahorita mismo
-    2 = mínimo 2 horas antes
-    24 = solo con un día de anticipación
-    */
+***
+Cuando Free intente abrir:
+Disponible en plan Pro. - esto genera intencion
+****
+ 
+ 
+minimum_notice_hours: Anticipación mínima para reservar.
+Ejemplo:
+0 = pueden reservar ahorita mismo
+2 = mínimo 2 horas antes
+24 = solo con un día de anticipación
+*/
 
-    /*
-    cancellation_limit_hours
-    Ejemplo:
-    0 = cancelar hasta el momento
-    2 = mínimo 2 horas antes
-    24 = cancelar un día antes
-    */
+/*
+cancellation_limit_hours
+Ejemplo:
+0 = cancelar hasta el momento
+2 = mínimo 2 horas antes
+24 = cancelar un día antes
+*/
 
 
 
@@ -107,7 +107,7 @@ export class Agenda implements OnInit {
     break_between_appointments: 0,
     minimum_notice_hours: 0, // Reserva inmediata permitida
     cancellation_limit_hours: 0, // Cancelación libre 
-    allow_online_booking: true, 
+    allow_online_booking: true,
     allow_cancellation: true
   };
 
@@ -133,7 +133,7 @@ export class Agenda implements OnInit {
     this.staffId = this.auth.getStaffId();
     this.planKey = this.auth.getPlanKey();
 
-    if(this.planKey == 'free' || this.planKey == null){
+    if (this.planKey == 'free' || this.planKey == null) {
       this.isFree = true;
     }
 
@@ -146,49 +146,60 @@ export class Agenda implements OnInit {
   }
 
   loadProfessionals() {
-    this.professionalsService.getAll().subscribe(res => {
-      this.professionals = res.data;
+    this.professionalsService
+      .getAll()
+      .subscribe({
+        next: (res) => {
+          this.professionals = res.data;
 
-      if (!this.professionals.length) return;
+          if (!this.professionals.length) return;
 
-      // STAFF → solo él mismo
-      if (this.role === 'staff') {
+          // STAFF → solo él mismo
+          if (this.role === 'staff') {
 
-        if (this.staffId) {
-          this.selectedProfessionalId = this.staffId;
+            if (this.staffId) {
+              this.selectedProfessionalId = this.staffId;
+              this.loadAgenda();
+            }
+
+            return; // NO cargar selector
+          }
+
+          // ADMIN / OWNER / RECEPTIONIST
+
+          // buscar si el user tiene staff asociado
+          const ownProfessional = this.professionals.find(
+            p => p.id === this.staffId // importante: staff_member_id === professional.id
+          );
+
+          if (ownProfessional) {
+            // cargar su propio horario por default
+            this.selectedProfessionalId = ownProfessional.id;
+          } else {
+            // fallback
+            this.selectedProfessionalId = this.professionals[0].id;
+          }
+
+          console.log("los profesionales: ", res);
+
           this.loadAgenda();
+
+        },
+
+        error: (err) => {
+          this.handleError(err, 'No pudimos cargar el staff');
         }
-
-        return; // NO cargar selector
-      }
-
-      // ADMIN / OWNER / RECEPTIONIST
-
-      // buscar si el user tiene staff asociado
-      const ownProfessional = this.professionals.find(
-        p => p.id === this.staffId // importante: staff_member_id === professional.id
-      );
-
-      if (ownProfessional) {
-        // cargar su propio horario por default
-        this.selectedProfessionalId = ownProfessional.id;
-      } else {
-        // fallback
-        this.selectedProfessionalId = this.professionals[0].id;
-      }
-
-      this.loadAgenda();
-
-    });
+      });
   }
 
   loadServiceVariants() {
     this.citasService.getVariantList().subscribe({
       next: (res) => {
+        console.log('las variantes: ',res);
         this.serviceVariants = res;
       },
       error: (err) => {
-        console.error('Error loading service variants', err);
+        this.handleError(err, 'No pudimos cargar los servicios');
       }
     });
   }
@@ -396,23 +407,6 @@ export class Agenda implements OnInit {
       });
   }
 
-  handleError(err: any, fallbackMessage: string) {
-
-    console.error(err);
-
-    if (err?.error?.message) {
-      this.notify.error(err.error.message);
-      return;
-    }
-
-    if (err?.error?.errors) {
-      const firstError = Object.values(err.error.errors)[0] as string[];
-      this.notify.error(firstError[0]);
-      return;
-    }
-
-    this.notify.error(fallbackMessage);
-  }
 
   validateBeforeSave(): boolean {
 
@@ -564,6 +558,24 @@ export class Agenda implements OnInit {
     };
 
     return toMinutes(start) < toMinutes(end);
+  }
+
+  handleError(err: any, fallbackMessage: string) {
+
+    //console.error(err);
+
+    if (err?.error?.message) {
+      this.notify.error(err.error.message);
+      return;
+    }
+
+    if (err?.error?.errors) {
+      const firstError = Object.values(err.error.errors)[0] as string[];
+      this.notify.error(firstError[0]);
+      return;
+    }
+
+    this.notify.error(fallbackMessage);
   }
 
 

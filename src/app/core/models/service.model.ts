@@ -11,11 +11,12 @@ export interface ServiceVariantListItem {
 export interface ServiceVariantModel {
   id: number;
   name: string;
+  description?: string;
   duration_minutes: number;
   price: number;
-  max_capacity: number;
+  max_capacity?: number;
   mode: ServiceMode;
-  includes_material: boolean;
+  includes_material?: boolean;
   active: boolean;
   //staff: StaffModel[];
 }
@@ -64,4 +65,10 @@ export interface OnboardingServiceResponse {
     onboarding_step: string;
     onboarding_completed_at: string | null;
   };
+}
+
+// Sirve para respuesta en rombi
+export interface ServiceApiResponse {
+  message: string;
+  data: ServiceModel;
 }

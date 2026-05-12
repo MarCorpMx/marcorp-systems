@@ -26,8 +26,10 @@
       <!-- <div class="relative flex flex-col items-center justify-center p-8 text-center"> -->
       <div class="relative flex flex-col items-center justify-center p-6 md:p-8 text-center md:text-center">
         <!-- Logo Replacement representing the 'M' logo -->
-        <div class="w-20 h-20 md:w-40 md:h-40 mb-1 relative">
-          <svg viewBox="0 0 512 512" class="w-full h-full text-[#10b981] drop-shadow-[0_0_15px_rgba(16,185,129,0.8)]">
+
+        <!-- drop-shadow-[0_0_15px_rgba(16,185,129,0.8)] -->
+        <div class="w-16 h-16 md:w-40 md:h-40 mb-1 relative">
+          <svg viewBox="0 0 512 512" class="w-full h-full text-[#10b981] drop-shadow-[0_0_10px_rgba(16,185,129,0.35)]">
             <!-- V superior -->
             <path fill="currentColor" d="M128 128 L256 256 L384 128 L384 176 L256 304 L128 176 Z" />
             <!-- Pilar izquierdo -->
@@ -42,23 +44,39 @@
         </h1> -->
 
         <div class="mb-2">
-          <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white">
-            CIT<span class="text-[#10b981]">ARA</span>
+          <h1 class="text-3xl md:text-5xl
+           font-extrabold
+           tracking-[0.14em]
+           text-white">
+
+            RO<span class="text-[#10b981] font-black">M</span>BI
+
           </h1>
-          <p class="text-[11px] text-gray-500 tracking-wide">by Marcorp</p>
+          <p class="text-[10px] uppercase tracking-[0.35em] text-gray-500 mt-1">
+            by Marcorp
+          </p>
         </div>
 
-        <p class="hidden md:block text-sm md:text-base text-gray-300 max-w-xs mx-auto md:mx-0">
-          {{leftTitle}}
+        <p class="block
+          text-xs sm:text-sm md:text-base
+          leading-relaxed
+          text-gray-400 md:text-gray-300
+          max-w-[240px] md:max-w-xs
+          mx-auto
+          mt-1 md:mt-0
+          line-clamp-2 md:line-clamp-none">
+
+          {{ leftTitle }}
+
         </p>
 
-        <p class="hidden md:block mt-3 text-xs text-emerald-400/80">
+        <!-- <p class="hidden md:block mt-3 text-xs text-emerald-400/80">
           ✔️ Sin instalaciones · ✔️ Acceso desde cualquier dispositivo
-        </p>
+        </p> -->
 
         <!-- Micro confianza -->
         <p class="hidden md:block mt-4 text-xs text-gray-500">
-          Simple. Rápido. Profesional.
+          Agenda más clientes. Haz crecer tu negocio.
         </p>
       </div>
     </div>

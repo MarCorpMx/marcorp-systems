@@ -13,7 +13,8 @@
             </h1>
 
             <p class="text-sm text-[var(--text-secondary)] mt-1 max-w-md mx-auto">
-                Define tus horarios para comenzar a recibir citas.
+                Define tus horarios para comenzar a recibir
+                {{ catalog.getAudienceLabel(niche) }}.
                 Puedes cambiar esto más adelante.
             </p>
         </div>
@@ -55,6 +56,10 @@
                         <option [ngValue]="60">Cada 60 minutos</option>
 
                     </select>
+
+                    <p class="text-xs text-[var(--text-secondary)] mt-1">
+                        Basado en tu tipo de servicio
+                    </p>
                 </div>
 
                 <div>
@@ -75,6 +80,9 @@
                         <option [ngValue]="10">10 minutos</option>
                         <option [ngValue]="15">15 minutos</option>
                     </select>
+                    <p class="text-xs text-[var(--text-secondary)] mt-1">
+                        Recomendado para tu actividad
+                    </p>
                 </div>
 
             </div>
@@ -90,7 +98,7 @@
 
                 <button (click)="applyDefaultSchedule()"
                     class="text-xs text-[var(--system-primary)] hover:underline cursor-pointer">
-                    Usar horario estándar
+                    Usar horario recomendado
                 </button>
             </div>
 

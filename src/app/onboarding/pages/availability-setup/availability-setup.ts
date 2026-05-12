@@ -8,6 +8,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { CitasServicesService } from '../../../core/services/citas-services.service';
 import { AgendaSettingsService, AgendaSettings } from '../../../core/services/citas-agenda-settings.service';
 import { Notification } from '../../../services/notification.service';
+import { BusinessCatalogService } from '../../../core/services/business-catalog.service';
 
 import { ONBOARDING_ROUTES_MAP } from '../../models/onboarding.model';
 
@@ -35,6 +36,7 @@ export class AvailabilitySetup implements OnInit {
   private agendaService = inject(AgendaSettingsService);
   private notify = inject(Notification);
   private router = inject(Router);
+  public catalog = inject(BusinessCatalogService);
 
   loading = true;
   saving = false;
@@ -44,12 +46,14 @@ export class AvailabilitySetup implements OnInit {
 
   staffId: number | null = null;
 
+  org = JSON.parse(localStorage.getItem('organization') || '{}');
+  niche = this.org.business_niche;
 
 
   // Configuración por defecto
   settings: AgendaSettings = {
-    appointment_duration: 15,
-    break_between_appointments: 0,
+    appointment_duration: 15, // Intervalo entre horarios (aparecen los bloques en booking-public)
+    break_between_appointments: 0, // Espacio entre citas (espacio para barrer, preparar siguiente cita)
     minimum_notice_hours: 0,
     cancellation_limit_hours: 0,
     allow_online_booking: true,
@@ -62,11 +66,32 @@ export class AvailabilitySetup implements OnInit {
 
     this.staffId = this.auth.getStaffId();
 
+    const agenda = this.catalog.getAgendaConfig(this.niche);
+    const schedule = this.catalog.getSmartSchedule(this.niche);
+
+    // settings
+    if (agenda) {
+      this.settings.appointment_duration = agenda.appointment_duration;
+      this.settings.break_between_appointments = agenda.break_between_appointments;
+    }
+
+    // horario (AQUÍ estaba el bug real)
+    if (schedule) {
+      this.weekDays = this.weekDays.map(day => ({
+        ...day,
+        active: schedule.working_days.includes(day.value),
+        start: schedule.start,
+        end: schedule.end
+      }));
+    }
+
+
     // Detenemos un rato para un delay suave
     setTimeout(() => {
       this.loading = false;
     }, 400);
   }
+
 
   private getDefaultWeekDays(): WeekDay[] {
     return [
@@ -82,21 +107,32 @@ export class AvailabilitySetup implements OnInit {
 
   applyDefaultSchedule() {
 
-    this.weekDays = this.getDefaultWeekDays();
+    const schedule = this.catalog.getSmartSchedule(this.niche);
+    const agenda = this.catalog.getAgendaConfig(this.niche);
 
-    this.settings = {
-      appointment_duration: 15,
-      break_between_appointments: 0,
-      minimum_notice_hours: 0,
-      cancellation_limit_hours: 0,
-      allow_online_booking: false,
-      allow_cancellation: false
-    };
+    if (schedule) {
+      this.weekDays = this.weekDays.map(day => ({
+        ...day,
+        active: schedule.working_days.includes(day.value),
+        start: schedule.start,
+        end: schedule.end
+      }));
+    }
 
-    this.notify.success('Horario restablecido');
+    if (agenda) {
+      this.settings.appointment_duration = agenda.appointment_duration;
+      this.settings.break_between_appointments = agenda.break_between_appointments;
+    }
+
+    this.notify.success('Horario recomendado aplicado');
   }
 
   save() {
+
+    if (this.weekDays.filter(d => d.active).length === 0) {
+      this.notify.error('Selecciona al menos un día');
+      return;
+    }
 
     const activeDays = this.weekDays.filter(d => d.active);
 
@@ -115,7 +151,11 @@ export class AvailabilitySetup implements OnInit {
 
     this.saving = true;
 
-    if (!this.staffId) { return; }
+    if (!this.staffId) {
+      this.notify.error('Error de sesión');
+      this.saving = false;
+      return;
+    }
 
     this.agendaService.updateAgenda(this.staffId, payload).subscribe({
       next: (res) => {

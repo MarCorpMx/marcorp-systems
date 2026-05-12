@@ -78,7 +78,7 @@ export class Login {
     // Llama al servicio 
     this.authService.login(payload).subscribe({
       next: (res) => {
-        this.notify.success(`Bienvenido a CITARA, ${res.user.name} `);
+        this.notify.success(`Bienvenido a ROMBI, ${res.user.name} `);
       },
       error: (err) => {
         this.isSubmitting = false;

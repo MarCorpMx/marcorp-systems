@@ -1,11 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ServiceModel, CreateServiceDto, ServiceVariantListItem } from '../models/service.model';
+import { ServiceModel, CreateServiceDto, ServiceVariantListItem, ServiceApiResponse } from '../models/service.model';
 import { Api } from './api';
 
 @Injectable({
   providedIn: 'root',
 })
+
+
 
 export class CitasServicesService {
 
@@ -24,6 +26,8 @@ export class CitasServicesService {
   private endpoint = 'me/services';
   private variantsEndpoint = 'me/service-variants';
 
+
+
   // ---------------------------
   // SERVICES (ADMIN)
   // ---------------------------
@@ -40,12 +44,15 @@ export class CitasServicesService {
   }
 
 
-  create<T = ServiceModel>(data: CreateServiceDto) {
+  create<T = ServiceApiResponse>(data: CreateServiceDto) {
     return this.api.post<T>(this.endpoint, data);
   }
 
   update(id: number, data: CreateServiceDto) {
-    return this.api.put<ServiceModel>(`${this.endpoint}/${id}`, data);
+    return this.api.put<ServiceApiResponse>(
+      `${this.endpoint}/${id}`,
+      data
+    );
   }
 
   delete(id: number): Observable<void> {
@@ -59,6 +66,28 @@ export class CitasServicesService {
     return this.api.get<ServiceVariantListItem[]>(
       `${this.variantsEndpoint}/list`
     );
+  }
+
+  // Cambiar el estatus de un servicio
+  changeStatus(id: number, payload: any) {
+    return this.api.patch<{
+      message: string;
+      data: {
+        id: number;
+        active: boolean;
+      };
+    }>(`${this.endpoint}/${id}/status`, payload);
+  }
+
+  // Cambiar el estatus de una variante
+  changeVariantStatus(id: number, payload: any) {
+    return this.api.patch<{
+      message: string;
+      data: {
+        id: number;
+        active: boolean;
+      };
+    }>(`${this.variantsEndpoint}/${id}/status`, payload);
   }
 
 

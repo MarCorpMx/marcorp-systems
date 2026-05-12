@@ -33,7 +33,6 @@ export class AuthService {
     localStorage.setItem('organization', JSON.stringify(res.organization));
 
 
-
     //console.log('dataSystem:', JSON.stringify(res.systems, null, 2));
     //console.log('dataUser:', JSON.stringify(res.user, null, 2));
     //console.log('dataOrganization :', JSON.stringify(res.organization, null, 2));
@@ -393,6 +392,18 @@ export class AuthService {
   // rombi implemando 25/04/26
   getCurrentBranch() {
     return this.currentBranchSignal();
+  }
+
+  getCurrentBranchTimezone(): string {
+    return this.getCurrentBranch()?.timezone || 'UTC';
+  }
+
+  getCurrentBranchId(): number | null {
+    return this.getCurrentBranch()?.branch_id || null;
+  }
+
+  getCurrentBranchName(): string | null {
+    return this.getCurrentBranch()?.branch_name || null;
   }
 
   // rombi implemando 25/04/26

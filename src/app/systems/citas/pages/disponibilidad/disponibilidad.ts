@@ -65,6 +65,8 @@ export class Disponibilidad implements OnInit {
   role: string | null = null;
   staffId: number | null = null;
 
+  branchTimezone = 'UTC';
+
   professionals: Professional[] = [];
   selectedProfessionalId!: number;
 
@@ -98,7 +100,8 @@ export class Disponibilidad implements OnInit {
 
     locales: [esLocale],
     locale: 'es',
-    timeZone: 'America/Mexico_City',
+    //timeZone: 'America/Mexico_City',
+    timeZone: this.branchTimezone,
 
     headerToolbar: {
       left: 'prev,next today',
@@ -270,19 +273,6 @@ export class Disponibilidad implements OnInit {
     }
   };
 
-  /*ngOnInit() {
-    this.setResponsiveOptions();
-    window.addEventListener('resize', () => this.setResponsiveOptions());
-
-    this.role = this.auth.getRole();
-    this.staffId = this.auth.getStaffId();
-
-    if (!this.role) {
-      console.warn('No hay rol definido');
-    }
-
-    this.loadProfessionals();
-  }*/
 
   ngOnInit() {
     this.setResponsiveOptions();
@@ -295,6 +285,17 @@ export class Disponibilidad implements OnInit {
       console.warn('No hay rol definido');
       return;
     }
+
+    const branch = this.auth.getCurrentBranch();
+
+    this.branchTimezone =
+      branch?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    this.calendarOptions = {
+      ...this.calendarOptions,
+      timeZone: this.branchTimezone
+    };
+
 
     // STAFF → no cargar profesionales
     if (this.role === 'staff') {

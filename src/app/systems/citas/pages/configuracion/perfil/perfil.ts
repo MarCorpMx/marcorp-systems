@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgxIntlTelInputModule, CountryISO, PhoneNumberFormat } from 'ngx-intl-tel-input';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, HelpCircle } from 'lucide-angular';
 
 
+import { BusinessCatalogService } from '../../../../../core/services/business-catalog.service';
 import { Notification } from '../../../../../services/notification.service';
 import { OrganizationService } from '../../../../../core/services/organization.service';
 import { AuthService } from '../../../../../core/services/auth.service';
@@ -20,6 +21,12 @@ export class Perfil implements OnInit {
 
   readonly HelpCircle = HelpCircle;
 
+  private fb = inject(FormBuilder);
+  private notify = inject(Notification);
+  private organizationService = inject(OrganizationService);
+  private auth = inject(AuthService);
+  private catalog = inject(BusinessCatalogService);
+
   form!: FormGroup;
 
   loading = true;
@@ -31,6 +38,8 @@ export class Perfil implements OnInit {
   showSlugHelp = false;
   showReferencePrefixHelp = false;
 
+  // Catálogos
+  niches = this.catalog.getNiches();
 
   // Configuración ngx-intl-tel-input
   PhoneNumberFormat = PhoneNumberFormat;
@@ -38,13 +47,6 @@ export class Perfil implements OnInit {
   preferredCountries: CountryISO[] = [CountryISO.Mexico, CountryISO.UnitedStates];
   countryEnum = CountryISO;
   countries: { code: CountryISO, name: string }[] = [];
-
-  constructor(
-    private fb: FormBuilder,
-    private notify: Notification,
-    private organizationService: OrganizationService,
-    private auth: AuthService
-  ) { }
 
   timezones: string[] = [
     'UTC',
@@ -114,6 +116,9 @@ export class Perfil implements OnInit {
   initForm() {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(120)]],
+      slogan: ['', [Validators.minLength(2), Validators.maxLength(200)]],
+      business_niche: ['', Validators.required],
+
       slug: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30), Validators.pattern(/^[a-z0-9]+(-[a-z0-9]+)*$/)]],
       reference_prefix: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(10), Validators.pattern(/^(?=.*[A-Z])[A-Z0-9]{2,5}$/)]],
 
@@ -152,8 +157,11 @@ export class Perfil implements OnInit {
 
         this.form.patchValue({
           name: org.name ?? '',
+          slogan: org.slogan ?? '',
+          business_niche: org.business_niche ?? '',
           slug: org.slug ?? '',
           reference_prefix: org.reference_prefix ?? '',
+
           email: org.email ?? '',
           phone: org.phone ?? null,
           website: org.website ?? '',
@@ -194,8 +202,12 @@ export class Perfil implements OnInit {
 
     const payload = {
       name: this.form.value.name,
+      slogan: this.form.value.slogan,
+      business_niche: this.form.value.business_niche,
+
       slug: this.form.value.slug,
       reference_prefix: this.form.value.reference_prefix,
+
       email: this.form.value.email,
       phone: this.form.value.phone,
       website: this.form.value.website,
@@ -207,7 +219,7 @@ export class Perfil implements OnInit {
       zip_code: this.form.value.zip_code,
       address: this.form.value.address
 
-      // rombi - FALTA ZONA HORARIA Y LOS CAMPOS PARA FACTURACION
+      // rombito - FALTA ZONA HORARIA Y LOS CAMPOS PARA FACTURACION
     };
 
     this.organizationService.updateOrganization(payload).subscribe({
@@ -236,21 +248,7 @@ export class Perfil implements OnInit {
       error: (err) => {
         this.saving = false;
 
-        if (err.status === 422) {
-          const errors = err.error.errors;
-          let messages = '';
-
-          for (const key in errors) {
-            messages += errors[key][0] + '\n';
-          }
-          this.notify.error(messages);
-
-        } else if (err.status === 503) {
-          this.notify.error(err.error?.message || 'Registro temporalmente deshabilitado');
-
-        } else {
-          this.notify.error('Error en el servidor, intenta más tarde');
-        }
+        this.handleError(err, 'No se pudo actualizar el perfil del negocio');
       }
     });
   }
@@ -280,6 +278,24 @@ export class Perfil implements OnInit {
       .replace(/[^a-z0-9]+/g, '-') // reemplaza todo por -
       .replace(/^-+|-+$/g, '') // quita guiones extremos
       .replace(/-{2,}/g, '-'); // evita dobles guiones
+  }
+
+  handleError(err: any, fallbackMessage: string) {
+
+    //console.error(err);
+
+    if (err?.error?.message) {
+      this.notify.error(err.error.message);
+      return;
+    }
+
+    if (err?.error?.errors) {
+      const firstError = Object.values(err.error.errors)[0] as string[];
+      this.notify.error(firstError[0]);
+      return;
+    }
+
+    this.notify.error(fallbackMessage);
   }
 
 }

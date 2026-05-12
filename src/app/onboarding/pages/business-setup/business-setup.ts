@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { NgxIntlTelInputModule, CountryISO, PhoneNumberFormat } from 'ngx-intl-tel-input';
 
 import { ONBOARDING_ROUTES_MAP } from '../../models/onboarding.model';
+import { BusinessCatalogService } from '../../../core/services/business-catalog.service';
 import { OrganizationService } from '../../../core/services/organization.service';
 import { Notification } from '../../../services/notification.service';
 
@@ -22,11 +23,15 @@ export class BusinessSetup implements OnInit {
   private orgService = inject(OrganizationService);
   private notify = inject(Notification);
   private router = inject(Router);
+  private catalog = inject(BusinessCatalogService);
 
   loading = true;
   saving = false;
 
   form!: FormGroup;
+
+  // Catálogos
+  niches = this.catalog.getNiches();
 
   // Configuración ngx-intl-tel-input
   PhoneNumberFormat = PhoneNumberFormat;
@@ -56,6 +61,7 @@ export class BusinessSetup implements OnInit {
   initForm() {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
+      business_niche: ['', Validators.required],
       phone: [null, Validators.required],
       country: ['mx', Validators.required],
       state: ['', [Validators.maxLength(100)]],
@@ -71,6 +77,7 @@ export class BusinessSetup implements OnInit {
 
         this.form.patchValue({
           name: org.name ?? '',
+          business_niche: org.business_niche ?? '',
           phone: org.phone ?? null,
           country: (org.country ?? 'mx').toLowerCase(),
           state: org.state ?? '',
@@ -97,6 +104,7 @@ export class BusinessSetup implements OnInit {
 
     const payload = {
       name: this.form.value.name ?? undefined,
+      business_niche: this.form.value.business_niche ?? undefined,
       phone: this.form.value.phone ?? undefined,
       country: this.form.value.country ?? undefined,
       state: this.form.value.state ?? undefined,
@@ -105,9 +113,9 @@ export class BusinessSetup implements OnInit {
 
     this.orgService.updateOrganization(payload).subscribe({
       next: (res) => {
-        
+
         this.saving = false;
-      
+
         this.notify.success('Negocio configurado');
 
         // avanzar onboarding
@@ -120,7 +128,7 @@ export class BusinessSetup implements OnInit {
         if (step) {
           this.router.navigate([ONBOARDING_ROUTES_MAP[step]]);
         }
-        
+
       },
       error: (err) => {
         this.saving = false;
@@ -131,7 +139,7 @@ export class BusinessSetup implements OnInit {
           return;
         }
 
-        this.notify.error('No se pudo guardar');
+        this.handleError(err, 'No se pudo guardar');
       }
     });
 
@@ -148,6 +156,24 @@ export class BusinessSetup implements OnInit {
     if (control.errors['maxlength']) return 'Muy largo';
 
     return null;
+  }
+
+  handleError(err: any, fallbackMessage: string) {
+
+    //console.error(err);
+
+    if (err?.error?.message) {
+      this.notify.error(err.error.message);
+      return;
+    }
+
+    if (err?.error?.errors) {
+      const firstError = Object.values(err.error.errors)[0] as string[];
+      this.notify.error(firstError[0]);
+      return;
+    }
+
+    this.notify.error(fallbackMessage);
   }
 
 }

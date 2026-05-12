@@ -18,7 +18,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
   ]
 })
 export class AuthLayout {
-  leftTitle: string = 'Administra tus citas y clientes desde un solo lugar.';
+  leftTitle: string = 'La forma inteligente de agendar.';
   urlImg = 'marcorp/images/authLayout_left.png';
 
   constructor(public route: ActivatedRoute, public router: Router) { }

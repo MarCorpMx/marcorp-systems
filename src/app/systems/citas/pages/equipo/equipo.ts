@@ -330,8 +330,6 @@ export class Equipo implements OnInit {
     } else {
       this.executeToggle(staff);
     }
-
-
   }
 
   executeToggle(staff: any) {

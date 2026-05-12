@@ -2,6 +2,7 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
   z-index: 2000;
 }
 
@@ -10,57 +11,118 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+
+  width: calc(100% - 2rem);
+  max-width: 420px;
+
   background: var(--marcorp-bg-card);
   color: var(--marcorp-text-main);
-  border-radius: 16px;
+
+  border: 1px solid rgba(255, 255, 255, .06);
+  border-radius: 24px;
+
   padding: 1.5rem;
-  width: 90%;
-  max-width: 360px;
+
   z-index: 2100;
-  box-shadow: 0 20px 40px rgba(0,0,0,.35);
-  animation: scaleIn .25s ease;
+
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, .35),
+    0 1px 0 rgba(255, 255, 255, .04) inset;
+
+  animation: scaleIn .22s ease;
 }
 
-h3 {
-  margin: 0 0 .5rem;
+.dialog h3 {
+  margin: 0 0 .6rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
-p {
+.dialog p {
+  margin: 0;
   color: var(--marcorp-text-muted);
   font-size: .95rem;
+  line-height: 1.55;
 }
+
+/* ================= ACTIONS ================= */
 
 .actions {
   display: flex;
-  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: .75rem;
   margin-top: 1.5rem;
 }
 
-.btn {
-  padding: .6rem 1.1rem;
-  border-radius: 10px;
-  border: none;
+/* TODOS los botones */
+.action-btn {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* tercer botón */
+.third-btn {
+  padding: .7rem 1rem;
+
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, .08);
+
+  background: rgba(255, 255, 255, .03);
+  color: var(--marcorp-text-main);
+
+  font-weight: 500;
+
+  transition:
+    background .18s ease,
+    border-color .18s ease,
+    transform .12s ease,
+    opacity .18s ease;
+
   cursor: pointer;
 }
 
-.cancel {
-  background: transparent;
-  color: var(--marcorp-text-muted);
+.third-btn:hover {
+  background: rgba(255, 255, 255, .06);
+  border-color: rgba(255, 255, 255, .14);
 }
 
-.confirm {
-  background: var(--system-primary, var(--marcorp-primary));
-  color: #002b1f;
+.third-btn:active {
+  transform: scale(.97);
 }
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 640px) {
+
+  .dialog {
+    width: calc(100% - 1.25rem);
+    padding: 1.25rem;
+    border-radius: 22px;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .action-btn {
+    width: 100%;
+  }
+
+}
+
+/* ================= ANIMATION ================= */
 
 @keyframes scaleIn {
+
   from {
     opacity: 0;
-    transform: translate(-50%, -48%) scale(.95);
+    transform: translate(-50%, -48%) scale(.96);
   }
+
   to {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
   }
+
 }

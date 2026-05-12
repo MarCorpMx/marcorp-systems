@@ -1,8 +1,11 @@
 export interface Organization {
   id: number;
   name: string;
+  slogan: string | null;
   slug: string;
   reference_prefix: string;
+  business_niche: string | null;
+
   email: string | null;
   phone: any | null; // luego lo tipamos mejor si quieres
   website: string | null;

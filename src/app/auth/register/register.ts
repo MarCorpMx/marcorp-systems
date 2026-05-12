@@ -97,8 +97,8 @@ export class Register implements OnInit {
     // Llama al servicio para enviar los datos
     this.authService.register(payload).subscribe({
       next: (res) => {
-        //this.notify.success('Bienvenido a CITARA\nTu espacio ya está listo');
-        this.notify.success('Bienvenido a CITARA');
+        //this.notify.success('Bienvenido a ROMBI\nTu espacio ya está listo');
+        this.notify.success('Bienvenido a ROMBI');
         this.isSubmitting = false;
       },
       error: (err) => {

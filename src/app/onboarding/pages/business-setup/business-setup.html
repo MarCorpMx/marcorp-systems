@@ -52,6 +52,37 @@
                     }
                 </div>
 
+                <!-- NICHO -->
+                <div class="md:col-span-2">
+                    <label class="text-sm text-[var(--text-secondary)]">
+                        ¿A qué se dedica tu negocio? *
+                    </label>
+
+                    <select formControlName="business_niche" class="input-primary">
+
+                        <option value="">
+                            Selecciona una categoría
+                        </option>
+
+                        @for (item of niches; track item.value) {
+                        <option [value]="item.value">
+                            {{ item.label }}
+                        </option>
+                        }
+
+                    </select>
+
+                    <p class="text-xs text-[var(--text-secondary)] mt-1">
+                        Esto nos ayudará a personalizar tu sistema.
+                    </p>
+
+                    @if (getError('business_niche')) {
+                    <small class="text-red-400 text-xs mt-1 block">
+                        {{ getError('business_niche') }}
+                    </small>
+                    }
+                </div>
+
                 <!-- PHONE -->
                 <div>
                     <label class="text-sm text-[var(--text-secondary)]">

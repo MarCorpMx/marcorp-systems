@@ -27,10 +27,6 @@ export class ProfessionalsService {
 
   constructor(private api: Api) { }
 
-  // getAll(): Observable<{ data: Professional[] }> {
-  //   return this.api.get<{ data: Professional[] }>(this.endpoint);
-  // }
-
   getAll(filters?: ProfessionalFilters): Observable<{ data: Professional[] }> {
 
     let params: Record<string, any> = {};

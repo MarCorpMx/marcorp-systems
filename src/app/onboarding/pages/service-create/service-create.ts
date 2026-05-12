@@ -2,12 +2,18 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
-import { LucideAngularModule, Video, MapPin } from 'lucide-angular';
+import {
+  LucideAngularModule, Video, MapPin,
+  Sparkles, Scissors, Hand, Brain, Stethoscope, Heart, Flower, Dumbbell, GraduationCap, Briefcase,
+  Target, PawPrint, PenTool, Circle
+
+} from 'lucide-angular';
 
 import { CreateServiceDto, OnboardingServiceResponse } from '../../../core/models/service.model';
 import { ONBOARDING_ROUTES_MAP } from '../../models/onboarding.model';
 import { CitasServicesService } from '../../../core/services/citas-services.service';
 import { Notification } from '../../../services/notification.service';
+import { BusinessCatalogService } from '../../../core/services/business-catalog.service';
 
 @Component({
   selector: 'app-service-create',
@@ -21,18 +27,59 @@ export class ServiceCreate implements OnInit {
   readonly Video = Video;
   readonly MapPin = MapPin;
 
+  ICON_MAP: any = {
+    scissors: Scissors,
+    sparkles: Sparkles,
+    hand: Hand,
+    brain: Brain,
+    stethoscope: Stethoscope,
+    heart: Heart,
+    flower: Flower,
+    dumbbell: Dumbbell,
+    'graduation-cap': GraduationCap,
+    briefcase: Briefcase,
+    target: Target,
+    'paw-print': PawPrint,
+    'pen-tool': PenTool,
+    circle: Circle
+  };
   private fb = inject(FormBuilder);
   private servicesService = inject(CitasServicesService);
   private router = inject(Router);
   private notify = inject(Notification);
+  public catalog = inject(BusinessCatalogService);
 
   loading = true;
   saving = false;
 
   form!: FormGroup;
 
+  org = JSON.parse(localStorage.getItem('organization') || '{}');
+  niche = this.org.business_niche;
+
+  nicheLabel = this.catalog.getLabel(this.niche);
+  nicheIcon = this.catalog.getIcon(this.niche);
+  nicheColor = this.catalog.getColor(this.niche);
+
+  presets = this.catalog.getPresets(this.niche);
+
   ngOnInit() {
     this.initForm();
+
+    const suggestion = this.catalog.getSuggestion(this.niche);
+
+    if (suggestion) {
+      this.form.patchValue({
+        name: suggestion.name,
+        duration_minutes: suggestion.duration,
+        price: suggestion.price,
+        mode: suggestion.mode
+      });
+    }
+
+    setTimeout(() => {
+      this.loading = false;
+    }, 400);
   }
 
   initForm() {
@@ -49,6 +96,11 @@ export class ServiceCreate implements OnInit {
     }, 400);
   }
 
+  applyPreset(preset: string) {
+    this.form.patchValue({ name: preset });
+  }
+
+
   save() {
 
     if (this.form.invalid) {
@@ -61,11 +113,13 @@ export class ServiceCreate implements OnInit {
 
     this.saving = true;
 
+    const variantName = this.catalog.getDefaultVariantName(this.niche);
+
     const payload: CreateServiceDto = {
       name: this.form.value.name,
       variants: [
         {
-          name: 'Sesión individual',
+          name: variantName,
           duration_minutes: this.form.value.duration_minutes,
           price: this.form.value.price ?? 0,
           max_capacity: 1,
@@ -75,6 +129,7 @@ export class ServiceCreate implements OnInit {
         }
       ]
     };
+
 
     this.servicesService
       .create<OnboardingServiceResponse>(payload)
@@ -96,19 +151,28 @@ export class ServiceCreate implements OnInit {
 
         },
         error: (err) => {
-
-          // manejo fino de errores backend
-          if (err.status === 422 && err.error?.errors) {
-            this.notify.error('Revisa los campos');
-          } else if (err.status === 403) {
-            this.notify.error('No puedes hacer esto en este momento');
-          } else {
-            this.notify.error('No se pudo guardar');
-          }
-
           this.saving = false;
+          this.handleError(err, 'Error al guardar');
         }
       });
 
+  }
+
+  handleError(err: any, fallbackMessage: string) {
+
+    //console.error(err);
+
+    if (err?.error?.message) {
+      this.notify.error(err.error.message);
+      return;
+    }
+
+    if (err?.error?.errors) {
+      const firstError = Object.values(err.error.errors)[0] as string[];
+      this.notify.error(firstError[0]);
+      return;
+    }
+
+    this.notify.error(fallbackMessage);
   }
 }

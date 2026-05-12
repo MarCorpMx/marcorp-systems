@@ -1,18 +1,40 @@
-<div class="overlay" (click)="cancel.emit()"></div>
+<div class="overlay" (click)="confirmDialog.close()"></div>
 
 <div class="dialog">
-  <h3>{{ title }}</h3>
-  <p style="white-space: pre-line;">{{ message }}</p>
+
+  <h3>{{ confirmDialog.title() }}</h3>
+
+  <p style="white-space: pre-line;">
+    {{ confirmDialog.message() }}
+  </p>
 
   <div class="actions">
-    <!-- <button class="btn cancel" (click)="cancel.emit()"> -->
-    <button class="mar-btn-secondary" (click)="cancel.emit()">
+
+    <!-- Cancelar -->
+    <button class="mar-btn-secondary action-btn" (click)="confirmDialog.close()">
+
       {{ confirmDialog.btnCancelText() }}
+
     </button>
 
-    <!-- <button class="btn confirm" (click)="confirm.emit()"> -->
-    <button class="mar-btn-primary" (click)="confirm.emit()">
-      {{ confirmDialog.btnConfirmText() }}
+    <!-- Tercer botón opcional -->
+    @if (confirmDialog.showThirdButton()) {
+
+    <button class="third-btn action-btn" (click)="confirmDialog.third()">
+
+      {{ confirmDialog.btnThirdText() }}
+
     </button>
+
+    }
+
+    <!-- Confirmar -->
+    <button class="mar-btn-primary action-btn" (click)="confirmDialog.confirm()">
+
+      {{ confirmDialog.btnConfirmText() }}
+
+    </button>
+
   </div>
+
 </div>
