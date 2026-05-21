@@ -63,7 +63,7 @@ export class ClienteDetalle implements OnInit {
     { date: '20 Dic 2025', service: 'Psicoterapia', status: 'cancelada' }
   ];*/
 
-  notes: ClientDetailApi['notes'] = [];
+  notes: ClientDetailApi['notes_history'] = [];
   /*notes: Note[] = [
     { date: '10 Ene 2026', content: 'Paciente mostró mejoría notable.' },
     { date: '15 Dic 2025', content: 'Se recomienda seguimiento semanal.' }
@@ -89,16 +89,19 @@ export class ClienteDetalle implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
-          this.client = data;
+
+          this.notify.info("FALTA MUCHA CONFIG MAN, A CHINGARLE MAN");
+
+          /*this.client = data;
           this.history = data.history;
-          this.notes = data.notes;
+          this.notes = data.notes_history;
 
           console.log('client: ', data);
           console.log('history: ', data.history);
           console.log('notes: ', data.notes);
 
           this.breadcrumbService.replaceAt(2, data.name);
-          this.loading = false;
+          this.loading = false;*/
         },
         error: (err) => {
           console.error('Error cargando cliente', err);

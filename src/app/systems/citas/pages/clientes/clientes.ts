@@ -1,7 +1,7 @@
-import { Component, OnInit, HostListener, inject } from '@angular/core';
+import { Component, OnInit, HostListener, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, FormsModule, FormArray } from '@angular/forms';
 import { NgxIntlTelInputModule, CountryISO, PhoneNumberFormat, SearchCountryField } from 'ngx-intl-tel-input';
 import {
   LucideAngularModule,
@@ -11,22 +11,36 @@ import {
   Calendar,
   FileText,
   MoreVertical,
-  Search, X
+  Search, X, UserRound, Eye, Pencil, PauseCircle, PlayCircle, Lock, Unlock, Trash2, HelpCircle, Phone, Mail,
+  MessageCircle
 } from 'lucide-angular';
 
+import { AuthService } from '../../../../core/services/auth.service';
+import { BusinessCatalogService } from '../../../../core/services/business-catalog.service';
 import { Notification } from '../../../../services/notification.service';
 import { ClientService } from '../../../../core/services/client.service';
-import { ClientApi } from '../../../../core/models/client.model';
+import { ClientApi, ClientDetailApi, ClientPayload, PhoneApi } from '../../../../core/models/client.model';
 import { ConfirmDialogService } from '../../../../shared/services/confirm-dialog.service';
 import { AppDatePipe } from '../../../../shared/pipes/app-date-pipe';
 
 
 @Component({
   selector: 'app-clientes',
-  imports: [CommonModule, LucideAngularModule, RouterLink, ReactiveFormsModule, NgxIntlTelInputModule, AppDatePipe],
+  imports: [CommonModule, FormsModule, LucideAngularModule, RouterLink,
+    ReactiveFormsModule, NgxIntlTelInputModule, AppDatePipe],
   templateUrl: './clientes.html',
   styleUrl: './clientes.css',
 })
+
+/** 
+ * rombito - mejoras
+ * Cuando se bloquea, corregir el diseño
+ * Controlar los errores de todos los campos
+ * Compactar/descompactar las mascotas
+ * Agregar más campos a las mascotas para tener un mejor historial de las mascotas
+ * CAMBIAR EL MODAL "VER" POR cliente-detalle
+ * 
+*/
 
 export class Clientes implements OnInit {
   readonly UserCheck = UserCheck;
@@ -37,20 +51,78 @@ export class Clientes implements OnInit {
   readonly MoreVertical = MoreVertical;
   readonly Search = Search;
   readonly X = X;
+  readonly UserRound = UserRound;
+  readonly Eye = Eye;
+  readonly Pencil = Pencil;
+  readonly PauseCircle = PauseCircle;
+  readonly PlayCircle = PlayCircle;
+  readonly Lock = Lock;
+  readonly Unlock = Unlock;
+  readonly Trash2 = Trash2;
+  readonly HelpCircle = HelpCircle;
+  readonly Phone = Phone;
+  readonly Mail = Mail;
+  readonly MessageCircle = MessageCircle;
+
+  private auth = inject(AuthService);
+  public businessCatalogService = inject(BusinessCatalogService);
+  confirm = inject(ConfirmDialogService);
+  private clientService = inject(ClientService);
+  private fb = inject(FormBuilder);
+  private notify = inject(Notification);
+
+  organization = this.auth.organization$;
+
+  niche = computed(() =>
+    this.organization()?.business_niche ?? 'other'
+  );
+
+  isPetNiche = computed(() =>
+    this.niche() === 'pet_grooming'
+  );
+
+  emailPlaceholder = computed(() =>
+    this.isPetNiche()
+      ? 'Ej. dueño@email.com'
+      : 'Ej. cliente@email.com'
+  );
 
   form!: FormGroup;
   loading = true;
   submitted = false;
   saving = false;
   success = false;
+
   activeMenu: number | null = null;
 
   searchTerm = ''; // Buscador
   private searchTimeout: any; // Buscador
 
-  clients: ClientApi[] = [];
   showModal = false;
-  editingClient: ClientApi | null = null;
+  showClientActionsHelp = false;
+  showAdditionalInfo = false;
+  showPetSection = false;
+
+  //showPreferencesSection = false;
+  //showInternalSection = false;
+
+  showBlockModal = false;
+  blockingClient: ClientApi | null = null;
+  blockReason = '';
+
+  // Modal "ver"
+  showViewModal = false;
+  viewingClient: ClientDetailApi | null = null;
+  showFullNotes = false;
+  loadingViewClientId: number | null = null;
+
+  processingClientId: number | null = null;
+  processingBlockId: number | null = null;
+  loadingClientDetailId: number | null = null;
+  processingDeleteId: number | null = null;
+
+  clients: ClientApi[] = [];
+  editingClient: ClientDetailApi | null = null;
   currentPage = 1; // Paginador
   total = 0; // Paginador
   lastPage = 1; // Paginador
@@ -64,35 +136,164 @@ export class Clientes implements OnInit {
   countries: { code: CountryISO, name: string }[] = [];
   SearchCountryField = SearchCountryField;
 
-  confirm = inject(ConfirmDialogService);
-  private clientService = inject(ClientService);
-  private fb = inject(FormBuilder);
-  private notify = inject(Notification);
+  // Variables para texto 
+  clientLabel = computed(() =>
+    this.businessCatalogService.getTerm(
+      this.niche(),
+      'clients',
+      'singular',
+      true
+    )
+  );
+
+  clientsLabel = computed(() =>
+    this.businessCatalogService.getTerm(
+      this.niche(),
+      'clients',
+      'plural',
+      true
+    )
+  );
+
+  clientLabelLower = computed(() =>
+    this.businessCatalogService.getTerm(
+      this.niche(),
+      'clients',
+      'singular'
+    )
+  );
+
+  clientsLabelLower = computed(() =>
+    this.businessCatalogService.getTerm(
+      this.niche(),
+      'clients',
+      'plural'
+    )
+  );
+
 
   ngOnInit() {
+
+    //console.log("el nicho: ", this.niche());
+    //console.log("clientLabel: ", this.clientLabel());
+    //console.log("clientsLabel: ", this.clientsLabel());
+    //console.log("clientLabelLower: ", this.clientLabelLower());
+    //console.log("clientsLabelLower: ", this.clientsLabelLower());
+
     this.initForm();
     this.loadClients();
   }
 
   initForm() {
     this.form = this.fb.group({
+
+      /*
+      |--------------------------------------------------------------------------
+      | Básico
+      |--------------------------------------------------------------------------
+      */
       first_name: ['', [
         Validators.required,
-        Validators.minLength(3),
+        Validators.minLength(2),
         Validators.maxLength(100)
       ]],
       last_name: ['', [
-        Validators.minLength(3),
+        Validators.minLength(2),
+        Validators.maxLength(100)
+      ]],
+      preferred_name: ['', [
         Validators.maxLength(100)
       ]],
       email: ['', [
-        Validators.required,
         Validators.email,
         Validators.maxLength(150)
       ]],
       phone: [null],
-      birth_date: ['']
+
+      /*
+      |--------------------------------------------------------------------------
+      | Personal
+      |--------------------------------------------------------------------------
+      */
+      birth_date: [''],
+      gender: [''],
+      preferred_language: ['es'],
+      timezone: [''],
+
+      /*
+      |--------------------------------------------------------------------------
+      | CRM
+      |--------------------------------------------------------------------------
+      */
+      source: ['manual'],
+      tags: [[]],
+      notes: ['', [
+        Validators.maxLength(3000)
+      ]],
+
+      /*
+      |--------------------------------------------------------------------------
+      | Estado
+      |--------------------------------------------------------------------------
+      */
+      is_active: [true],
+
+      /*
+      |--------------------------------------------------------------------------
+      | Mascota (pet grooming)
+      |--------------------------------------------------------------------------
+      */
+      /*pet_name: [''],
+      pet_species: [''],
+      pet_breed: [''],
+      pet_gender: ['unknown'],
+      pet_weight: [null],
+      pet_weight_unit: ['kg'],
+      pet_color: [''],
+      pet_birth_date: [''],
+      pet_allergies: [''],
+      pet_medical_notes: ['']*/
+
+      pets: this.fb.array([])
+
     });
+  }
+
+  get pets() {
+    return this.form.get('pets') as FormArray;
+  }
+
+  createPetForm(data?: any): FormGroup {
+    return this.fb.group({
+
+      _tmpId: [data?._tmpId ?? this.generateId()],
+      id: [data?.id ?? null],
+
+      name: [data?.name ?? '', [Validators.required]],
+      species: [data?.species ?? ''],
+      breed: [data?.breed ?? ''],
+      gender: [data?.gender ?? 'unknown'],
+      weight: [data?.weight ?? null],
+      weight_unit: [data?.weight_unit ?? 'kg'],
+      color: [data?.color ?? ''],
+      birth_date: [data?.birth_date ?? ''],
+      allergies: [data?.allergies ?? ''],
+      medical_notes: [data?.medical_notes ?? '']
+    });
+  }
+
+  addPet(data?: any) {
+
+    this.pets.push(
+      this.createPetForm(data)
+    );
+
+  }
+
+  removePet(index: number) {
+
+    this.pets.removeAt(index);
+
   }
 
 
@@ -102,15 +303,20 @@ export class Clientes implements OnInit {
     this.clientService
       .getClients(page, this.searchTerm) // enviamos search
       .subscribe({
-        next: (response) => {
-          this.clients = response.data;
-          this.currentPage = response.current_page;
-          this.lastPage = response.last_page;
-          this.perPage = response.per_page;
-          this.total = response.total;
+        next: (res) => {
+
+          this.clients = res.data;
+          this.currentPage = res.current_page;
+          this.lastPage = res.last_page;
+          this.perPage = res.per_page;
+          this.total = res.total;
           this.loading = false;
         },
-        error: () => this.loading = false
+        error: (err) => {
+          this.loading = false;
+
+          this.handleError(err, 'Error al consultar los datos');
+        }
       });
   }
 
@@ -175,34 +381,334 @@ export class Clientes implements OnInit {
     this.activeMenu = null;
   }
 
-  openCreate() {
-    this.editingClient = null;
-    this.form.reset();
-    this.showModal = true;
+  openView(client: ClientApi): void {
+
+    if (this.loadingViewClientId) {
+      this.notify.error('Procesando ' + this.clientLabel());
+      return;
+    }
+
+    this.loadingViewClientId = client.id;
+
+    this.clientService
+      .getClient(client.id)
+      .subscribe({
+
+        next: (res) => {
+
+          this.viewingClient = res.data;
+
+          this.loadingViewClientId = null;
+
+          this.showViewModal = true;
+        },
+
+        error: (err) => {
+
+          this.loadingViewClientId = null;
+
+          this.handleError(
+            err,
+            'Error cargando información'
+          );
+        }
+
+      });
+
   }
 
-  openEdit(client: ClientApi) {
-    this.editingClient = client;
+  toggleClientStatus(client: ClientApi): void {
 
-    const [firstName, ...lastParts] = client.full_name.split(' ');
+    if (this.processingClientId) {
+      this.notify.error('Procesando ' + this.clientLabel());
+      return;
+    }
 
-    const formattedBirthDate = client.birth_date
-      ? client.birth_date.substring(0, 10)
-      : '';
+    const execute = () => {
 
-    this.form.patchValue({
-      first_name: firstName,
-      last_name: lastParts.join(' '),
-      email: client.email ?? '',
-      phone: client.phone ?? '',
-      birth_date: formattedBirthDate
+      this.processingClientId = client.id;
+
+      const prev = client.is_active;
+
+      const payload = {
+        active: !client.is_active
+      };
+
+      this.clientService
+        .changeStatus(client.id, payload)
+        .subscribe({
+          next: (res) => {
+
+            client.is_active = res.data.is_active;
+
+            this.sortClients();
+
+            this.notify.success(
+              res.data.is_active
+                ? this.clientLabel() + ' activado correctamente'
+                : this.clientLabel() + ' desactivado correctamente'
+            );
+
+            this.processingClientId = null;
+          },
+          error: (err) => {
+            client.is_active = prev;
+
+            this.processingClientId = null;
+
+            this.handleError(err, 'Ocurrió un error al actualizar');
+
+          }
+        });
+    };
+
+    // Solo confirmar si se va a desactivar
+    if (client.is_active) {
+      this.confirm.open(
+        'Desactivar ' + this.clientLabelLower(),
+        'Este ' + this.clientLabelLower() + ' dejará de aparecer en nuevas reservas y listas activas. \nSu historial, citas y datos permanecerán guardados.\n\n¿Deseas continuar?',
+        execute,
+        'Cancelar',
+        'Desactivar'
+      );
+    } else {
+      execute();
+    }
+
+  }
+
+  handleBlockAction(client: ClientApi) {
+
+    /*
+    |----------------------------------------------------------
+    | Si ya está bloqueado → desbloquear
+    |----------------------------------------------------------
+    */
+    if (client.is_blocked) {
+
+      this.confirm.open(
+        'Desbloquear ' + this.clientLabelLower(),
+        'Este ' + this.clientLabelLower() + ' volverá a aparecer en reservas y procesos activos.\n\n¿Deseas continuar?',
+        () => this.executeBlock(client, false),
+        'Cancelar',
+        'Desbloquear'
+      );
+
+      return;
+    }
+
+    /*
+    |----------------------------------------------------------
+    | Si no está bloqueado → abrir modal
+    |----------------------------------------------------------
+    */
+    this.blockingClient = client;
+
+    this.blockReason = '';
+
+    this.showBlockModal = true;
+  }
+
+  closeBlockModal() {
+
+    if (this.processingBlockId) {
+      this.notify.error('Procesando ' + this.clientLabel());
+      return;
+    }
+
+    this.showBlockModal = false;
+    this.blockingClient = null;
+    this.blockReason = '';
+  }
+
+  confirmBlock() {
+
+    if (!this.blockReason.trim()) {
+      this.notify.error('Escribe un motivo del bloqueo');
+      return;
+    }
+
+    if (!this.blockingClient || this.processingBlockId) {
+      this.notify.error('Procesando ' + this.clientLabel());
+      return;
+    }
+
+    this.executeBlock(
+      this.blockingClient,
+      true,
+      this.blockReason
+    );
+
+  }
+
+  executeBlock(
+    client: ClientApi,
+    blocked: boolean,
+    reason: string | null = null
+  ) {
+
+    this.processingBlockId = client.id;
+
+    this.clientService
+      .changeBlockStatus(
+        client.id,
+        {
+          blocked,
+          reason
+        }
+      )
+      .subscribe({
+
+        next: (res) => {
+
+          client.is_blocked = res.data.is_blocked;
+          client.blocked_reason = res.data.blocked_reason;
+
+          // si bloqueas, mejor desactivar automáticamente
+          if (blocked) {
+            client.is_active = false;
+          }
+
+          this.sortClients();
+
+          this.notify.success(
+            blocked
+              ? this.clientLabel() + ' bloqueado'
+              : this.clientLabel() + ' desbloqueado'
+          );
+
+          this.processingBlockId = null;
+
+          // limpiar modal
+          this.closeBlockModal();
+        },
+        error: (err) => {
+          this.processingBlockId = null;
+
+          this.handleError(
+            err,
+            'Error al actualizar'
+          );
+        }
+      });
+
+  }
+
+  openCreate() {
+
+    this.pets.clear();
+
+    if (this.isPetNiche()) {
+      this.addPet();
+    }
+
+    this.editingClient = null;
+
+    this.showAdditionalInfo = false;
+    //this.showPreferencesSection = false;
+    //this.showInternalSection = false;
+    this.showPetSection = false;
+
+    this.submitted = false;
+
+    this.form.reset({
+      preferred_language: 'es',
+      source: 'manual',
+      gender: '',
+      is_active: true
     });
 
     this.showModal = true;
   }
 
+  openEdit(client: ClientApi) {
+
+    if (this.loadingClientDetailId) {
+      this.notify.error('Procesando ' + this.clientLabel());
+      return;
+    }
+
+
+    this.loadingClientDetailId = client.id;
+
+    this.clientService
+      .getClient(client.id)
+      .subscribe({
+
+        next: (res) => {
+
+          const detail = res.data;
+
+          this.editingClient = detail;
+
+          this.showAdditionalInfo = true;
+
+          this.showPetSection = (detail.pets?.length ?? 0) > 0;
+
+          this.pets.clear();
+
+          detail.pets?.forEach(pet => {
+
+            this.addPet({
+              id: pet.id,
+              name: pet.name,
+              species: pet.species,
+              breed: pet.breed,
+              gender: pet.gender,
+              weight: pet.weight,
+              weight_unit: pet.weight_unit,
+              color: pet.color,
+              birth_date: pet.birth_date,
+              allergies: pet.allergies,
+              medical_notes: pet.medical_notes
+            });
+
+          });
+
+          this.form.patchValue({
+            first_name: detail.first_name ?? '',
+            last_name: detail.last_name ?? '',
+            preferred_name: detail.preferred_name ?? '',
+            email: detail.email ?? '',
+            phone: detail.phone ?? null,
+            birth_date: detail.birth_date?.split('T')[0] ?? '',
+            gender: detail.gender ?? '',
+            preferred_language: detail.preferred_language ?? 'es',
+            timezone: detail.timezone ?? '',
+            source: detail.source ?? 'manual',
+            tags: detail.tags ?? [],
+            notes: detail.notes ?? '',
+            is_active: detail.is_active ?? true
+          });
+
+          this.loadingClientDetailId = null;
+
+          this.showModal = true;
+
+        },
+
+        error: (err) => {
+          this.loadingClientDetailId = null;
+
+          this.handleError(err, 'Error cargando cliente');
+        }
+
+      });
+
+  }
+
   closeModal() {
+
     this.showModal = false;
+
+    this.submitted = false;
+
+    this.form.reset();
+
+    this.showAdditionalInfo = false;
+    //this.showPreferencesSection = false;
+    //this.showInternalSection = false;
+    this.showPetSection = false;
   }
 
   save() {
@@ -216,57 +722,200 @@ export class Clientes implements OnInit {
     this.submitted = true;
     this.saving = true;
 
+    const raw = this.form.getRawValue();
 
-    const data = this.form.value;
+    const payload: ClientPayload = {
+      first_name: raw.first_name?.trim(),
+      last_name: raw.last_name?.trim() || null,
+      preferred_name: raw.preferred_name?.trim() || null,
+
+      email: raw.email?.trim() || null,
+      phone: raw.phone || null,
+
+      birth_date: raw.birth_date || null,
+      gender: raw.gender || null,
+      preferred_language: raw.preferred_language || null,
+      timezone: raw.timezone || null,
+
+      source: raw.source || 'manual',
+
+      tags: raw.tags ?? [],
+
+      notes: raw.notes?.trim() || null,
+
+      is_active: raw.is_active ?? true
+    };
+
+    if (this.isPetNiche()) {
+
+      payload.pets = raw.pets
+        ?.filter(
+          (pet: any) => pet.name?.trim()
+        )
+        .map((pet: any) => ({
+          id: pet.id ?? null,
+          name: pet.name.trim(),
+          species: pet.species || null,
+          breed: pet.breed || null,
+          gender: pet.gender || 'unknown',
+          weight: pet.weight || null,
+          weight_unit: pet.weight_unit || 'kg',
+          color: pet.color || null,
+          birth_date: pet.birth_date || null,
+          allergies: pet.allergies?.trim() || null,
+          medical_notes: pet.medical_notes?.trim() || null
+        }));
+    }
 
     if (this.editingClient) {
 
-      this.notify.info('andamos en la actualizacion man');
-      /*this.clientService.updateClient(this.editingClient.id, data)
-        .subscribe(() => {
-          this.notify.success('Cliente actualizado correctamente');
-          this.loadClients(this.currentPage);
-          this.closeModal();
-        });*/
-    } else {
-      //this.notify.info('gardando a chico che');
-      this.clientService.createClient(data)
+      this.clientService
+        .updateClient(
+          this.editingClient.id,
+          payload
+        )
         .subscribe({
           next: (res) => {
-            this.notify.success('Cliente creado correctamente');
-            
-            this.submitted = false;
+
+            this.notify.success(
+              this.clientLabel() + ' actualizado correctamente'
+            );
+
             this.saving = false;
-            
+            this.submitted = false;
+
+            // recargar listado
             this.loadClients(this.currentPage);
+
+            // cerrar modal
             this.closeModal();
           },
           error: (err) => {
-            this.submitted = false;
-            this.saving = false;
 
+            this.saving = false;
+            this.submitted = false;
+
+            this.handleError(
+              err,
+              'Error al actualizar'
+            );
+
+          }
+        });
+
+    } else {
+
+      this.clientService
+        .createClient(payload)
+        .subscribe({
+          next: () => {
+            this.notify.success(this.clientLabel() + ' creado correctamente');
+
+            this.saving = false;
+            this.submitted = false;
+
+            this.loadClients(this.currentPage);
+
+            this.closeModal();
+          },
+          error: (err) => {
+            this.saving = false;
+            this.submitted = false;
 
             this.handleError(err, 'Error al guardar');
           }
-
         });
     }
   }
 
   delete(client: ClientApi) {
+
+    if (this.processingDeleteId) {
+      this.notify.error('Procesando ' + this.clientLabel());
+      return;
+    }
+
     this.confirm.open(
-      'Eliminar cliente',
-      '¿Seguro que deseas eliminar el cliente?',
+      'Eliminar ' + this.clientLabelLower(),
+      '¿Seguro que deseas eliminar el ' + this.clientLabelLower() + ' ?',
       () => {
-        this.clientService.deleteClient(client.id)
-          .subscribe(() => this.loadClients(this.currentPage));
-        this.notify.success('Cliente eliminado correctamente');
+
+        this.processingDeleteId = client.id;
+
+        this.clientService
+          .deleteClient(client.id)
+          .subscribe({
+            next: () => {
+              this.notify.success(this.clientLabel() + ' eliminado correctamente');
+
+              this.processingDeleteId = null;
+
+              this.loadClients(this.currentPage);
+
+            },
+            error: (err) => {
+
+              this.processingDeleteId = null;
+
+              this.handleError(err, 'Error al eliminar');
+            }
+          });
+
       },
       'Cancelar',
       'Eliminar'
     );
+  }
 
+  // Para ordenar
+  private sortClients(): void {
 
+    this.clients.sort((a, b) => {
+
+      /*
+      |----------------------------------------------------------
+      | Prioridad:
+      | 1 = activos
+      | 2 = inactivos
+      | 3 = bloqueados
+      |----------------------------------------------------------
+      */
+      const getPriority = (client: ClientApi) => {
+
+        if (client.is_blocked) return 3;
+
+        if (!client.is_active) return 2;
+
+        return 1;
+      };
+
+      const priorityA = getPriority(a);
+      const priorityB = getPriority(b);
+
+      // primero prioridad
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
+
+      // dentro del mismo grupo por nombre
+      return this.getClientFullName(a)
+        .localeCompare(
+          this.getClientFullName(b)
+        );
+
+    });
+
+  }
+
+  // Genera los id´s para poder eliminar mascotas
+  private generateId(): string {
+    try {
+      return crypto.randomUUID();
+    } catch {
+      return 'tmp_' +
+        Math.random().toString(36).substring(2) +
+        Date.now();
+    }
   }
 
   // Status classes para badges
@@ -276,6 +925,33 @@ export class Clientes implements OnInit {
       inactivo: 'bg-gray-500/10 text-gray-400',
       riesgo: 'bg-yellow-500/10 text-yellow-400'
     }[status];
+  }
+
+  getClientFullName(client: ClientApi): string {
+
+    return client.full_name
+      ?? client.preferred_name
+      ?? client.first_name
+      ?? 'Sin nombre';
+
+  }
+
+  getInitials(client: ClientApi): string {
+
+    return (
+      client.first_name?.charAt(0) +
+      (client.last_name?.charAt(0) ?? '')
+    )
+      .toUpperCase()
+      || '?';
+
+  }
+
+  getWhatsappLink(phone: PhoneApi): string {
+
+    const number = phone.e164Number.replace('+', '');
+
+    return `https://wa.me/${number}`;
   }
 
 
@@ -294,9 +970,34 @@ export class Clientes implements OnInit {
     return 'Campo inválido';
   }
 
-  handleError(err: any, fallbackMessage: string) {
+  getPetError(index: number, controlName: string): string | null {
 
-    //console.error(err);
+    const control = this.pets
+      .at(index)
+      ?.get(controlName);
+
+    if (!control?.errors) return null;
+
+    if (!control.touched && !this.submitted) {
+      return null;
+    }
+
+    if (control.errors['required']) {
+      return 'Obligatorio';
+    }
+
+    if (control.errors['maxlength']) {
+      return 'Muy largo';
+    }
+
+    if (control.errors['minlength']) {
+      return 'Muy corto';
+    }
+
+    return 'Campo inválido';
+  }
+
+  handleError(err: any, fallbackMessage: string) {
 
     if (err?.error?.message) {
       this.notify.error(err.error.message);

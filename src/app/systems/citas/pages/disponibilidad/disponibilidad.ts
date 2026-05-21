@@ -22,6 +22,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import esLocale from '@fullcalendar/core/locales/es';
+import momentTimezonePlugin from '@fullcalendar/moment-timezone';
 
 // Serivios Internos
 import { AuthService } from '../../../../core/services/auth.service';
@@ -61,11 +62,13 @@ export class Disponibilidad implements OnInit {
   private notify = inject(Notification);
 
   loading = true;
+  saving = false;
   emptyState = false;
   role: string | null = null;
   staffId: number | null = null;
 
-  branchTimezone = 'UTC';
+  //branchTimezone = 'UTC';
+  branchTimezone = this.auth.getCurrentBranch();
 
   professionals: Professional[] = [];
   selectedProfessionalId!: number;
@@ -94,7 +97,12 @@ export class Disponibilidad implements OnInit {
 
 
   calendarOptions: any = {
-    plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
+    plugins: [
+      dayGridPlugin,
+      timeGridPlugin,
+      interactionPlugin,
+      momentTimezonePlugin
+    ],
 
     initialView: 'timeGridWeek',
 
@@ -102,6 +110,8 @@ export class Disponibilidad implements OnInit {
     locale: 'es',
     //timeZone: 'America/Mexico_City',
     timeZone: this.branchTimezone,
+    //timeZone: 'local',
+    //timeZone: 'America/New_York',
 
     headerToolbar: {
       left: 'prev,next today',
@@ -120,12 +130,13 @@ export class Disponibilidad implements OnInit {
 
     slotMinTime: '08:00:00',
     slotMaxTime: '18:00:00',
+    //slotMaxTime: '23:59:59',
 
     events: [],
 
     selectAllow: (selectInfo: any) => {
-      const start = this.fixToLocal(selectInfo.start);
-      const end = this.fixToLocal(selectInfo.end);
+      const start = selectInfo.start;
+      const end = selectInfo.end;
 
       // BLOQUEAR MULTI-DÍA
       if (start.toDateString() !== end.toDateString()) {
@@ -153,16 +164,33 @@ export class Disponibilidad implements OnInit {
       |----------------------------------------------------------
       */
 
-      //const day = start.getDay();
-      let day = start.getDay();
-      day = day === 0 ? 7 : day;
-
       const schedule = this.currentSchedule || [];
 
+      /*
+      |----------------------------------------------------------
+      | OBTENER DÍA REAL DEL CALENDAR
+      |----------------------------------------------------------
+      */
 
-      const jsDay = start.getDay(); // 0-6
+      const startStr = selectInfo.startStr;
+      const endStr = selectInfo.endStr;
+
+      // YYYY-MM-DD
+      const datePart = startStr.split('T')[0];
+
+      const tempDate = new Date(datePart + 'T00:00:00');
+
+      let day = tempDate.getDay();
+      //day = day === 0 ? 7 : day;
+
+      /*
+      |----------------------------------------------------------
+      | BUSCAR CONFIGURACIÓN DEL DÍA
+      |----------------------------------------------------------
+      */
+
       const workingDay = schedule.find((d: any) => {
-        return Number(d.day_of_week) === jsDay;
+        return Number(d.day_of_week) === day;
       });
 
       if (!workingDay) {
@@ -170,9 +198,28 @@ export class Disponibilidad implements OnInit {
         return false;
       }
 
+      /*
+      |----------------------------------------------------------
+      | EXTRAER HORAS REALES DEL CALENDAR
+      |----------------------------------------------------------
+      */
 
-      const startMinutes = start.getHours() * 60 + start.getMinutes();
-      const endMinutes = end.getHours() * 60 + end.getMinutes();
+      // 2026-05-12T10:00:00-06:00
+
+      const startTime = startStr.split('T')[1].substring(0, 5);
+      const endTime = endStr.split('T')[1].substring(0, 5);
+
+      const [startHour, startMinute] = startTime.split(':').map(Number);
+      const [endHour, endMinute] = endTime.split(':').map(Number);
+
+      const startMinutes = (startHour * 60) + startMinute;
+      const endMinutes = (endHour * 60) + endMinute;
+
+      /*
+      |----------------------------------------------------------
+      | HORARIO LABORAL
+      |----------------------------------------------------------
+      */
 
       const workStart = this.toMinutes(workingDay.start_time);
       const workEnd = this.toMinutes(workingDay.end_time);
@@ -220,7 +267,12 @@ export class Disponibilidad implements OnInit {
     |----------------------------------------------------------
     */
     select: (info: any) => {
-      this.openBlockModal(info.start, info.end);
+
+      this.openBlockModal(
+        new Date(info.startStr),
+        new Date(info.endStr)
+      );
+
     },
 
     /*
@@ -274,6 +326,8 @@ export class Disponibilidad implements OnInit {
   };
 
 
+
+
   ngOnInit() {
     this.setResponsiveOptions();
     window.addEventListener('resize', () => this.setResponsiveOptions());
@@ -315,6 +369,29 @@ export class Disponibilidad implements OnInit {
     return h * 60 + m;
   }
 
+  extractTimeMinutes(dateStr: string): number {
+
+    // 2026-05-12T10:00:00-06:00
+
+    const timePart = dateStr.split('T')[1].substring(0, 5);
+
+    const [h, m] = timePart.split(':').map(Number);
+
+    return (h * 60) + m;
+  }
+
+  extractWeekDay(dateStr: string): number {
+
+    // YYYY-MM-DD
+    const datePart = dateStr.split('T')[0];
+
+    const date = new Date(datePart + 'T00:00:00');
+
+    let day = date.getDay();
+
+    return day === 0 ? 7 : day;
+  }
+
   getTimeString(date: Date): string {
     const pad = (n: number) => n.toString().padStart(2, '0');
     return `${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
@@ -325,8 +402,8 @@ export class Disponibilidad implements OnInit {
       open: true,
       editMode: true,
       id: event.id,
-      start: this.fixToLocal(event.start),
-      end: this.fixToLocal(event.end),
+      start: event.start,
+      end: event.end,
       reason: event.title,
       error: false
     };
@@ -337,8 +414,8 @@ export class Disponibilidad implements OnInit {
       open: true,
       editMode: false,
       id: null,
-      start: this.fixToLocal(start),
-      end: this.fixToLocal(end),
+      start: start,
+      end: end,
       reason: '',
       error: false
     };
@@ -366,6 +443,7 @@ export class Disponibilidad implements OnInit {
   }
 
   closeBlockModal() {
+    this.saving = false;
     this.blockModal.open = false;
   }
 
@@ -373,10 +451,6 @@ export class Disponibilidad implements OnInit {
     this.appointmentModal.open = false;
   }
 
-  fixToLocal(date: Date): Date {
-    const offset = date.getTimezoneOffset();
-    return new Date(date.getTime() + offset * 60000);
-  }
 
   setResponsiveOptions() {
     if (window.innerWidth < 768) {
@@ -450,7 +524,7 @@ export class Disponibilidad implements OnInit {
         next: (res) => {
           const data = res.data;
 
-          //console.log('dataConfig:', JSON.stringify(res, null, 2));
+          console.log('dataConfig:', JSON.stringify(res, null, 2));
 
           if (this.isNotConfigured(data)) {
             this.loading = false;
@@ -494,8 +568,8 @@ export class Disponibilidad implements OnInit {
                   })),
                   // bloqueos manuales
                   ...manualBlocks.map(b => ({
-                    start: this.fixToLocal(new Date(b.start)),
-                    end: this.fixToLocal(new Date(b.end)),
+                    start: new Date(b.start),
+                    end: new Date(b.end),
                     type: 'manual_block'
                   })),
                   // días no laborales (fechas completas)
@@ -511,6 +585,7 @@ export class Disponibilidad implements OnInit {
                   ...this.calendarOptions,
                   slotMinTime: min,
                   slotMaxTime: max,
+                  //slotMaxTime: '23:59:59',
                   events: [
                     ...recurringEvents,
                     ...nonWorkingDays,
@@ -574,32 +649,50 @@ export class Disponibilidad implements OnInit {
   }
 
   createBlock(payload: any) {
+    this.saving = true;
     this.agendaService.createBlock(this.selectedProfessionalId, payload)
       .subscribe({
         next: () => {
           this.notify.success('Horario bloqueado');
           this.loadAvailability(); // recarga real
           this.closeBlockModal();
+
+          this.saving = false;
         },
-        error: (err) => this.handleError(err, 'Error al guardar')
+        error: (err) => {
+          this.saving = false;
+          this.handleError(err, 'Error al guardar');
+        }
       });
   }
 
   updateBlock(payload: any) {
 
-    if (!this.blockModal.id) return;
+    const blockId = this.blockModal.id;
+
+    if (!blockId) {
+      this.notify.error('No se encontró un ID');
+      return;
+    }
+
+    this.saving = true;
 
     this.agendaService.updateBlock(
       this.selectedProfessionalId,
-      this.blockModal.id,
+      blockId,
       payload
     ).subscribe({
       next: () => {
         this.notify.success('Horario actualizado');
         this.loadAvailability();
         this.closeBlockModal();
+
+        this.saving = false;
       },
-      error: (err) => this.handleError(err, 'Error al actualizar')
+      error: (err) => {
+        this.saving = false;
+        this.handleError(err, 'Error al actualizar');
+      }
     });
   }
 
@@ -660,7 +753,7 @@ export class Disponibilidad implements OnInit {
 
       //display: 'background', // bloque visual tipo Calendly
       display: 'block',
-      color: '#ef4444',
+      color: '#a855f7',
 
       extendedProps: {
         type: 'recurring_block'
@@ -688,6 +781,14 @@ export class Disponibilidad implements OnInit {
       min: starts.sort()[0],
       max: ends.sort().reverse()[0]
     };
+  }
+
+  formatLocalDate(date: Date): string {
+
+    const pad = (n: number) => n.toString().padStart(2, '0');
+
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} `
+      + `${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
   }
 
   mapNonWorkingDays(schedule: any[]) {
@@ -743,7 +844,13 @@ export class Disponibilidad implements OnInit {
 
   mapNonWorkingDates(days: any[]) {
     return days.map(d => {
-      const date = new Date(d.date);
+
+      const [year, month, day] = d.date
+        .split('-')
+        .map(Number);
+
+      // FECHA LOCAL REAL
+      const date = new Date(year, month - 1, day);
 
       const start = new Date(date);
       start.setHours(0, 0, 0, 0);
@@ -753,10 +860,11 @@ export class Disponibilidad implements OnInit {
 
       return {
         title: d.reason || 'No disponible',
+
         start,
         end,
 
-        display: 'background', // bloquea todo el día
+        display: 'background',
 
         color: 'rgba(239, 68, 68, 0.35)',
 
@@ -771,9 +879,14 @@ export class Disponibilidad implements OnInit {
     return blocks.map(b => ({
       id: b.id,
       title: b.reason || 'Bloqueado',
-      start: this.toLocal(b.start_datetime),
-      end: this.toLocal(b.end_datetime),
-      color: '#ef4444',
+
+      // FULLCALENDAR MANEJA EL UTC
+      start: b.start_datetime,
+      end: b.end_datetime,
+
+      display: 'block',
+      color: '#f97316',
+
       extendedProps: {
         type: 'manual_block'
       }
@@ -848,17 +961,6 @@ export class Disponibilidad implements OnInit {
     }
   }
 
-  toLocal(dateStr: string): Date {
-    const date = new Date(dateStr);
-    return new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-  }
-
-  formatLocalDate(date: Date) {
-    const pad = (n: number) => n.toString().padStart(2, '0');
-
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} `
-      + `${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
-  }
 
   goToConfig() {
     window.location.href = '/sistemas/citas/configuracion/agenda';

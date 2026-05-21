@@ -20,6 +20,12 @@ export class AuthService {
     JSON.parse(localStorage.getItem('current_system') || 'null')
   );
 
+  private currentOrganization = signal<any>(
+    JSON.parse(localStorage.getItem('organization') || 'null')
+  );
+
+  organization$ = this.currentOrganization.asReadonly();
+
   private api = inject(Api);
   private router = inject(Router);
   private theme = inject(ThemeService);
@@ -30,8 +36,8 @@ export class AuthService {
     localStorage.setItem('auth_token', res.token);
     localStorage.setItem('user', JSON.stringify(res.user));
     localStorage.setItem('systems', JSON.stringify(res.systems));
-    localStorage.setItem('organization', JSON.stringify(res.organization));
-
+    //localStorage.setItem('organization', JSON.stringify(res.organization));
+    this.setCurrentOrganization(res.organization);
 
     //console.log('dataSystem:', JSON.stringify(res.systems, null, 2));
     //console.log('dataUser:', JSON.stringify(res.user, null, 2));
@@ -245,7 +251,8 @@ export class AuthService {
       tap((res) => {
         localStorage.setItem('user', JSON.stringify(res.user));
         localStorage.setItem('systems', JSON.stringify(res.systems));
-        localStorage.setItem('organization', JSON.stringify(res.organization));
+        //localStorage.setItem('organization', JSON.stringify(res.organization));
+        this.setCurrentOrganization(res.organization);
 
         if (res.systems?.length) {
           this.setCurrentSystem(res.systems[0]);
@@ -287,7 +294,8 @@ export class AuthService {
   }
 
   getOrganization() {
-    return JSON.parse(localStorage.getItem('organization') || 'null');
+    //return JSON.parse(localStorage.getItem('organization') || 'null');
+    return this.currentOrganization();
   }
 
   /*getCurrentSystem() {
@@ -359,6 +367,15 @@ export class AuthService {
     this.currentSystem.set(system);
 
     this.theme.setCurrentSystem(system);
+  }
+
+  setCurrentOrganization(org: any) {
+
+    if (!org) return;
+
+    localStorage.setItem('organization', JSON.stringify(org));
+
+    this.currentOrganization.set(org);
   }
 
   getAuthContext() {

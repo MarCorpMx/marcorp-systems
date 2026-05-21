@@ -8,7 +8,26 @@
     <div class="sidebar-overlay" (click)="closeSidebar()"></div>
     <!-- HEADER -->
     <div class="sidebar-header">
-        <div class="logo">M</div>
+        <!-- <div class="logo">M</div> -->
+        <div class="logo">
+
+            @if (organizationLogo()) {
+
+            <img [src]="organizationLogo()" alt="Logo organización" class="logo-image" />
+
+            } @else {
+
+            <div class="logo-fallback" [style.background]="nicheColor() + '20'">
+
+                <lucide-icon [img]="sidebarNicheIcon()" size="20" [style.color]="nicheColor()">
+                </lucide-icon>
+
+            </div>
+
+            }
+
+        </div>
+
         <div class="system">
             <!-- <span class="name">{{ currentSystem?.subsystem.name }}</span> -->
             <span class="name">ROMBI</span>
@@ -69,7 +88,8 @@
             (click)="handleMenuClick(item)">
 
             <lucide-icon [img]="ICON_MAP[item.icon]" size="20"></lucide-icon>
-            <span>{{ item.label }}</span>
+            <!-- <span>{{ item.label }}</span> -->
+            <span>{{ item.dynamicLabel }}</span>
         </a>
 
         }

@@ -32,7 +32,7 @@ export const CITAS_ROUTES: Routes = [
           import('./pages/agenda/agenda')
             .then(m => m.Agenda),
         data: {
-          breadcrumb: 'Agenda',
+          breadcrumb: 'agenda',
           feature: 'agenda'
         },
       },
@@ -40,7 +40,7 @@ export const CITAS_ROUTES: Routes = [
         path: 'clientes',
         canActivate: [featureGuard],
         canActivateChild: [featureGuard],
-        data: { breadcrumb: 'Clientes', feature: 'clients' },
+        data: { breadcrumb: 'clients', feature: 'clients' },
         children: [
           {
             path: '',
@@ -65,10 +65,23 @@ export const CITAS_ROUTES: Routes = [
           import('./pages/servicios/servicios')
             .then(m => m.Servicios),
         data: {
-          breadcrumb: 'Servicios',
+          breadcrumb: 'services',
           feature: 'services'
         }
       },
+
+      {
+        path: 'reservas-online',
+        canActivate: [featureGuard],
+        loadComponent: () =>
+          import('./pages/reservas-online/reservas-online')
+            .then(m => m.ReservasOnline),
+        data: {
+          breadcrumb: 'booking',
+          feature: 'booking'
+        }
+      },
+
       {
         path: 'disponibilidad',
         canActivate: [featureGuard],
@@ -119,7 +132,7 @@ export const CITAS_ROUTES: Routes = [
           import('./pages/equipo/equipo')
             .then(m => m.Equipo),
         data: {
-          breadcrumb: 'Equipo',
+          breadcrumb: 'team', // estan en ingles como el key para que puedan cambiar por el nicho en breadcrumb.service.ts
           feature: 'team'
         }
       },

@@ -1,9 +1,21 @@
-import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import {
+  LucideAngularModule,
+  Calendar, X, HelpCircle
+} from 'lucide-angular';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  switchMap
+} from 'rxjs';
+import { NgxIntlTelInputModule, CountryISO, PhoneNumberFormat, SearchCountryField } from 'ngx-intl-tel-input';
+
 
 import { ClientService } from '../../../../../core/services/client.service';
-import { ClientApi } from '../../../../../core/models/client.model';
+import { ClientApi, ClientSelectItem, PetSelectItem } from '../../../../../core/models/client.model';
 
 import { CitasServicesService } from '../../../../../core/services/citas-services.service';
 import { CitasAgendaService } from '../../../../../core/services/citas-agenda.service';
@@ -13,18 +25,63 @@ import { ProfessionalsService } from '../../../../../core/services/professionals
 import { StaffListItem } from '../../../../../core/models/staff.model';
 
 import { Notification } from '../../../../../services/notification.service';
+import { ConfirmDialogService } from '../../../../../shared/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-agenda-modal',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, NgxIntlTelInputModule],
   templateUrl: './agenda-modal.html',
   styleUrl: './agenda-modal.css',
 })
 
 export class AgendaModal implements OnInit, OnChanges {
+
+  readonly Calendar = Calendar;
+  readonly X = X;
+  readonly HelpCircle = HelpCircle;
+
+  private fb = inject(FormBuilder);
+  private clientService = inject(ClientService);
+  private servicesApi = inject(CitasServicesService);
+  private staffService = inject(ProfessionalsService);
+  private appointmentsService = inject(CitasAgendaService);
+  private notify = inject(Notification);
+  private confirm = inject(ConfirmDialogService);
+
+  @Input() niche!: string;
   @Input() selectedDate!: string;
-  @Input() show = false;
+  @Input() showModal = false;
   @Output() closed = new EventEmitter<boolean>();
+
+  @Input() uiTerms!: {
+    appointments: {
+      singular: string;
+      plural: string;
+      singularLower: string;
+      pluralLower: string;
+    };
+
+    team: {
+      singular: string;
+      plural: string;
+      singularLower: string;
+      pluralLower: string;
+    };
+
+    services: {
+      singular: string;
+      plural: string;
+      singularLower: string;
+      pluralLower: string;
+    };
+
+    clients: {
+      singular: string;
+      plural: string;
+      singularLower: string;
+      pluralLower: string;
+    };
+  };
 
   form!: FormGroup;
   saving = false;
@@ -32,24 +89,285 @@ export class AgendaModal implements OnInit, OnChanges {
   loading = true;
   isOccasionalClient = false;
 
-  clients: ClientApi[] = [];
+  clients: ClientSelectItem[] = [];
   variants: ServiceVariantListItem[] = [];
   selectedVariant?: ServiceVariantListItem;
   staffMembers: StaffListItem[] = [];
 
-  constructor(
-    private fb: FormBuilder,
-    private clientService: ClientService,
-    private servicesApi: CitasServicesService,
-    private staffService: ProfessionalsService,
-    private appointmentsService: CitasAgendaService,
-    private notify: Notification
-  ) { }
+  //selectedClient?: ClientDetailApi;
+  clientPets: PetSelectItem[] = [];
+  availableSlots: string[] = [];
+
+  searchingClients = false;
+  clientSelected = false;
+
+  showQuickClient = false;
+  showQuickClientHelp = false;
+
+  savingQuickClient = false;
+
+  // Configuración ngx-intl-tel-input
+  PhoneNumberFormat = PhoneNumberFormat;
+  CountryISO = CountryISO;
+  preferredCountries: CountryISO[] = [CountryISO.Mexico, CountryISO.UnitedStates];
+  countryEnum = CountryISO;
+  countries: { code: CountryISO, name: string }[] = [];
+  SearchCountryField = SearchCountryField;
+
 
   ngOnInit() {
-    this.loadClients();
-    this.loadVariants();
     this.initForm();
+    this.loadVariants();
+
+    this.watchClientSearch();
+  }
+
+  initForm() {
+    this.form = this.fb.group({
+      // Cliente
+      client_search: [''],
+
+      // Crear el cliente
+      quick_client:
+        this.fb.group({
+
+          first_name: ['', Validators.required],
+          phone: [null],
+
+          pet_name: ['', this.isPetNiche ? Validators.required : []],
+          pet_species: ['']
+
+        }),
+
+      client_id: [null, Validators.required],
+
+      // Solo pet grooming
+      pet_id: [null],
+
+      // Servicio
+      service_variant_id: [null, Validators.required],
+      // Profesional
+      staff_member_id: [null, Validators.required],
+      // Fecha/Hora
+      date: [this.selectedDate, Validators.required],
+      time: [null, Validators.required],
+      // Futuro
+      mode: ['in_person'],
+      // Extra
+      notes: [null]
+    });
+  }
+
+  clearClient() {
+    this.clientSelected = false;
+    this.clients = [];
+    this.clientPets = [];
+    this.form.patchValue(
+      {
+        client_id: null,
+        client_search: '',
+        pet_id: null
+      },
+      {
+        emitEvent: false
+      }
+    );
+
+  }
+
+  createQuickClient() {
+
+    const quickClient = this.form.get('quick_client');
+
+    quickClient?.markAllAsTouched();
+
+    if (quickClient?.invalid) {
+      return;
+    }
+
+    const data = this.form.value.quick_client;
+
+    if (!data.first_name) {
+      this.notify.error('Nombre requerido');
+      return;
+    }
+
+    this.savingQuickClient = true;
+
+    this.clientService
+      .quickCreate(data)
+      .subscribe({
+        next: (client) => {
+
+          this.showQuickClient = false;
+          this.savingQuickClient = false;
+
+          this.selectClient(client);
+
+          this.notify.success(this.uiTerms.clients.singular + ' creado');
+
+        },
+        error: (err) => {
+          this.savingQuickClient = false;
+
+          const existingClient = err?.error?.existing_client;
+
+          if (existingClient) {
+            this.confirm.open(
+              `${this.uiTerms.clients.singular} encontrado`,
+              `El teléfono ya existe y pertenece a "${existingClient.full_name}".\n\n ¿Deseas usar este ${this.uiTerms.clients.singularLower}?`,
+              () => {
+                this.selectClient(
+                  existingClient
+                );
+
+                this.showQuickClient = false;
+              },
+              'Cancelar',
+              `Usar ${this.uiTerms.clients.singularLower}`
+            );
+          } else {
+            console.log('no entra en el if');
+            this.handleError(err, 'Error al crear ' + this.uiTerms.clients.singular);
+          }
+
+
+        }
+
+      });
+
+  }
+
+  watchClientSearch() {
+
+    this.form
+      .get('client_search')
+      ?.valueChanges
+      .pipe(
+
+        debounceTime(300),
+
+        distinctUntilChanged(),
+
+        switchMap(value => {
+
+          const search =
+            value?.trim();
+
+          // limpiar solo si el usuario
+          // está escribiendo manualmente
+
+          this.clientSelected = false;
+
+          this.form.patchValue(
+            {
+              client_id: null
+            },
+            {
+              emitEvent: false
+            }
+          );
+
+          this.clientPets = [];
+
+          if (
+            !search ||
+            search.length < 3
+          ) {
+
+            this.clients = [];
+
+            return [];
+          }
+
+          this.searchingClients = true;
+
+          return this.clientService
+            .getClientList(
+              search
+            );
+
+        })
+
+      )
+
+      .subscribe({
+
+        next: (clients) => {
+
+          this.clients = clients;
+
+          this.searchingClients = false;
+
+        },
+
+        error: (err) => {
+
+          this.searchingClients = false;
+
+          this.handleError(
+            err,
+            'Error consultando clientes'
+          );
+
+        }
+
+      });
+
+  }
+
+  selectClient(client: ClientSelectItem) {
+
+    this.clientSelected = true;
+
+    this.form.patchValue({
+      client_id: client.id,
+      //client_search: client.display_name
+      client_search: this.getClientLabel(client)
+    },
+      {
+        emitEvent: false
+      });
+
+    this.clients = [];
+    this.clientPets = [];
+
+    this.form.patchValue(
+      {
+        pet_id: null
+      },
+      {
+        emitEvent: false
+      }
+    );
+
+    if (!this.isPetNiche) {
+      return;
+    }
+
+    this.clientService
+      .getClientPets(
+        client.id
+      )
+      .subscribe({
+        next: (pets) => {
+          this.clientPets = pets;
+
+          // si solo hay una mascota
+          // seleccionarla automáticamente
+
+          if (pets.length === 1) {
+            this.form.patchValue({
+              pet_id: pets[0].id
+            });
+          }
+
+        },
+        error: (err) => {
+          this.handleError(err, 'Error cargando mascotas');
+        }
+      });
+
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -60,42 +378,53 @@ export class AgendaModal implements OnInit, OnChanges {
     }
   }
 
-  loadClients() {
-    this.loading = true;
+  getClientLabel(
+    client: ClientSelectItem
+  ): string {
 
-    this.clientService
-      .getClientList()
-      .subscribe({
-        next: (response) => {
-          this.clients = response;
-        },
-        error: () => this.loading = false
-      });
+    const fullName = client.full_name?.trim();
+
+    const preferredName = client.preferred_name?.trim();
+
+    if (
+      preferredName &&
+      preferredName !== fullName
+    ) {
+
+      return `${fullName} (${preferredName})`;
+
+    }
+
+    return (
+      fullName ||
+      preferredName ||
+      'Sin nombre'
+    );
+
   }
+
 
   loadVariants() {
     this.servicesApi.getVariantList()
       .subscribe({
         next: (data) => {
           this.variants = data;
-          console.log(data);
+          //console.log(data);
         }
       });
   }
 
-  initForm() {
-    this.form = this.fb.group({
-      client_id: [null, Validators.required],
-      service_variant_id: [null, Validators.required],
-      staff_member_id: [null, Validators.required],
-      date: [this.selectedDate, Validators.required],
-      time: [null, Validators.required],
-      notes: [null]
-    });
-  }
 
   save() {
-    if (this.form.invalid) return;
+    this.form.markAllAsTouched();
+
+    if (!this.form.value.client_id) {
+      return;
+    }
+
+    if (this.form.invalid) {
+      return;
+    }
 
     this.saving = true;
 
@@ -128,8 +457,29 @@ export class AgendaModal implements OnInit, OnChanges {
     });
   }
 
-  close() {
+  closeModal() {
     this.closed.emit(false);
+  }
+
+  get isPetNiche(): boolean {
+    return this.niche === 'pet_grooming';
+  }
+
+  getClientName(client: ClientApi): string {
+
+    return (
+      client.preferred_name ||
+      client.full_name ||
+      [
+        client.first_name,
+        client.last_name
+      ]
+        .filter(Boolean)
+        .join(' ') ||
+
+      'Sin nombre'
+    );
+
   }
 
   getError(field: string): string | null {
@@ -145,6 +495,18 @@ export class AgendaModal implements OnInit, OnChanges {
       }
     }
 
+    return null;
+  }
+
+  getQuickClientError(field: string): string | null {
+
+    const control = this.form.get(`quick_client.${field}`);
+
+    if (control?.touched && control?.invalid) {
+      if (control.errors?.['required']) {
+        return 'Este campo es obligatorio';
+      }
+    }
     return null;
   }
 
@@ -181,5 +543,21 @@ export class AgendaModal implements OnInit, OnChanges {
 
   useOccasionalClient() {
     this.isOccasionalClient = true;
+  }
+
+  handleError(err: any, fallbackMessage: string) {
+
+    if (err?.error?.message) {
+      this.notify.error(err.error.message);
+      return;
+    }
+
+    if (err?.error?.errors) {
+      const firstError = Object.values(err.error.errors)[0] as string[];
+      this.notify.error(firstError[0]);
+      return;
+    }
+
+    this.notify.error(fallbackMessage);
   }
 }

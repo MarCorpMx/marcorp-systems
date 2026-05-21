@@ -1,7 +1,8 @@
-import { Injectable, signal, WritableSignal } from '@angular/core';
+import { Injectable, signal, WritableSignal, inject } from '@angular/core';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from './auth.service';
+import { BusinessCatalogService } from './business-catalog.service';
 
 @Injectable({ providedIn: 'root' })
 export class BreadcrumbService {
@@ -19,9 +20,13 @@ export class BreadcrumbService {
       .subscribe(() => this.build());
   }
 
+  private businessCatalog = inject(BusinessCatalogService);
+
   private build() {
     const crumbs: string[] = [];
     let current = this.route.root;
+
+    const niche = this.auth.getOrganization()?.business_niche || 'default';
 
     while (current.firstChild) {
       current = current.firstChild;
@@ -32,7 +37,14 @@ export class BreadcrumbService {
       const label = current.snapshot.data['breadcrumb'];
 
       if (label !== null && label !== undefined) {
-        crumbs.push(label);
+        //crumbs.push(label);
+        crumbs.push(
+          this.businessCatalog.getMenuLabel(
+            niche,
+            label.toLowerCase(), // key
+            label
+          )
+        );
       }
     }
 
@@ -44,7 +56,7 @@ export class BreadcrumbService {
     ]);
   }
 
-  /** 👇 OPCIONAL: reemplazar por índice */
+  /** OPCIONAL: reemplazar por índice */
   replaceAt(index: number, label: string) {
     this._breadcrumbs.update(bc => {
       if (!bc[index]) return bc;

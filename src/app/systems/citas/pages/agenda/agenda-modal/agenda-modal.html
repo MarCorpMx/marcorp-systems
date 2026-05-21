@@ -1,138 +1,540 @@
-@if (show) {
+@if (showModal) {
+<div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64
+            z-50 flex items-end sm:items-center justify-center
+            p-0 sm:p-4">
 
-<div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64 
-            z-50 flex items-center justify-center p-4">
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeModal()">
+    </div>
 
-    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="close()"></div>
-
-    <div class="relative w-full max-w-xl
+    <!-- Modal -->
+    <div class="relative w-full h-full sm:h-auto
+              sm:max-w-2xl
               bg-[var(--bg-surface)]
-              border border-[var(--border-soft)]
-              rounded-2xl shadow-xl
-              flex flex-col">
+              border-0 sm:border border-[var(--border-soft)]
+              rounded-none sm:rounded-2xl
+              shadow-xl
+              flex flex-col
+              max-h-screen sm:max-h-[90vh]">
 
-        <!-- Header -->
-        <div class="p-6 border-b border-[var(--border-soft)]
-                flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-[var(--text-primary)]">
-                Nueva cita
-            </h3>
+        <!-- ================= HEADER ================= -->
+        <div class="p-4 sm:p-6
+                border-b border-[var(--border-soft)]
+                flex items-center justify-between shrink-0">
 
-            <button (click)="close()"
-                class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
+            <div class="space-y-1">
+
+                <div class="flex items-center gap-3 flex-wrap">
+
+                    <div class="hidden sm:flex
+                      w-11 h-11 rounded-2xl
+                      bg-[var(--system-accent)]
+                      items-center justify-center">
+
+                        <lucide-icon [name]="Calendar" class="w-5 h-5 text-[var(--system-secondary)]">
+                        </lucide-icon>
+
+                    </div>
+
+                    <div>
+
+                        <h3 class="text-xl font-semibold text-[var(--text-primary)]">
+                            Nueva {{ uiTerms.appointments.singularLower }}
+                        </h3>
+
+                        <p class="text-sm text-[var(--text-secondary)]">
+                            Completa los datos para programar la {{ uiTerms.appointments.singularLower }}.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <button (click)="closeModal()" class="text-[var(--text-secondary)]
+               hover:text-[var(--text-primary)]
+               transition cursor-pointer">
+
                 ✕
+
             </button>
+
         </div>
 
-        <form [formGroup]="form" (ngSubmit)="save()" class="p-6 space-y-4">
+        <!-- ================= FORM ================= -->
+        <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col flex-1 min-h-0">
 
-            <!-- Cliente -->
-            <div>
-                <label class="text-sm text-[var(--text-secondary)]">
-                    Cliente *
-                </label>
-                <select formControlName="client_id" class="input-primary">
-                    <option [value]="null">Seleccionar cliente</option>
-                    <option *ngFor="let c of clients" [value]="c.id">
-                        {{ c.full_name }}
-                    </option>
-                </select>
-                @if (getError('client_id')) {
-                <small class="text-red-400 text-xs mt-1 block">
-                    {{ getError('client_id') }}
-                </small>
-                }
 
-                <button type="button" (click)="useOccasionalClient()"
-                    class="text-xs text-[var(--system-primary)] mt-1 cursor-pointer">
-                    Cliente ocasional
-                </button>
+            <!-- ================= BODY ================= -->
+            <div class="flex-1 overflow-y-auto
+                  p-4 sm:p-6
+                  space-y-6">
+
+                <div class="space-y-4">
+
+                    <!-- Cliente -->
+                    <div class="relative">
+
+                        <label class="text-sm text-[var(--text-secondary)]">
+
+                            {{ uiTerms.clients.singular }} *
+
+                        </label>
+
+                        <div class="relative">
+
+                            <input type="text" formControlName="client_search" autocomplete="off"
+                                placeholder="Buscar por nombre o correo..." class="input-primary pr-10">
+
+                            @if(form.value.client_search){
+
+                            <button type="button" (click)="clearClient()" class="absolute
+               right-3
+               top-1/2
+               -translate-y-1/2
+               text-[var(--text-secondary)]
+               hover:text-[var(--text-primary)]
+               cursor-pointer">
+
+                                <lucide-icon [name]="X" class="w-4 h-4">
+                                </lucide-icon>
+
+                            </button>
+
+                            }
+
+                        </div>
+
+                        <div class="text-xs mt-1 text-[var(--text-secondary)]">
+
+                            <div class="text-xs mt-1 text-[var(--text-secondary)]">
+
+                                @if(!form.value.client_search){
+
+                                Escribe al menos 3 letras
+
+                                }
+
+                                @if(searchingClients){
+
+                                Buscando...
+
+                                }
+
+                                @if(
+                                form.value.client_search?.length>=3 &&
+                                !searchingClients &&
+                                !clients.length &&
+                                !clientSelected
+                                ){
+
+                                Sin resultados
+
+                                }
+
+                            </div>
+
+                            @if(getError('client_id')){
+                            <small class="text-red-400 text-xs mt-1 block">
+                                {{ getError('client_id') }}
+                            </small>
+                            }
+
+
+
+
+                        </div>
+
+                        @if(clients.length){
+
+                        <div class="absolute z-20 mt-1 w-full
+    rounded-xl
+    border border-[var(--border-soft)]
+    bg-[var(--bg-surface)]
+    shadow-lg
+    max-h-64
+    overflow-y-auto">
+
+                            @for(
+                            client of clients;
+                            track client.id
+                            ){
+
+                            <button type="button" (click)="selectClient(client)" class="w-full px-4 py-3
+                            text-left
+                            hover:bg-[var(--state-hover)]
+                            cursor-pointer">
+
+                                <div class="font-medium">
+
+                                    {{ getClientLabel(client) }}
+
+                                </div>
+
+                                <div class="text-xs text-[var(--text-secondary)]">
+
+                                    {{ client.email }}
+
+                                    @if(
+                                    client.pets_count
+                                    ){
+
+                                    · 🐾 {{client.pets_count}}
+
+                                    }
+
+                                </div>
+
+                            </button>
+
+                            }
+
+                        </div>
+
+                        }
+
+                        <button type="button" (click)="showQuickClient = !showQuickClient" class="mt-3
+           w-full
+           rounded-xl
+           border
+           border-green-500/30
+           bg-green-500/10
+           px-4
+           py-3
+           flex
+           items-center
+           justify-center
+           gap-2
+           text-green-500
+           font-medium
+           hover:bg-green-500/20
+           transition
+           cursor-pointer">
+
+                            @if(!showQuickClient){
+
+                            + Crear {{ uiTerms.clients.singularLower }} rápido
+
+                            } @else {
+
+                            Ocultar creación rápida
+
+                            }
+
+                        </button>
+
+                    </div>
+
+
+
+                    @if(showQuickClient){
+
+                    <div formGroupName="quick_client" class="rounded-xl
+           border
+           border-[var(--border-soft)]
+           p-4
+           space-y-4">
+
+                        <div class="font-medium">
+
+                            {{ uiTerms.clients.singular }} rápido
+
+                        </div>
+
+                        <div>
+
+                            <input formControlName="first_name" placeholder="Nombre *" class="input-primary">
+
+                            @if(getQuickClientError('first_name')){
+                            <small class="text-red-400 text-xs mt-1 block">
+                                {{ getQuickClientError('first_name') }}
+                            </small>
+                            }
+
+                        </div>
+
+                        <div>
+
+                            <ngx-intl-tel-input [preferredCountries]="preferredCountries"
+                                [enableAutoCountrySelect]="true" [searchCountryFlag]="true" [searchCountryField]="[
+                  SearchCountryField.Name,
+                  SearchCountryField.DialCode,
+                  SearchCountryField.Iso2
+                ]" [selectedCountryISO]="CountryISO.Mexico" [phoneValidation]="true" [separateDialCode]="true"
+                                [numberFormat]="PhoneNumberFormat.International" formControlName="phone"
+                                [cssClass]="'input-primary'">
+
+                            </ngx-intl-tel-input>
+
+                        </div>
+
+                        @if(isPetNiche){
+
+                        <div>
+
+                            <input formControlName="pet_name" placeholder="Nombre Mascota *" class="input-primary">
+                            @if(getQuickClientError('pet_name')){
+                            <small class="text-red-400 text-xs mt-1 block">
+                                {{ getQuickClientError('pet_name') }}
+                            </small>
+                            }
+
+                        </div>
+
+                        <div>
+
+                            <input formControlName="pet_species" placeholder="Especie" class="input-primary">
+
+                        </div>
+
+                        }
+
+                        <small class="flex items-center gap-1 text-xs text-[var(--text-secondary)]">
+
+                            <span class="relative group cursor-pointer shrink-0">
+                                <lucide-icon [name]="HelpCircle"
+                                    class="w-4 h-4 text-gray-400 transition-colors duration-200 group-hover:text-emerald-500"
+                                    (click)="showQuickClientHelp = !showQuickClientHelp">
+                                </lucide-icon>
+                            </span>
+
+                            <span>
+                                Puedes completar más información después desde el módulo "{{ uiTerms.clients.plural }}".
+                            </span>
+
+                        </small>
+
+                        <button type="button" (click)="createQuickClient()" [disabled]="savingQuickClient"
+                            class="mar-btn-primary w-full">
+                            {{savingQuickClient
+                            ? 'Guardando...'
+                            : 'Guardar y continuar'
+                            }}
+                        </button>
+
+                    </div>
+
+                    }
+
+                    <!-- Mascota -->
+                    @if(isPetNiche && clientPets.length){
+
+                    <div>
+
+                        <label class="text-sm text-[var(--text-secondary)]">
+
+                            Mascota *
+
+                        </label>
+
+                        <select formControlName="pet_id" class="input-primary">
+
+                            <option [ngValue]="null">
+
+                                Seleccionar mascota
+
+                            </option>
+
+                            @for(
+                            pet of clientPets;
+                            track pet.id
+                            ){
+
+                            <option [ngValue]="pet.id">
+
+                                {{ pet.name }}
+
+                                @if(pet.breed){
+                                - {{ pet.breed }}
+                                }
+
+                                @if(pet.species){
+                                - {{ pet.species }}
+                                }
+
+                            </option>
+
+                            }
+
+                        </select>
+
+                    </div>
+
+                    }
+
+                    <!-- Servicio -->
+                    <div>
+                        <label class="text-sm text-[var(--text-secondary)]">
+                            {{ uiTerms.services.singular }} *
+                        </label>
+                        <select (change)="onVariantChange($event)" formControlName="service_variant_id"
+                            class="input-primary">
+                            <option [value]="null">Seleccionar {{ uiTerms.services.singularLower }}</option>
+                            <option *ngFor="let v of variants" [value]="v.id">
+                                {{ v.label }}
+                                <span *ngIf="v.price"> - ${{ v.price }}</span>
+                            </option>
+
+                        </select>
+
+                        @if (getError('service_variant_id')) {
+                        <small class="text-red-400 text-xs mt-1 block">
+                            {{ getError('service_variant_id') }}
+                        </small>
+                        }
+                    </div>
+
+                    <!-- Colaborador -->
+                    <div>
+                        <label class="text-sm text-[var(--text-secondary)]">
+                            {{ uiTerms.team.singular }} *
+                        </label>
+                        <select formControlName="staff_member_id" class="input-primary">
+                            <option [value]="null">Seleccionar {{ uiTerms.team.singularLower }}</option>
+                            <option *ngFor="let s of staffMembers" [value]="s.id">
+                                {{ s.name }}
+                            </option>
+                        </select>
+                        @if (getError('staff_member_id')) {
+                        <small class="text-red-400 text-xs mt-1 block">
+                            {{ getError('staff_member_id') }}
+                        </small>
+                        }
+                    </div>
+
+                    <!-- Hora -->
+                    <div>
+                        <label class="text-sm text-[var(--text-secondary)]">
+                            Hora *
+                        </label>
+                        <input type="time" formControlName="time" class="input-primary">
+                        @if (getError('time')) {
+                        <small class="text-red-400 text-xs mt-1 block">
+                            {{ getError('time') }}
+                        </small>
+                        }
+                    </div>
+
+                    <!-- Notas -->
+                    <div>
+                        <label class="text-sm text-[var(--text-secondary)]">
+                            Notas
+                        </label>
+                        <textarea formControlName="notes" placeholder="Escribe las notas coquetas" rows="3"
+                            class="input-primary"></textarea>
+                    </div>
+
+
+                </div>
             </div>
 
-            <!-- Servicio -->
-            <div>
-                <label class="text-sm text-[var(--text-secondary)]">
-                    Servicio *
-                </label>
-                <select (change)="onVariantChange($event)" formControlName="service_variant_id" class="input-primary">
-                    <option [value]="null">Seleccionar servicio</option>
-                    <option *ngFor="let v of variants" [value]="v.id">
-                        {{ v.label }}
-                        <span *ngIf="v.price"> - ${{ v.price }}</span>
-                    </option>
+            <!-- ================= FOOTER ================= -->
+            <div class="p-4 sm:p-6
+                  border-t border-[var(--border-soft)]
+                  flex flex-col sm:flex-row
+                  justify-end gap-3 shrink-0">
 
-                </select>
+                <button type="button" (click)="closeModal()" class="mar-btn-secondary">
 
-                @if (getError('service_variant_id')) {
-                <small class="text-red-400 text-xs mt-1 block">
-                    {{ getError('service_variant_id') }}
-                </small>
-                }
-            </div>
-
-            <!-- Colaborador -->
-            <div>
-                <label class="text-sm text-[var(--text-secondary)]">
-                    Profesional *
-                </label>
-                <select formControlName="staff_member_id" class="input-primary">
-                    <option [value]="null">Seleccionar profesional</option>
-                    <option *ngFor="let s of staffMembers" [value]="s.id">
-                        {{ s.name }}
-                    </option>
-                </select>
-                @if (getError('staff_member_id')) {
-                <small class="text-red-400 text-xs mt-1 block">
-                    {{ getError('staff_member_id') }}
-                </small>
-                }
-            </div>
-
-            <!-- Hora -->
-            <div>
-                <label class="text-sm text-[var(--text-secondary)]">
-                    Hora *
-                </label>
-                <input type="time" formControlName="time" class="input-primary">
-                @if (getError('time')) {
-                <small class="text-red-400 text-xs mt-1 block">
-                    {{ getError('time') }}
-                </small>
-                }
-            </div>
-
-            <!-- Notas -->
-            <div>
-                <label class="text-sm text-[var(--text-secondary)]">
-                    Notas
-                </label>
-                <textarea formControlName="notes" rows="3" class="input-primary"></textarea>
-            </div>
-
-            <!-- Footer -->
-            <div class="flex justify-end gap-3 pt-4">
-
-                <button type="button" (click)="close()" class="px-4 py-2 rounded-lg
-                       border border-[var(--border-soft)]
-                       text-[var(--text-secondary)]
-                       cursor-pointer">
                     Cancelar
+
                 </button>
 
-                <button type="submit" [disabled]="form.invalid || saving" class="px-4 py-2 rounded-lg
-                       bg-[var(--system-primary)]
-                       text-white
-                       hover:bg-[var(--system-secondary)]
-                       cursor-pointer
-                       disabled:opacity-50
-                       disabled:cursor-not-allowed">
+                <button type="submit" [disabled]="saving" class="mar-btn-primary">
 
-                    {{ saving ? 'Guardando...' : 'Guardar cita' }}
+                    Crear {{ uiTerms.appointments.singularLower }}
+
                 </button>
 
             </div>
 
         </form>
+
     </div>
+
 </div>
+}
+
+@if (showQuickClientHelp) {
+
+<div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+
+    <!-- backdrop -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showQuickClientHelp = false">
+    </div>
+
+    <!-- modal -->
+    <div class="relative
+        w-full
+        max-w-sm
+        p-4
+        bg-[var(--bg-surface)]
+        border border-[var(--border-soft)]
+        rounded-2xl
+        shadow-xl">
+
+        <p class="font-semibold text-base mb-2
+                  text-[var(--text-primary)]">
+
+            {{ uiTerms.clients.singular }} rápido
+        </p>
+
+        <p class="text-sm
+                  text-[var(--text-secondary)]
+                  leading-relaxed">
+
+            Esta opción permite crear un {{ uiTerms.clients.singularLower }}
+            rápidamente para continuar con la
+            {{ uiTerms.appointments.singularLower }}
+            sin detener el flujo de trabajo.
+
+        </p>
+
+        <div class="mt-4
+                    rounded-xl
+                    border border-[var(--border-soft)]
+                    bg-[var(--bg-muted)]
+                    p-4">
+
+            <p class="font-medium
+                      text-[var(--text-primary)]
+                      mb-2">
+
+                Después podrás agregar:
+
+            </p>
+
+            <ul class="space-y-1
+                       text-sm
+                       text-[var(--text-secondary)]">
+
+                <li>• Apellidos</li>
+
+                <li>• Teléfono y correo</li>
+
+                <li>• Notas e información adicional</li>
+
+                @if(isPetNiche){
+
+                <li>• Mascotas y sus datos</li>
+
+                }
+
+                <li>• Información completa del perfil</li>
+
+            </ul>
+
+        </div>
+
+        <button class="mar-btn-help mt-4" (click)="showQuickClientHelp = false">
+
+            Entendido
+
+        </button>
+
+    </div>
+
+</div>
+
 }

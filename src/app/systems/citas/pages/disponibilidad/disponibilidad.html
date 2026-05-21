@@ -131,7 +131,9 @@
                     </div>
 
                     <div class="text-[var(--text-primary)] font-semibold">
-                        {{ blockModal.start | date:'HH:mm' }} - {{ blockModal.end | date:'HH:mm' }}
+                        {{ blockModal.start | date:'HH:mm' }}
+                        -
+                        {{ blockModal.end | date:'HH:mm' }}
                     </div>
                 </div>
 
@@ -167,8 +169,11 @@
                         Eliminar
                     </button>
 
-                    <button (click)="saveBlock()" class="mar-btn-primary">
-                        {{ blockModal.editMode ? 'Actualizar' : 'Guardar' }}
+                    <button (click)="saveBlock()" [disabled]="saving"  class="mar-btn-primary">
+                        {{ saving
+                        ? 'Guardando...'
+                        : (blockModal.editMode ? 'Actualizar' : 'Guardar') }}
+                    
                     </button>
 
 

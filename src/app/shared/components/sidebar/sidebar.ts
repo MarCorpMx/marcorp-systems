@@ -6,10 +6,10 @@ import {
   Calendar,
   Users,
   Settings,
-  GraduationCap,
   BookOpen,
   LayoutDashboard,
   Briefcase,
+  Globe,
   Clock,
   Bell,
   BarChart,
@@ -18,13 +18,16 @@ import {
   ShieldCheck,
   UsersRound,
   UserRound,
-  ChevronDown
+  ChevronDown,
+  Sparkles, Scissors, Hand, Brain, Stethoscope, Heart, Flower, Dumbbell, GraduationCap, Presentation,
+  Target, PawPrint, PenTool, Circle, Apple, ShieldPlus,
 } from 'lucide-angular';
 
 import { AuthService } from '../../../core/services/auth.service';
 import { ThemeService } from '../../../core/services/theme.service';
 //import { SYSTEM_MENUS } from '../../../core/config/system-menus';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
+import { BusinessCatalogService } from '../../../core/services/business-catalog.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -42,12 +45,51 @@ export class Sidebar implements OnInit {
     Calendar,
     UserRound,
     Briefcase,
+    Globe,
     Clock,
     Bell,
     BarChart,
     UsersRound,
     Settings,
-    ChevronDown
+    ChevronDown,
+
+    // business niches
+    Sparkles,
+    Scissors,
+    Hand,
+    Brain,
+    Stethoscope,
+    Heart,
+    Flower,
+    Dumbbell,
+    GraduationCap,
+    Presentation,
+    Target,
+    PawPrint,
+    PenTool,
+    Circle,
+    Apple,
+    ShieldPlus,
+  };
+
+  // Iconos para Niches
+  ICON_NAME_MAP: Record<string, string> = {
+    'sparkles': 'Sparkles',
+    'scissors': 'Scissors',
+    'hand': 'Hand',
+    'brain': 'Brain',
+    'stethoscope': 'Stethoscope',
+    'heart': 'Heart',
+    'flower': 'Flower',
+    'dumbbell': 'Dumbbell',
+    'graduation-cap': 'GraduationCap',
+    'presentation': 'Presentation',
+    'target': 'Target',
+    'paw-print': 'PawPrint',
+    'pen-tool': 'PenTool',
+    'circle': 'Circle',
+    'apple': 'Apple',
+    'shield-plus': 'ShieldPlus'
   };
 
   private auth = inject(AuthService);
@@ -56,6 +98,7 @@ export class Sidebar implements OnInit {
   private confirm = inject(ConfirmDialogService);
   sidebarOpen = signal(false);
   private elRef = inject(ElementRef);
+  private businessCatalogService = inject(BusinessCatalogService);
 
   user = this.auth.getUser();
   systems = this.auth.getSystems();
@@ -67,23 +110,76 @@ export class Sidebar implements OnInit {
   @Input() open = false;
   @Output() close = new EventEmitter<void>();
 
+  // Contexto de la organización
+  organization = this.auth.organization$;
+
+  niche = computed(() =>
+    this.organization()?.business_niche ?? 'other'
+  );
+
+  organizationLogo = computed(() =>
+    this.organization()?.logo_url ?? null
+  );
+
+  nicheIcon = computed(() =>
+    this.businessCatalogService.getIcon(this.niche())
+  );
+
+  nicheColor = computed(() =>
+    this.businessCatalogService.getColor(this.niche())
+  );
+
+  // iconos
+  sidebarNicheIcon = computed(() => {
+
+    const iconName =
+      this.businessCatalogService.getIcon(this.niche());
+
+    const mapped =
+      this.ICON_NAME_MAP[iconName] || 'Circle';
+
+    return this.ICON_MAP[mapped];
+  });
+
 
   /*menu = computed(() => {
-    if (!this.currentSystem?.features) return [];
+    const system = this.currentSystem();
 
-    return this.currentSystem.features
+    if (!system?.features) return [];
+
+    console.log(system.features);
+
+    return system.features
       .filter((f: any) => f.visible && !f.parent)
       .sort((a: any, b: any) => a.sort_order - b.sort_order);
   });*/
 
   menu = computed(() => {
+
     const system = this.currentSystem();
 
     if (!system?.features) return [];
 
+    const niche = this.niche();
+
     return system.features
+
       .filter((f: any) => f.visible && !f.parent)
-      .sort((a: any, b: any) => a.sort_order - b.sort_order);
+
+      .sort((a: any, b: any) => a.sort_order - b.sort_order)
+
+      .map((feature: any) => ({
+
+        ...feature,
+
+        dynamicLabel: this.businessCatalogService.getMenuLabel(
+          niche,
+          feature.key,
+          feature.label
+        )
+
+      }));
+
   });
 
   @HostListener('document:click', ['$event'])
@@ -111,7 +207,7 @@ export class Sidebar implements OnInit {
   branchMenuOpen = false;
 
   ngOnInit() {
-    //const branches = this.currentSystem?.branches ?? [];
+
     const branches = this.currentSystem()?.branches ?? [];
 
     if (!branches.length) return;

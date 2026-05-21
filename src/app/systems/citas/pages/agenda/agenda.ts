@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, HostListener } from '@angular/core';
+import { Component, inject, OnInit, HostListener, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -23,40 +23,9 @@ import { AppointmentModel } from '../../../../core/models/appointment.model';
 import { APPOINTMENT_STATUS_CONFIG, AppointmentStatus } from '../../../../shared/config/appointment-status.config';
 import { AgendaModal } from './agenda-modal/agenda-modal';
 import { Notification } from '../../../../services/notification.service';
+import { BusinessCatalogService } from '../../../../core/services/business-catalog.service';
 
 
-/**
- * 
- * Si quieres el siguiente nivel 👇
-Podemos hacer que al seleccionar servicio:
-
-Se autocalcule duración
-
-Se bloquee horario ocupado
-
-Se valide solapamiento en tiempo real
-
-Ahí ya entramos a lógica de calendario real.
- * 
- */
-
-/*
-interface Reminder {
-  whatsapp: boolean;
-  email: boolean;
-  sent: boolean;
-}
-
-type AppointmentStatus = 'confirmada' | 'pendiente' | 'cancelada' | 'no_asistio';
-
-interface Appointment {
-  id: number;
-  time: string;          // o Date si lo manejas así
-  client: string;
-  service: string;
-  status: AppointmentStatus;
-  reminders?: Reminder;
-}*/
 
 @Component({
   selector: 'app-agenda',
@@ -78,9 +47,20 @@ export class Agenda implements OnInit {
   readonly UsersRound = UsersRound;
 
   private auth = inject(AuthService);
+  public businessCatalogService = inject(BusinessCatalogService);
   private professionalsService = inject(ProfessionalsService);
   private appointmentsService = inject(CitasAgendaService);
   private notify = inject(Notification);
+
+  organization = this.auth.organization$;
+
+  niche = computed(() =>
+    this.organization()?.business_niche ?? 'other'
+  );
+
+  isPetNiche = computed(() =>
+    this.niche() === 'pet_grooming'
+  );
 
   loading = true;
   selectedDate!: string;
@@ -105,59 +85,130 @@ export class Agenda implements OnInit {
   noteAppointmentId: number | null = null;
   noteText: string = '';
 
+  // Variables para texto
+  uiTerms = computed(() => ({
 
-  /*appointments: Appointment[] = [
-    {
-      id: 1,
-      time: '10:01',
-      client: 'Ana López',
-      service: 'Psicoterapia individual',
-      status: 'confirmada',
-      reminders: {
-        whatsapp: true,
-        email: true,
-        sent: true
-      }
+    appointments: {
+      singular: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'singular',
+        true
+      ),
+
+      plural: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'plural',
+        true
+      ),
+
+      singularLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'singular'
+      ),
+
+      pluralLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'plural'
+      )
     },
-    {
-      id: 2,
-      time: '11:30',
-      client: 'Marlem Pérez',
-      service: 'Terapia de pareja',
-      status: 'pendiente',
-      reminders: {
-        whatsapp: true,
-        email: false,
-        sent: false
-      }
+
+    team: {
+      singular: this.businessCatalogService.getTerm(
+        this.niche(),
+        'team',
+        'singular',
+        true
+      ),
+
+      plural: this.businessCatalogService.getTerm(
+        this.niche(),
+        'team',
+        'plural',
+        true
+      ),
+
+      singularLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'team',
+        'singular'
+      ),
+
+      pluralLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'team',
+        'plural'
+      )
     },
-    {
-      id: 3,
-      time: '12:30',
-      client: 'Claudia Pérez',
-      service: 'Consulta',
-      status: 'cancelada',
-      reminders: {
-        whatsapp: true,
-        email: true,
-        sent: true
-      }
+
+    services: {
+      singular: this.businessCatalogService.getTerm(
+        this.niche(),
+        'services',
+        'singular',
+        true
+      ),
+
+      plural: this.businessCatalogService.getTerm(
+        this.niche(),
+        'services',
+        'plural',
+        true
+      ),
+
+      singularLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'services',
+        'singular'
+      ),
+
+      pluralLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'services',
+        'plural'
+      )
     },
-    {
-      id: 4,
-      time: '15:00',
-      client: 'Monse Islas',
-      service: 'Consulta',
-      status: 'no_asistio',
-      reminders: {
-        whatsapp: true,
-        email: true,
-        sent: false
-      }
+
+    clients: {
+      singular: this.businessCatalogService.getTerm(
+        this.niche(),
+        'clients',
+        'singular',
+        true
+      ),
+
+      plural: this.businessCatalogService.getTerm(
+        this.niche(),
+        'clients',
+        'plural',
+        true
+      ),
+
+      singularLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'clients',
+        'singular'
+      ),
+
+      pluralLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'clients',
+        'plural'
+      )
     }
-  ];*/
+
+  }));
+
+
 
   ngOnInit() {
+
+    //console.log("el nicho: ", this.niche());
+    //console.log("services.singular: ", this.uiTerms().services.singular);
+
     this.selectedDate = this.getTodayLocal();
 
     this.role = this.auth.getRole();
@@ -245,7 +296,7 @@ export class Agenda implements OnInit {
 
     this.appointmentsService.getAll({ date: this.selectedDate }).subscribe({
       next: (response) => {
-        console.log('todo bien con las citas: ', response.data);
+        //console.log('todo bien con las citas: ', response.data);
 
         //this.appointments = response.data;
         // rombi - Simular recordatorios
@@ -344,19 +395,19 @@ export class Agenda implements OnInit {
   }
 
   get emptyStateTitle(): string {
-    if (this.isPast) return 'No tuviste citas este día';
-    if (this.isToday) return 'Aún no tienes citas para hoy';
-    return 'No hay citas programadas para este día';
+    if (this.isPast) return 'No tuviste ' + this.uiTerms().appointments.pluralLower + ' este día';
+    if (this.isToday) return 'Aún no tienes ' + this.uiTerms().appointments.pluralLower + ' para hoy';
+    return 'No hay ' + this.uiTerms().appointments.pluralLower + ' programadas para este día';
   }
 
   get emptyStateDescription(): string {
     if (this.isPast)
-      return 'Este día ya pasó y no se registraron citas.';
+      return 'Este día ya pasó y no se registraron ' + this.uiTerms().appointments.pluralLower + '.';
 
     if (this.isToday)
-      return 'Agenda tu primera cita para organizar tu día y reducir ausencias.';
+      return 'Agenda tu primer ' + this.uiTerms().appointments.singularLower + ' para organizar tu día y reducir ausencias.';
 
-    return 'Puedes programar citas para este día con anticipación.';
+    return 'Puedes programar ' + this.uiTerms().appointments.pluralLower + ' para este día con anticipación.';
   }
 
   get hasAppointments(): boolean {
@@ -445,8 +496,8 @@ export class Agenda implements OnInit {
 
   updateStatus(id: number, status: string) {
     alert("updateStatus");
-    console.log("id: ", id);
-    console.log("staus: ", status);
+    //console.log("id: ", id);
+    //console.log("staus: ", status);
   }
 
   saveNoteAndStatus() {

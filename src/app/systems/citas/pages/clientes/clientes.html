@@ -1,18 +1,46 @@
 <section class="space-y-6">
 
   <!-- HEADER -->
-  <div class="flex items-center justify-between">
-    <h2 class="text-xl font-semibold text-[var(--text-primary)]">
-      Clientes
-    </h2>
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
-    <button (click)="openCreate()" class="px-4 py-2 rounded-lg
-           bg-[var(--system-primary)]
-           text-white text-sm
-           hover:bg-[var(--system-secondary)]
-           transition cursor-pointer">
-      + Nuevo cliente
+    <div>
+
+      <!-- Título + ayuda -->
+      <div class="flex items-center gap-2">
+
+        <h2 class="text-2xl font-semibold text-[var(--text-primary)]">
+          {{ clientsLabel() }}
+        </h2>
+
+        <button type="button" (click)="showClientActionsHelp = !showClientActionsHelp" class="group
+               w-7 h-7
+               rounded-full
+               flex items-center justify-center
+               text-gray-400
+               hover:bg-[var(--bg-base)]
+               hover:text-[var(--system-primary)]
+               transition-all duration-200
+               cursor-pointer">
+
+          <lucide-icon [name]="HelpCircle" class="w-4 h-4">
+          </lucide-icon>
+
+        </button>
+
+      </div>
+
+      <p class="text-sm text-[var(--text-secondary)] mt-1">
+        {{ businessCatalogService.getUiText(niche(), 'clients_description') }}
+      </p>
+
+    </div>
+
+    <button (click)="openCreate()" class="mar-btn-primary">
+
+      + {{ businessCatalogService.getUiText(niche(), 'clients_cta') }}
+
     </button>
+
   </div>
 
   <!-- SEARCH -->
@@ -22,7 +50,7 @@
 
       <!-- Input -->
       <input type="text" [value]="searchTerm" (input)="onSearch($any($event.target).value)"
-        placeholder="Buscar cliente..." class="input-primary w-full pl-10 pr-10
+        [placeholder]="'Buscar ' + clientLabelLower() + '...'" class="input-primary w-full pl-10 pr-10
              transition-all duration-200
              focus:ring-2
              focus:ring-[var(--system-primary)]" />
@@ -82,11 +110,17 @@
     </div>
 
     <h3 class="text-lg font-semibold text-[var(--text-primary)]">
-      No tienes clientes
+      {{
+      niche() === 'pet_grooming'
+      ? 'No tienes clientes'
+      : 'No tienes ' + clientsLabelLower()
+      }}
+
+
     </h3>
 
     <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
-      Agrega tu primer cliente para comenzar a registrar citas y notas.
+      {{ businessCatalogService.getUiText(niche(), 'clients_empty_state') }}
     </p>
 
     <button (click)="openCreate()" class="inline-flex items-center gap-2
@@ -95,7 +129,7 @@
              text-white
              hover:bg-[var(--system-secondary)]
              transition cursor-pointer">
-      + Nuevo cliente
+      + {{ businessCatalogService.getUiText(niche(), 'clients_cta') }}
     </button>
   </div>
   }
@@ -105,91 +139,637 @@
   =============================== -->
   @else {
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
     @for (client of clients; track client.id) {
-    <div class="bg-[var(--bg-surface)] 
-       rounded-xl 
-       p-4 
-       border border-[var(--border-soft)] 
-       space-y-2 
-       cursor-pointer
-       transition-all duration-200
-       hover:shadow-lg
-       hover:-translate-y-1
-       hover:bg-[var(--bg-base)]" [routerLink]="['/sistemas/citas/clientes', client.id]">
 
-      <div class="flex items-start justify-between">
-        <div>
-          <p class="font-medium text-[var(--text-primary)]">
-            {{ client.full_name }}
-          </p>
-        </div>
+    <!-- [routerLink]="['/sistemas/citas/clientes', client.id]" -->
+    <!-- cursor-pointer -->
+    <div class="group
+           bg-[var(--bg-surface)]
+           rounded-2xl
+           p-5
+           border border-[var(--border-soft)]
+           transition-all duration-300
+           hover:shadow-xl
+           hover:shadow-black/5
+           hover:border-[var(--system-primary)]
+           hover:-translate-y-1">
 
-        <div class="flex items-center gap-2">
+      <!-- LOADING OVERLAY -->
+      @if((processingClientId === client.id) || (processingBlockId === client.id) || (processingDeleteId ===
+      client.id)){
 
-          <!-- Badge -->
-          <span class="px-2 py-1 text-sm rounded-full font-medium" [ngClass]="getStatusClasses(client.status)">
-            {{ client.status | titlecase }}
+      <div class="absolute inset-0
+              rounded-2xl
+              bg-[var(--bg-surface)]/70
+              backdrop-blur-[2px]
+              z-40
+              flex items-center justify-center">
+
+        <div class="flex items-center gap-3">
+
+          <div class="w-5 h-5
+                    border-2 border-[var(--system-primary)]
+                    border-t-transparent
+                    rounded-full
+                    animate-spin">
+          </div>
+
+          <span class="text-sm font-medium
+                     text-[var(--text-primary)]">
+
+            Procesando...
+
           </span>
 
-          <!-- Menu -->
-          <div class="relative" (click)="$event.stopPropagation()">
-            <button (click)="toggleMenu(client.id); $event.stopPropagation()"
-              class="p-1 rounded-md hover:bg-[var(--bg-base)] transition cursor-pointer">
-              <lucide-icon [name]="MoreVertical" class="w-4 h-4 text-[var(--text-secondary)]">
+        </div>
+
+      </div>
+
+      }
+
+      <!-- HEADER -->
+      <div class="flex items-start justify-between gap-3">
+
+        <!-- Avatar + info -->
+        <div class="flex items-center gap-3 min-w-0 flex-1">
+
+          <!-- Avatar -->
+          <div class="w-12 h-12
+                    rounded-2xl
+                    bg-[var(--system-accent)]
+                    flex items-center justify-center
+                    shrink-0">
+
+            <span class="font-semibold
+                       text-sm
+                       text-[var(--system-secondary)]">
+
+              {{ getInitials(client) }}
+
+            </span>
+
+          </div>
+
+
+
+          <!-- Nombre -->
+
+          <div class="min-w-0 flex-1">
+
+            <h3 class="font-semibold
+               text-[var(--text-primary)]
+               leading-tight">
+
+              {{ getClientFullName(client) }}
+
+            </h3>
+
+            <!-- Estado -->
+
+            @if(client.is_blocked){
+
+            <div class="mt-1 inline-flex items-center gap-2
+          px-3 py-1 rounded-full
+          bg-red-500/10
+          text-red-400
+          text-xs">
+
+              <lucide-icon [name]="Lock" class="w-3 h-3">
               </lucide-icon>
-            </button>
 
-            @if (activeMenu === client.id) {
-            <div class="absolute right-0 mt-2 w-36
-         bg-[var(--bg-surface)]
-         border border-[var(--border-soft)]
-         rounded-lg shadow-lg z-20" (click)="$event.stopPropagation()">
-
-              <button (click)="openEdit(client)" class="block w-full text-left px-4 py-2 text-sm
-         bg-transparent
-         hover:bg-black/5
-         transition-colors duration-150
-         cursor-pointer">
-                Editar
-              </button>
-
-              <button (click)="delete(client)" class="cursor-pointer block w-full text-left px-4 py-2 text-sm
-                   text-red-400
-                   hover:bg-red-500/10">
-                Eliminar
-              </button>
+              Bloqueado
 
             </div>
+
+            @if(client.blocked_reason){
+
+            <p class="mt-2 text-xs text-[var(--text-muted)] italic">
+
+              Motivo:
+              "{{ client.blocked_reason }}"
+
+            </p>
+
             }
+
+            }
+
+            @else if(!client.is_active){
+
+            <div class="mt-1 inline-flex items-center gap-2
+          px-3 py-1 rounded-full
+          bg-gray-500/10
+          text-gray-400
+          text-xs">
+
+              <lucide-icon [name]="PauseCircle" class="w-3 h-3">
+              </lucide-icon>
+
+              Desactivado
+
+            </div>
+
+            }
+
+            <p class="text-sm
+              text-[var(--text-secondary)]
+              break-all">
+
+              {{
+              client.email
+              || client.phone?.internationalNumber
+              || 'Sin información'
+              }}
+
+            </p>
+
           </div>
 
         </div>
+
+        <!-- Estado + menu -->
+        <div class="flex items-center gap-1 shrink-0">
+
+          <!-- Badge -->
+          @if(client.is_blocked){
+
+          <span class="
+px-2.5 py-1
+rounded-full
+text-[10px]
+font-semibold
+bg-red-500/10
+text-red-400">
+
+            Bloqueado
+
+          </span>
+
+          }
+          @else if(client.is_active){
+
+          <span class="
+px-2.5 py-1
+rounded-full
+text-[10px]
+font-semibold
+bg-green-500/10
+text-green-400">
+
+            Activo
+
+          </span>
+
+          }
+          @else{
+
+          <span class="
+px-2.5 py-1
+rounded-full
+text-[10px]
+font-semibold
+bg-gray-500/10
+text-gray-400">
+
+            Inactivo
+
+          </span>
+
+          }
+
+          <!-- Menu -->
+          <!-- <div class="relative" (click)="$event.stopPropagation()">
+
+            <button (click)="toggleMenu(client.id); $event.stopPropagation()" class="p-1.5
+                   rounded-lg
+                   hover:bg-[var(--bg-base)]
+                   transition
+                   cursor-pointer">
+
+              <lucide-icon [name]="MoreVertical" class="w-4 h-4 text-[var(--text-secondary)]">
+
+              </lucide-icon>
+
+            </button>
+
+            @if (activeMenu === client.id) {
+
+            <div class="absolute
+                   right-0
+                   top-full
+                   mt-2
+                   w-36
+                   bg-[var(--bg-surface)]
+                   border border-[var(--border-soft)]
+                   rounded-xl
+                   shadow-xl
+                   overflow-hidden
+                   z-30" (click)="$event.stopPropagation()">
+
+              <button (click)="openEdit(client)" class="block
+                     w-full
+                     text-left
+                     px-4
+                     py-3
+                     text-sm
+                     hover:bg-black/5
+                     transition
+                     cursor-pointer">
+
+                Editar
+
+              </button>
+
+              <button (click)="delete(client)" class="block
+                     w-full
+                     text-left
+                     px-4
+                     py-3
+                     text-sm
+                     text-red-400
+                     hover:bg-red-500/10
+                     transition
+                     cursor-pointer">
+
+                Eliminar
+
+              </button>
+
+            </div>
+
+            }
+
+          </div> -->
+
+        </div>
+
       </div>
 
-      <p class="text-sm text-[var(--text-secondary)]">
-        Última cita:
-        {{ client.last_appointment ? (client.last_appointment | appDate:'datetime') : 'Sin citas' }}
-      </p>
+      <!-- Última cita -->
+      <div class="mt-4">
 
-      <div class="flex items-center gap-2 flex-wrap mt-2">
-        <!--<span *ngFor="let tag of client.tags"
-          class="bg-[var(--system-accent)] text-[var(--system-secondary)] px-2 py-0.5 rounded-full text-xs">
-          {{ tag }}
-        </span> -->
-      </div>
+        <p class="text-xs
+                text-[var(--text-secondary)]">
 
-      <div class="mt-3 flex items-center justify-between">
-        <p class="text-sm text-[var(--text-secondary)]">
-          Notas: {{ client.notes_count }}
+          Última cita
+
         </p>
 
-        <span class="text-sm text-[var(--system-primary)] font-medium">
-          Ver perfil →
-        </span>
+        <p class="text-sm
+                text-[var(--text-primary)]">
+
+          {{
+          client.last_appointment
+          ? (client.last_appointment | appDate:'datetime')
+          : 'Sin citas'
+          }}
+
+        </p>
+
+      </div>
+
+      <!-- Métricas -->
+      <div class="grid grid-cols-3 gap-2 mt-4">
+
+        <div class="rounded-xl
+                  bg-[var(--bg-base)]
+                  p-3
+                  text-center">
+
+          <p class="text-xs text-[var(--text-secondary)]">
+
+            Citas
+
+          </p>
+
+          <p class="font-semibold
+                  text-[var(--text-primary)]">
+
+            {{ client.appointments_count || 0 }}
+
+          </p>
+
+        </div>
+
+        <div class="rounded-xl
+                  bg-[var(--bg-base)]
+                  p-3
+                  text-center">
+
+          <p class="text-xs text-[var(--text-secondary)]">
+
+            Notas
+
+          </p>
+
+          <p class="font-semibold
+                  text-[var(--text-primary)]">
+
+            {{ client.notes_count || 0 }}
+
+          </p>
+
+        </div>
+
+        <!-- Contador de mascotas -->
+        @if(isPetNiche()){
+        <div class="rounded-xl
+                  bg-[var(--bg-base)]
+                  p-3
+                  text-center">
+
+          <p class="text-xs text-[var(--text-secondary)]">
+            Mascotas
+          </p>
+
+          <p class="font-semibold
+                  text-[var(--text-primary)]">
+
+            {{ client.pets_count|| 0 }}
+
+          </p>
+
+        </div>
+        }
+
+        <!-- <div class="rounded-xl
+                  bg-[var(--bg-base)]
+                  p-3
+                  text-center">
+
+          <p class="text-xs text-[var(--text-secondary)]">
+
+            Tags
+
+          </p>
+
+          <p class="font-semibold
+                  text-[var(--text-primary)]">
+
+            {{ client.tags?.length || 0 }}
+
+          </p>
+
+        </div> -->
+
+      </div>
+
+      <!-- Footer -->
+      <div class="pt-4 border-t border-[var(--border-soft)]">
+
+        <div class="flex items-center justify-between">
+
+          <!-- LEFT -->
+          <div class="flex items-center gap-4">
+
+            <!-- Ver -->
+            <button (click)="openView(client)" [disabled]="loadingViewClientId === client.id" class="inline-flex items-center gap-2
+text-sm font-medium
+text-[var(--text-secondary)]
+hover:text-[var(--text-primary)]
+transition cursor-pointer
+disabled:opacity-50
+disabled:cursor-not-allowed">
+
+              @if(loadingViewClientId === client.id){
+
+              <div class="w-4 h-4
+border-2 border-current
+border-t-transparent
+rounded-full
+animate-spin">
+              </div>
+
+              }
+              @else{
+
+              <lucide-icon [name]="Eye" class="w-4 h-4 shrink-0">
+              </lucide-icon>
+
+              }
+
+              <span>
+
+                {{ loadingViewClientId === client.id
+                ? 'Cargando...'
+                : 'Ver'
+                }}
+
+              </span>
+
+            </button>
+
+
+            <!-- Editar solo activos y no bloqueados -->
+            @if(
+            client.is_active
+            && !client.is_blocked
+            ){
+
+            <button (click)="openEdit(client)" [disabled]="loadingClientDetailId === client.id" class="inline-flex items-center gap-2
+text-sm font-medium
+text-[var(--system-primary)]
+hover:text-[var(--system-secondary)]
+transition cursor-pointer
+disabled:opacity-50
+disabled:cursor-not-allowed">
+
+              @if(loadingClientDetailId === client.id){
+
+              <div class="w-4 h-4
+border-2 border-current
+border-t-transparent
+rounded-full
+animate-spin">
+              </div>
+
+              }
+              @else{
+
+              <lucide-icon [name]="Pencil" class="w-4 h-4 shrink-0">
+              </lucide-icon>
+
+              }
+
+              <span>
+
+                {{ loadingClientDetailId === client.id
+                ? 'Cargando...'
+                : 'Editar'
+                }}
+
+              </span>
+
+            </button>
+
+            }
+
+          </div>
+
+
+          <!-- RIGHT -->
+          <div class="relative" (click)="$event.stopPropagation()">
+
+            <button (click)="toggleMenu(client.id)" class="w-9 h-9
+               rounded-xl
+               flex items-center justify-center
+               hover:bg-[var(--bg-base)]
+               transition cursor-pointer">
+
+              <lucide-icon [name]="MoreVertical" class="w-5 h-5 text-[var(--text-secondary)]">
+              </lucide-icon>
+
+            </button>
+
+
+            @if(activeMenu===client.id){
+
+            <div class="absolute
+            right-0
+            bottom-full
+            mb-2
+            w-52
+            bg-[var(--bg-surface)]
+            border border-[var(--border-soft)]
+            rounded-xl
+            shadow-xl
+            overflow-hidden
+            z-50">
+
+              <!-- ACTIVAR / DESACTIVAR -->
+              @if(!client.is_blocked){
+
+              <button (click)="toggleClientStatus(client)" [disabled]="processingClientId === client.id" class="w-full
+  px-4 py-3
+  flex items-center gap-3
+  text-sm font-medium
+  transition
+  cursor-pointer" [class.text-amber-500]="client.is_active" [class.hover:bg-amber-500/10]="client.is_active"
+                [class.text-green-500]="!client.is_active" [class.hover:bg-green-500/10]="!client.is_active"
+                [class.opacity-50]="processingClientId === client.id">
+
+                @if(processingClientId===client.id){
+
+                <div class="w-4 h-4
+      border-2 border-current
+      border-t-transparent
+      rounded-full
+      animate-spin">
+                </div>
+
+                <span>Procesando...</span>
+
+                } @else {
+
+                <lucide-icon [name]="client.is_active ? PauseCircle : PlayCircle" class="w-4 h-4">
+                </lucide-icon>
+
+                <span>
+                  {{ client.is_active ? 'Desactivar' : 'Activar' }}
+                </span>
+
+                }
+
+              </button>
+
+              }
+
+              <!-- BLOQUEAR -->
+              <button (click)="handleBlockAction(client)" [disabled]="processingBlockId===client.id" class="w-full
+           px-4 py-3
+           flex items-center gap-3
+           text-sm font-medium
+           text-orange-500
+           hover:bg-orange-500/10
+           transition
+           cursor-pointer" [class.opacity-50]="processingBlockId===client.id">
+
+                @if(processingBlockId===client.id){
+
+                <div class="w-4 h-4
+                  border-2 border-current
+                  border-t-transparent
+                  rounded-full
+                  animate-spin">
+                </div>
+
+                <span>Procesando...</span>
+
+                }@else{
+
+                <lucide-icon [name]="client.is_blocked ? Unlock : Lock" class="w-4 h-4">
+                </lucide-icon>
+
+                <span>
+
+                  {{
+                  client.is_blocked
+                  ? 'Desbloquear'
+                  : 'Bloquear'
+                  }}
+
+                </span>
+
+                }
+
+              </button>
+
+
+              <!-- ELIMINAR -->
+              <button (click)="delete(client)" [disabled]="processingDeleteId===client.id" class="w-full
+px-4 py-3
+flex items-center gap-3
+text-sm font-medium
+text-red-400
+hover:bg-red-500/10
+transition
+cursor-pointer" [class.opacity-50]="processingDeleteId===client.id">
+
+                @if(processingDeleteId===client.id){
+
+                <div class="w-4 h-4
+    border-2 border-current
+    border-t-transparent
+    rounded-full
+    animate-spin">
+                </div>
+
+                <span>Procesando...</span>
+
+                } @else {
+
+                <lucide-icon [name]="Trash2" class="w-4 h-4">
+                </lucide-icon>
+
+                <span>
+
+                  {{
+                  client.appointments_count
+                  ? 'Archivar'
+                  : 'Eliminar'
+                  }}
+
+                </span>
+
+                }
+
+              </button>
+
+            </div>
+
+            }
+
+          </div>
+
+        </div>
+
       </div>
 
     </div>
+
     }
+
   </div>
   }
 
@@ -278,24 +858,47 @@
               max-h-screen sm:max-h-[90vh]">
 
     <!-- ================= HEADER ================= -->
-    <div class="p-4 sm:p-6 border-b border-[var(--border-soft)]
+    <div class="p-4 sm:p-6
+                border-b border-[var(--border-soft)]
                 flex items-center justify-between shrink-0">
 
-      <div>
+      <div class="space-y-1">
 
-        <h3 class="text-lg font-semibold text-[var(--text-primary)]">
-          {{ editingClient ? 'Editar cliente' : 'Nuevo cliente' }}
-        </h3>
+        <div class="flex items-center gap-3 flex-wrap">
 
-        <p class="hidden sm:block text-sm text-[var(--text-secondary)] mt-1">
-          Configura la información del cliente.
-        </p>
+          <div class="hidden sm:flex
+                      w-11 h-11 rounded-2xl
+                      bg-[var(--system-accent)]
+                      items-center justify-center">
+
+            <lucide-icon [name]="UserRound" class="w-5 h-5 text-[var(--system-secondary)]">
+            </lucide-icon>
+
+          </div>
+
+          <div>
+
+            <h3 class="text-xl font-semibold text-[var(--text-primary)]">
+              {{ editingClient
+              ? 'Editar ' + clientLabelLower()
+              : 'Nuevo ' + clientLabelLower() }}
+            </h3>
+
+            <p class="text-sm text-[var(--text-secondary)]">
+              {{ editingClient
+              ? 'Actualiza la información del ' + clientLabelLower() + '.'
+              : 'Agrega la información principal para comenzar a agendar.' }}
+            </p>
+
+          </div>
+
+        </div>
 
       </div>
 
       <button (click)="closeModal()" class="text-[var(--text-secondary)]
-                     hover:text-[var(--text-primary)]
-                     transition cursor-pointer">
+               hover:text-[var(--text-primary)]
+               transition cursor-pointer">
 
         ✕
 
@@ -309,18 +912,28 @@
       <!-- ================= BODY ================= -->
       <div class="flex-1 overflow-y-auto
                   p-4 sm:p-6
-                  space-y-8">
+                  space-y-6">
 
-        <!-- ================= INFO GENERAL ================= -->
+        <!-- ========================================================= -->
+        <!-- BASIC INFO -->
+        <!-- ========================================================= -->
         <div class="space-y-4">
 
           <div>
-            <h3 class="text-lg font-semibold text-[var(--text-primary)]">
-              Información general
+            <h3 class="text-base font-semibold text-[var(--text-primary)]">
+              {{
+              niche() === 'pet_grooming'
+              ? 'Información del dueño'
+              : 'Información básica'
+              }}
             </h3>
 
             <p class="text-sm text-[var(--text-secondary)] mt-1">
-              Datos principales del cliente.
+              {{
+              niche() === 'pet_grooming'
+              ? 'Datos de contacto del responsable de la mascota.'
+              : 'Lo necesario para comenzar a gestionar citas.'
+              }}
             </p>
           </div>
 
@@ -364,38 +977,25 @@
             <div>
 
               <label class="text-sm text-[var(--text-secondary)]">
-                Email *
+                Email
               </label>
 
-              <input type="email" formControlName="email" placeholder="Ej. cliente@email.com" class="input-primary">
+              <input type="email" formControlName="email" [placeholder]="emailPlaceholder()" class="input-primary">
+
+              <small class="text-xs text-[var(--text-secondary)]">
+                Útil para enviar confirmaciones y recordatorios.
+              </small>
 
               @if (getError('email')) {
-              <small class="text-red-400 text-xs">
+              <small class="text-red-400 text-xs block mt-1">
                 {{ getError('email') }}
               </small>
               }
 
             </div>
 
-            <!-- Fecha nacimiento -->
-            <div>
-
-              <label class="text-sm text-[var(--text-secondary)]">
-                Fecha de nacimiento
-              </label>
-
-              <input type="date" formControlName="birth_date" class="input-primary">
-
-              @if (getError('birth_date')) {
-              <small class="text-red-400 text-xs">
-                {{ getError('birth_date') }}
-              </small>
-              }
-
-            </div>
-
             <!-- Teléfono -->
-            <div class="md:col-span-2">
+            <div>
 
               <label class="text-sm text-[var(--text-secondary)]">
                 Teléfono
@@ -411,8 +1011,12 @@
 
               </ngx-intl-tel-input>
 
+              <small class="text-xs text-[var(--text-secondary)]">
+                Ideal para recordatorios y futuras confirmaciones.
+              </small>
+
               @if (getError('phone')) {
-              <small class="text-red-400 text-xs">
+              <small class="text-red-400 text-xs block mt-1">
                 {{ getError('phone') }}
               </small>
               }
@@ -423,10 +1027,322 @@
 
         </div>
 
+        <!-- ========================================================= -->
+        <!-- ADDITIONAL INFO -->
+        <!-- ========================================================= -->
+        <div class="border border-[var(--border-soft)]
+                    rounded-2xl overflow-hidden">
+
+          <!-- Toggle -->
+          <button type="button" (click)="showAdditionalInfo = !showAdditionalInfo" class="w-full flex items-center justify-between
+                   px-4 py-4
+                   hover:bg-[var(--bg-base)]
+                   transition cursor-pointer">
+
+            <div class="text-left">
+
+              <h3 class="text-sm font-medium text-[var(--text-primary)]">
+                {{
+                niche() === 'psychology'
+                ? 'Información del paciente'
+                : niche() === 'medical' || niche() === 'dentist'
+                ? 'Información clínica básica'
+                : 'Información adicional'
+                }}
+              </h3>
+
+              <p class="text-xs text-[var(--text-secondary)] mt-1">
+                Datos opcionales para personalizar el perfil.
+              </p>
+
+            </div>
+
+            <span class="text-[var(--text-secondary)] text-xl">
+              {{ showAdditionalInfo ? '−' : '+' }}
+            </span>
+
+          </button>
+
+          <!-- Content -->
+          @if (showAdditionalInfo) {
+
+          <div class="border-t border-[var(--border-soft)]
+                      p-4 sm:p-5
+                      space-y-5">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              <!-- Nombre preferido -->
+              <div>
+
+                <label class="text-sm text-[var(--text-secondary)]">
+                  Nombre preferido
+                </label>
+
+                <input type="text" formControlName="preferred_name" placeholder="Ej. Maggie" class="input-primary">
+
+              </div>
+
+              <!-- Fecha nacimiento -->
+              <div>
+
+                <label class="text-sm text-[var(--text-secondary)]">
+                  Fecha de nacimiento
+                </label>
+
+                <input type="date" formControlName="birth_date" class="input-primary">
+
+              </div>
+
+              <!-- Género -->
+              <div>
+
+                <label class="text-sm text-[var(--text-secondary)]">
+                  Género
+                </label>
+
+                <select formControlName="gender" class="input-primary">
+
+                  <option value="">
+                    Seleccionar
+                  </option>
+
+                  <option value="female">
+                    Femenino
+                  </option>
+
+                  <option value="male">
+                    Masculino
+                  </option>
+
+                  <option value="non_binary">
+                    No binario
+                  </option>
+
+                  <option value="other">
+                    Otro
+                  </option>
+
+                </select>
+
+              </div>
+
+              <!-- Fuente -->
+              <div>
+
+                <label class="text-sm text-[var(--text-secondary)]">
+                  ¿Cómo llegó?
+                </label>
+
+                <select formControlName="source" class="input-primary">
+
+                  <!-- <option value="">
+                    Seleccionar
+                  </option> -->
+
+                  <option value="manual">
+                    Registro directo
+                  </option>
+
+                  <option value="instagram">
+                    Instagram
+                  </option>
+
+                  <option value="facebook">
+                    Facebook
+                  </option>
+
+                  <option value="whatsapp">
+                    WhatsApp
+                  </option>
+
+                  <option value="web">
+                    Página web
+                  </option>
+
+                  <option value="referral">
+                    Recomendación
+                  </option>
+
+                  <option value="other">
+                    Otro
+                  </option>
+
+                </select>
+
+              </div>
+
+            </div>
+
+            <!-- Nota rápida -->
+            <div>
+
+              <label class="text-sm text-[var(--text-secondary)]">
+                Nota rápida
+              </label>
+
+              <textarea rows="3" formControlName="notes" placeholder="Agrega información útil para el equipo..."
+                class="input-primary resize-none">
+              </textarea>
+
+            </div>
+
+          </div>
+
+          }
+
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- PET SECTION -->
+        <!-- ========================================================= -->
+        @if (niche() === 'pet_grooming') {
+
+        <div class="border border-[var(--border-soft)]
+            rounded-2xl overflow-hidden">
+
+          <!-- Toggle -->
+          <button type="button" (click)="showPetSection = !showPetSection" class="w-full flex items-center justify-between
+           px-4 py-4
+           hover:bg-[var(--bg-base)]
+           transition cursor-pointer">
+
+            <div class="text-left">
+
+              <h3 class="text-sm font-medium text-[var(--text-primary)]">
+                Mascotas
+              </h3>
+
+              <p class="text-xs text-[var(--text-secondary)] mt-1">
+                Agrega una o varias mascotas.
+              </p>
+
+            </div>
+
+            <span class="text-[var(--text-secondary)] text-xl">
+              {{ showPetSection ? '−' : '+' }}
+            </span>
+
+          </button>
+
+          <!-- Content -->
+          @if(showPetSection){
+
+          <div class="border-t border-[var(--border-soft)]
+              p-4 sm:p-5
+              space-y-5">
+
+            <!-- AQUÍ EMPIEZA EL FORM ARRAY -->
+            <div formArrayName="pets">
+
+              @for(
+              pet of pets.controls;
+              track pet.value._tmpId;
+              let i = $index
+              ){
+
+              <div [formGroupName]="i" class="rounded-2xl
+               border border-[var(--border-soft)]
+               p-4
+               bg-[var(--bg-base)]
+               space-y-4 mb-4">
+
+                <!-- Header card -->
+                <div class="flex items-center justify-between">
+
+                  <div>
+
+                    <h4 class="font-medium text-[var(--text-primary)]">
+                      Mascota {{ i + 1 }}
+                    </h4>
+
+                    <p class="text-xs text-[var(--text-secondary)]">
+                      Información básica
+                    </p>
+
+                  </div>
+
+                  @if(pets.length > 1){
+
+                  <button type="button" (click)="removePet(i)" class="text-red-500 text-sm hover:text-red-600">
+
+                    Eliminar
+
+                  </button>
+
+                  }
+
+                </div>
+
+                <!-- Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                  <!-- Nombre -->
+                  <div>
+
+                    <label class="text-sm text-[var(--text-secondary)]">
+                      Nombre *
+                    </label>
+
+                    <input type="text" formControlName="name" placeholder="Ej. Rocky" class="input-primary">
+                    @if (getPetError(i,'name')) {
+                    <small class="text-red-400 text-xs">
+                      {{ getPetError(i,'name') }}
+                    </small>
+                    }
+
+                  </div>
+
+                  <!-- Especie -->
+                  <div>
+
+                    <label class="text-sm text-[var(--text-secondary)]">
+                      Especie
+                    </label>
+
+                    <input type="text" formControlName="species" placeholder="Ej. Perro" class="input-primary">
+
+                  </div>
+
+                  <!-- Raza -->
+                  <div class="md:col-span-2">
+
+                    <label class="text-sm text-[var(--text-secondary)]">
+                      Raza
+                    </label>
+
+                    <input type="text" formControlName="breed" placeholder="Ej. Husky Siberiano" class="input-primary">
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              }
+
+            </div>
+
+            <!-- Botón agregar -->
+            <button type="button" (click)="addPet()" class="mar-btn-secondary">
+
+              + Agregar mascota
+
+            </button>
+
+          </div>
+
+          }
+
+        </div>
+
+        }
+
       </div>
 
       <!-- ================= FOOTER ================= -->
-      <div class="p-4 sm:p-6 border-t border-[var(--border-soft)]
+      <div class="p-4 sm:p-6
+                  border-t border-[var(--border-soft)]
                   flex flex-col sm:flex-row
                   justify-end gap-3 shrink-0">
 
@@ -436,13 +1352,13 @@
 
         </button>
 
-        <!-- [disabled]="form.invalid" -->
         <button type="submit" [disabled]="saving" class="mar-btn-primary">
 
           {{ saving
           ? 'Guardando...'
-          : (editingClient ? 'Actualizar' : 'Guardar') }}
-
+          : (editingClient
+          ? 'Actualizar'
+          : 'Crear ' + clientLabelLower()) }}
 
         </button>
 
@@ -453,4 +1369,656 @@
   </div>
 
 </div>
+}
+
+@if(showClientActionsHelp){
+
+<div class="fixed inset-0 z-50
+            flex items-center justify-center px-4">
+
+  <!-- backdrop -->
+  <div class="absolute inset-0
+              bg-black/40
+              backdrop-blur-sm" (click)="showClientActionsHelp=false">
+
+  </div>
+
+  <div class="relative
+              w-full max-w-md
+              bg-[var(--bg-surface)]
+              border border-[var(--border-soft)]
+              rounded-2xl
+              shadow-xl
+              p-5">
+
+    <h3 class="text-lg font-semibold
+               text-[var(--text-primary)]">
+
+      Acciones de clientes
+
+    </h3>
+
+    <div class="mt-4 space-y-4 text-sm">
+
+      <div>
+
+        <p class="font-medium text-green-500">
+
+          Activar / Desactivar
+
+        </p>
+
+        <p class="text-[var(--text-secondary)]">
+
+          Oculta o vuelve a mostrar un cliente para nuevas reservas.
+          Su historial y datos permanecen intactos.
+
+        </p>
+
+      </div>
+
+      <div>
+
+        <p class="font-medium text-amber-500">
+
+          Bloquear
+
+        </p>
+
+        <p class="text-[var(--text-secondary)]">
+
+          Restringe al cliente para evitar nuevas reservas
+          o acciones dentro del sistema.
+
+        </p>
+
+      </div>
+
+      <div>
+
+        <p class="font-medium text-red-500">
+
+          Eliminar / Archivar
+
+        </p>
+
+        <p class="text-[var(--text-secondary)]">
+
+          Si el cliente ya tiene historial se archivará.
+          Si nunca tuvo actividad se eliminará completamente.
+
+        </p>
+
+      </div>
+
+    </div>
+
+    <button class="mar-btn-help mt-6" (click)="showClientActionsHelp=false">
+
+      Entendido
+
+    </button>
+
+  </div>
+
+</div>
+
+}
+
+@if (showBlockModal) {
+
+<div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+
+  <!-- backdrop -->
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm">
+  </div>
+
+  <!-- modal -->
+  <div class="relative w-full max-w-md p-5
+      bg-[var(--bg-surface)]
+      border border-[var(--border-soft)]
+      rounded-2xl shadow-xl">
+
+    <h3 class="text-lg font-semibold mb-2">
+      Bloquear {{ clientLabelLower() }}
+    </h3>
+
+    <p class="text-sm text-[var(--text-muted)] mb-4">
+      Escribe el motivo del bloqueo.
+      Esta información podrá consultarse después.
+    </p>
+
+    <textarea [(ngModel)]="blockReason" rows="4" [disabled]="processingBlockId !== null"
+      placeholder="Ej. Cancelaciones frecuentes, comportamiento agresivo, fraude..." class="input-primary resize-none">
+    </textarea>
+
+    <!-- Loader -->
+    @if(processingBlockId){
+
+    <div class="flex items-center gap-2 mt-4 text-sm text-[var(--text-muted)]">
+
+      <div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin">
+      </div>
+
+      Procesando bloqueo...
+
+    </div>
+
+    }
+
+    <div class="flex justify-end gap-3 mt-5">
+
+      <button class="mar-btn-secondary" [disabled]="processingBlockId" (click)="closeBlockModal()">
+
+        Cancelar
+
+      </button>
+
+      <button class="mar-btn-primary" [disabled]="processingBlockId" (click)="confirmBlock()">
+
+        {{ processingBlockId ? 'Procesando...' : 'Bloquear' }}
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+}
+
+@if(showViewModal && viewingClient){
+
+<div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64
+            z-50 flex items-end sm:items-center justify-center
+            p-0 sm:p-4">
+
+  <!-- Overlay -->
+  <div class="absolute inset-0
+                bg-black/50
+                backdrop-blur-sm" (click)="showViewModal=false">
+
+  </div>
+
+  <!-- Modal -->
+  <div class="relative w-full h-full sm:h-auto
+                sm:w-full sm:max-w-5xl
+                bg-[var(--bg-surface)]
+                border-0 sm:border border-[var(--border-soft)]
+                rounded-none sm:rounded-3xl
+                shadow-2xl
+                flex flex-col
+                max-h-screen sm:max-h-[92vh]
+                overflow-hidden">
+
+    <!-- ================= HEADER ================= -->
+
+    <div class="p-4 sm:p-6
+                    border-b border-[var(--border-soft)]
+                    flex items-start justify-between gap-4">
+
+      <div class="flex gap-4 min-w-0">
+
+        <!-- Avatar -->
+
+        <div class="w-14 h-14
+                            rounded-2xl
+                            bg-[var(--system-accent)]
+                            flex items-center justify-center
+                            shrink-0">
+
+          <span class="text-lg font-semibold
+                                 text-[var(--system-secondary)]">
+
+            {{ getInitials(viewingClient) }}
+
+          </span>
+
+        </div>
+
+        <div class="min-w-0">
+
+          <div class="flex flex-wrap items-center gap-2">
+
+            <h3 class="text-xl font-semibold
+                                   text-[var(--text-primary)]">
+
+              {{ getClientFullName(viewingClient) }}
+
+            </h3>
+
+            @if(viewingClient.is_blocked){
+
+            <span class="px-2 py-1 rounded-full text-xs
+                                     bg-red-500/10 text-red-400">
+
+              Bloqueado
+
+            </span>
+
+            }
+
+            @else if(viewingClient.is_active){
+
+            <span class="px-2 py-1 rounded-full text-xs
+                                     bg-green-500/10 text-green-400">
+
+              Activo
+
+            </span>
+
+            }
+
+            @else{
+
+            <span class="px-2 py-1 rounded-full text-xs
+                                     bg-gray-500/10 text-gray-400">
+
+              Inactivo
+
+            </span>
+
+            }
+
+          </div>
+
+          <p class="text-sm
+                              text-[var(--text-secondary)]
+                              mt-2">
+
+            {{
+            viewingClient.email
+            || viewingClient.phone?.internationalNumber
+            || 'Sin información'
+            }}
+
+          </p>
+
+        </div>
+
+      </div>
+
+      <!-- cerrar -->
+
+      <button (click)="showViewModal=false" class="w-10 h-10
+                       rounded-xl
+                       hover:bg-[var(--bg-base)]
+                       transition
+                       cursor-pointer">
+
+        ✕
+
+      </button>
+
+    </div>
+
+
+    <!-- ================= BODY ================= -->
+
+    <div class="flex-1 overflow-y-auto
+                    p-4 sm:p-6
+                    space-y-6">
+
+      <!-- RESUMEN -->
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+
+        <div class="rounded-2xl
+                            border border-[var(--border-soft)]
+                            bg-[var(--bg-base)]
+                            p-4">
+
+          <p class="text-xs text-[var(--text-secondary)]">
+            Citas
+          </p>
+
+          <p class="mt-1 text-xl font-semibold">
+
+            {{ viewingClient.appointments_count || 0 }}
+
+          </p>
+
+        </div>
+
+
+        <div class="rounded-2xl
+                            border border-[var(--border-soft)]
+                            bg-[var(--bg-base)]
+                            p-4">
+
+          <p class="text-xs text-[var(--text-secondary)]">
+            Notas
+          </p>
+
+          <p class="mt-1 text-xl font-semibold">
+
+            {{ viewingClient.notes_count || 0 }}
+
+          </p>
+
+        </div>
+
+
+        @if(isPetNiche()){
+
+        <div class="rounded-2xl
+                            border border-[var(--border-soft)]
+                            bg-[var(--bg-base)]
+                            p-4">
+
+          <p class="text-xs text-[var(--text-secondary)]">
+            Mascotas
+          </p>
+
+          <p class="mt-1 text-xl font-semibold">
+
+            {{ viewingClient.pets_count || 0 }}
+
+          </p>
+
+        </div>
+
+        }
+
+
+        <div class="rounded-2xl
+                            border border-[var(--border-soft)]
+                            bg-[var(--bg-base)]
+                            p-4">
+
+          <p class="text-xs text-[var(--text-secondary)]">
+            Última cita
+          </p>
+
+          <p class="mt-1 text-sm font-medium">
+
+            {{
+            viewingClient.last_appointment
+            ? (viewingClient.last_appointment | appDate:'datetime')
+            : 'Sin citas'
+            }}
+
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- CONTACTO -->
+
+      <!-- CONTACTO -->
+
+      <div class="rounded-2xl
+            border border-[var(--border-soft)]
+            p-5">
+
+        <h4 class="font-semibold mb-4">
+
+          Información
+
+        </h4>
+
+        <div class="grid md:grid-cols-2 gap-4">
+
+          <!-- TELEFONO -->
+
+          <div>
+
+            <p class="text-xs text-[var(--text-secondary)]">
+
+              Teléfono
+
+            </p>
+
+            @if(viewingClient.phone){
+
+            <div class="flex items-center gap-3 mt-2 flex-wrap">
+
+              <p>
+
+                {{ viewingClient.phone.nationalNumber }}
+
+              </p>
+
+              <!-- WhatsApp -->
+
+              <a [href]="getWhatsappLink(viewingClient.phone)" target="_blank" aria-label="Enviar WhatsApp" class="w-9 h-9
+             rounded-xl
+             flex items-center justify-center
+             bg-green-500/10
+             text-green-500
+             hover:bg-green-500/20
+             transition">
+
+                <lucide-icon [name]="MessageCircle" class="w-4 h-4">
+                </lucide-icon>
+
+              </a>
+
+              <!-- Llamar -->
+
+              <a [href]="'tel:' + viewingClient.phone.e164Number" aria-label="Llamar" class="w-9 h-9
+             rounded-xl
+             flex items-center justify-center
+             bg-blue-500/10
+             text-blue-500
+             hover:bg-blue-500/20
+             transition">
+
+                <lucide-icon [name]="Phone" class="w-4 h-4">
+                </lucide-icon>
+
+              </a>
+
+            </div>
+
+            }
+            @else{
+
+            <p>No registrado</p>
+
+            }
+
+          </div>
+
+
+          <!-- EMAIL -->
+
+          <div>
+
+            <p class="text-xs text-[var(--text-secondary)]">
+
+              Email
+
+            </p>
+
+            @if(viewingClient.email){
+
+            <div class="flex items-center gap-3 mt-2 flex-wrap">
+
+              <p class="truncate">
+
+                {{ viewingClient.email }}
+
+              </p>
+
+              <a [href]="'mailto:' + viewingClient.email" aria-label="Enviar correo" class="w-9 h-9
+             rounded-xl
+             flex items-center justify-center
+             bg-amber-500/10
+             text-amber-500
+             hover:bg-amber-500/20
+             transition">
+
+                <lucide-icon [name]="Mail" class="w-4 h-4">
+                </lucide-icon>
+
+              </a>
+
+            </div>
+
+            }
+            @else{
+
+            <p>No registrado</p>
+
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- NOTAS -->
+
+      @if(viewingClient.notes){
+
+      <div class="rounded-2xl
+                        border border-[var(--border-soft)]
+                        p-5">
+
+        <h4 class="font-semibold mb-3">
+
+          Notas internas
+
+        </h4>
+
+        <p class="text-sm
+                          text-[var(--text-secondary)]">
+
+          {{ viewingClient.notes }}
+
+        </p>
+
+      </div>
+
+      }
+
+
+      <!-- MASCOTAS -->
+
+      @if(
+      isPetNiche()
+      && viewingClient.pets_count > 0
+      ){
+
+      <div class="space-y-4">
+
+        <h4 class="font-semibold">
+
+          Mascotas
+
+        </h4>
+
+        @for(
+        pet of viewingClient.pets;
+        track pet.id
+        ){
+
+        <div class="rounded-2xl
+                            border border-[var(--border-soft)]
+                            bg-[var(--bg-base)]
+                            p-4">
+
+          <div class="flex justify-between">
+
+            <div>
+
+              <h5 class="font-medium">
+
+                {{ pet.name }}
+
+              </h5>
+
+              <p class="text-sm text-[var(--text-secondary)]">
+
+                {{ pet.species || 'Sin especie' }}
+                •
+                {{ pet.breed || 'Sin raza' }}
+
+              </p>
+
+            </div>
+
+          </div>
+
+          @if(
+          pet.allergies
+          || pet.medical_notes
+          ){
+
+          <div class="mt-4
+                                border-t border-[var(--border-soft)]
+                                pt-4 space-y-2">
+
+            @if(pet.allergies){
+
+            <p class="text-sm">
+
+              <span class="font-medium">
+
+                Alergias:
+
+              </span>
+
+              {{ pet.allergies }}
+
+            </p>
+
+            }
+
+            @if(pet.medical_notes){
+
+            <p class="text-sm">
+
+              <span class="font-medium">
+
+                Notas:
+
+              </span>
+
+              {{ pet.medical_notes }}
+
+            </p>
+
+            }
+
+          </div>
+
+          }
+
+        </div>
+
+        }
+
+      </div>
+
+      }
+
+
+
+
+    </div>
+
+    <!-- FOOTER -->
+
+    <div class="p-4 sm:p-6
+                    border-t border-[var(--border-soft)]
+                    flex justify-end">
+
+      <button (click)="showViewModal=false" class="mar-btn-secondary">
+
+        Cerrar
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
 }
