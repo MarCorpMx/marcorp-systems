@@ -1,0 +1,19 @@
+<!-- <div class="mb-5 p-3 rounded-xl
+    border border-[var(--system-primary)]/20
+    bg-[var(--system-primary)]/5"> -->
+<div class="mb-5 p-3 rounded-xl" [class.section-tip-info]="variant() === 'info'"
+    [class.border-amber-500/20]="variant() === 'warning'" [class.bg-amber-500/5]="variant() === 'warning'"
+    [class.border-sky-500/20]="variant() === 'success'" [class.bg-sky-500/5]="variant() === 'success'">
+
+    <p class="text-xs leading-relaxed" [class.section-tip-info-text]="variant() === 'info'"
+        [class.text-amber-400]="variant() === 'warning'" [class.text-sky-400]="variant() === 'success'">
+
+        <ng-content></ng-content>
+
+    </p>
+
+</div>
+
+<!-- <app-section-tip variant="info">
+    Mantén esta información actualizada...
+</app-section-tip> -->

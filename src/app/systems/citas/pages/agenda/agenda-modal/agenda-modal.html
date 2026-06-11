@@ -52,9 +52,14 @@
 
             </div>
 
-            <button (click)="closeModal()" class="text-[var(--text-secondary)]
-               hover:text-[var(--text-primary)]
-               transition cursor-pointer">
+            <button type="button" (click)="closeModal()" class="w-10 h-10
+           flex items-center justify-center
+           rounded-xl
+           text-[var(--text-secondary)]
+           hover:text-[var(--text-primary)]
+           hover:bg-[var(--bg-base)]
+           transition
+           cursor-pointer">
 
                 ✕
 
@@ -194,35 +199,34 @@
 
                         }
 
-                        <button type="button" (click)="showQuickClient = !showQuickClient" class="mt-3
-           w-full
-           rounded-xl
-           border
-           border-green-500/30
-           bg-green-500/10
-           px-4
-           py-3
-           flex
-           items-center
-           justify-center
-           gap-2
-           text-green-500
-           font-medium
-           hover:bg-green-500/20
-           transition
-           cursor-pointer">
+                        <!-- Crear nuevo -->
+                        <div class="mt-2 flex items-center justify-start gap-2 text-sm">
 
-                            @if(!showQuickClient){
+                            <span class="text-[var(--text-secondary)]">
 
-                            + Crear {{ uiTerms.clients.singularLower }} rápido
+                                ¿{{ uiTerms.clients.singular }} nuevo?
 
-                            } @else {
+                            </span>
 
-                            Ocultar creación rápida
+                            <button type="button" (click)="showQuickClient = !showQuickClient" class="font-medium
+               text-green-500
+               hover:text-green-400
+               transition
+               cursor-pointer">
 
-                            }
+                                @if(!showQuickClient){
 
-                        </button>
+                                + Crear rápidamente
+
+                                } @else {
+
+                                Ocultar
+
+                                }
+
+                            </button>
+
+                        </div>
 
                     </div>
 
@@ -293,7 +297,7 @@
                         <small class="flex items-center gap-1 text-xs text-[var(--text-secondary)]">
 
                             <span class="relative group cursor-pointer shrink-0">
-                                <lucide-icon [name]="HelpCircle"
+                                <lucide-icon [name]="Info"
                                     class="w-4 h-4 text-gray-400 transition-colors duration-200 group-hover:text-emerald-500"
                                     (click)="showQuickClientHelp = !showQuickClientHelp">
                                 </lucide-icon>
@@ -305,12 +309,20 @@
 
                         </small>
 
-                        <button type="button" (click)="createQuickClient()" [disabled]="savingQuickClient"
-                            class="mar-btn-primary w-full">
-                            {{savingQuickClient
+                        <button type="button" (click)="createQuickClient()"
+                            [disabled]="savingQuickClient || clientSelected"
+                            class="mar-btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed">
+
+                            {{
+                            clientSelected
+                            ? uiTerms.clients.singular + ' seleccionado'
+                            : (
+                            savingQuickClient
                             ? 'Guardando...'
                             : 'Guardar y continuar'
+                            )
                             }}
+
                         </button>
 
                     </div>
@@ -370,7 +382,7 @@
                         </label>
                         <select (change)="onVariantChange($event)" formControlName="service_variant_id"
                             class="input-primary">
-                            <option [value]="null">Seleccionar {{ uiTerms.services.singularLower }}</option>
+                            <option [ngValue]="null">Seleccionar {{ uiTerms.services.singularLower }}</option>
                             <option *ngFor="let v of variants" [value]="v.id">
                                 {{ v.label }}
                                 <span *ngIf="v.price"> - ${{ v.price }}</span>
@@ -385,13 +397,82 @@
                         }
                     </div>
 
+
+                    <!-- Cargando staff -->
+                    @if(form.value.service_variant_id && loadingStaff){
+                    <div class="rounded-xl border border-[var(--border-soft)] p-4">
+                        Consultando {{ uiTerms.team.pluralLower }}...
+                    </div>
+                    }
+
+                    <!-- Si no hay Staff asignado al servicio -->
+                    @if(form.value.service_variant_id && !loadingStaff && !staffMembers.length){
+
+                    <div class="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 space-y-3">
+
+                        <div class="flex items-start gap-3">
+
+                            <lucide-icon [name]="Info" class="w-5 h-5 mt-0.5 shrink-0 text-amber-500">
+                            </lucide-icon>
+
+                            <div class="space-y-2">
+
+                                <p class="font-medium text-[var(--text-primary)]">
+
+                                    {{ getServiceArticle(true) }} {{ uiTerms.services.singularLower }}
+                                    aún no tiene {{ uiTerms.team.pluralLower }}
+                                    asignados
+
+                                </p>
+
+                                <p class="text-sm text-[var(--text-secondary)] leading-relaxed">
+
+                                    Para programar
+                                    {{ uiTerms.appointments.pluralLower }}
+                                    necesitas indicar quién puede realizar {{ getServiceArticle() }}
+                                    {{ uiTerms.services.singularLower }}.
+
+                                </p>
+
+                                <div class="mt-4 flex justify-end">
+
+                                    <button type="button" (click)="goToAgenda()" class="inline-flex
+               items-center
+               gap-2
+               px-4
+               py-2.5
+               rounded-xl
+               border
+               border-amber-500/30
+               bg-amber-500/10
+               text-amber-400
+               font-medium
+               hover:bg-amber-500/20
+               transition
+               cursor-pointer">
+
+                                        Configurar {{ uiTerms.team.pluralLower }}
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    }
+
                     <!-- Colaborador -->
+                    @if(form.value.service_variant_id && !loadingStaff && staffMembers.length){
                     <div>
                         <label class="text-sm text-[var(--text-secondary)]">
                             {{ uiTerms.team.singular }} *
                         </label>
                         <select formControlName="staff_member_id" class="input-primary">
-                            <option [value]="null">Seleccionar {{ uiTerms.team.singularLower }}</option>
+                            <option [ngValue]="null">Seleccionar {{ uiTerms.team.singularLower }}</option>
                             <option *ngFor="let s of staffMembers" [value]="s.id">
                                 {{ s.name }}
                             </option>
@@ -402,6 +483,92 @@
                         </small>
                         }
                     </div>
+                    }
+
+                    <!-- ================= MODALIDAD ================= -->
+
+                    @if(selectedVariant){
+
+                    <div class="space-y-4">
+
+                        <!-- HYBRID -->
+                        @if(isHybridAppointment){
+
+                        <div>
+
+                            <label class="text-sm text-[var(--text-secondary)]">
+                                Modalidad *
+                            </label>
+
+                            <select formControlName="mode" class="input-primary">
+
+                                <option value="presential">
+                                    Presencial
+                                </option>
+
+                                <option value="online">
+                                    Online
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        }
+
+                        <!-- ONLINE INFO -->
+                        @if(isOnlineAppointment){
+
+                        <div class="rounded-xl
+                border border-[var(--border-soft)]
+                bg-[var(--bg-muted)]/40
+                p-4
+                space-y-4">
+
+                            <div>
+
+                                <div class="font-medium text-[var(--text-primary)]">
+
+                                    Sesión online
+
+                                </div>
+
+                                <div class="text-sm text-[var(--text-secondary)]">
+
+                                    Puedes agregar un enlace de videollamada ahora
+                                    o compartirlo después manualmente.
+
+                                </div>
+
+                            </div>
+
+                            <div>
+
+                                <label class="text-sm text-[var(--text-secondary)]">
+
+                                    Link de videollamada
+
+                                </label>
+
+                                <input type="url" formControlName="meeting_url"
+                                    placeholder="https://meet.google.com/..." class="input-primary">
+
+                                <div class="text-xs mt-1 text-[var(--text-secondary)]">
+
+                                    Compatible con Google Meet, Zoom, Teams o cualquier plataforma.
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        }
+
+                    </div>
+
+                    }
+
 
                     <!-- Hora -->
                     <div>
@@ -416,14 +583,144 @@
                         }
                     </div>
 
-                    <!-- Notas -->
-                    <div>
-                        <label class="text-sm text-[var(--text-secondary)]">
-                            Notas
-                        </label>
-                        <textarea formControlName="notes" placeholder="Escribe las notas coquetas" rows="3"
-                            class="input-primary"></textarea>
+                    <!-- ================= OPCIONES ADICIONALES ================= -->
+
+                    <div class="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-muted)]/40">
+
+                        <!-- Header -->
+                        <button type="button" (click)="showAdditionalOptions = !showAdditionalOptions" class="w-full
+               flex
+               items-center
+               justify-between
+               px-4
+               py-4
+               text-left
+               cursor-pointer
+               hover:bg-[var(--state-hover)]
+               transition
+               rounded-xl">
+
+                            <div>
+
+                                <div class="font-medium text-[var(--text-primary)]">
+
+                                    Opciones adicionales
+
+                                </div>
+
+                                <div class="text-sm text-[var(--text-secondary)]">
+
+                                    Repetición, notas y configuración avanzada.
+
+                                </div>
+
+                            </div>
+
+                            <div class="text-[var(--text-secondary)] text-lg">
+
+                                @if(showAdditionalOptions){
+
+                                −
+
+                                } @else {
+
+                                +
+
+                                }
+
+                            </div>
+
+                        </button>
+
+                        <!-- Content -->
+                        @if(showAdditionalOptions){
+
+                        <div class="px-4 pb-4 space-y-5">
+
+                            <!-- Repetir cita -->
+                            <div class="rounded-xl
+                    border border-[var(--border-soft)]
+                    bg-[var(--bg-surface)]
+                    p-4">
+
+                                <div class="flex items-center justify-between gap-4">
+
+                                    <div>
+
+                                        <div class="font-medium text-[var(--text-primary)]">
+
+                                            Repetir {{ uiTerms.appointments.singularLower }}
+
+                                        </div>
+
+                                        <div class="text-sm text-[var(--text-secondary)]">
+
+                                            Programa automáticamente futuras
+                                            {{ uiTerms.appointments.pluralLower }}.
+
+                                        </div>
+
+                                    </div>
+
+                                    <button type="button" (click)="showRecurringModal=true" class="text-sm
+                           font-medium
+                           text-green-500
+                           hover:text-green-400
+                           transition
+                           cursor-pointer">
+
+                                        Configurar
+
+                                    </button>
+
+                                </div>
+
+                                @if(recurringEnabled){
+
+                                <div class="mt-3
+                        text-sm
+                        rounded-lg
+                        bg-[var(--bg-muted)]
+                        border border-[var(--border-soft)]
+                        p-3">
+
+                                    Se repetirá
+                                    <span class="font-medium">
+
+                                        {{ recurringSummary }}
+
+                                    </span>
+
+                                </div>
+
+                                }
+
+                            </div>
+
+
+                            <!-- Cita recurrente modal michelle -->
+
+
+
+                            <!-- Notas -->
+                            <div>
+
+                                <label class="text-sm text-[var(--text-secondary)]">
+
+                                    Notas
+
+                                </label>
+
+                                <textarea formControlName="notes" placeholder="Escribe notas adicionales..." rows="3"
+                                    class="input-primary"></textarea>
+                            </div>
+
+                        </div>
+
+                        }
+
                     </div>
+
 
 
                 </div>
@@ -528,6 +825,492 @@
         </div>
 
         <button class="mar-btn-help mt-4" (click)="showQuickClientHelp = false">
+
+            Entendido
+
+        </button>
+
+    </div>
+
+</div>
+
+}
+
+@if(showRecurringModal){
+<div class="fixed inset-0
+    z-[997]
+    overflow-hidden
+    touch-none
+    flex items-stretch sm:items-center justify-center
+    p-0 sm:p-4">
+
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-auto" (click)="showRecurringModal=false">
+    </div>
+
+    <!-- Modal -->
+    <div class="relative
+                w-full h-full sm:h-auto
+                sm:w-full sm:max-w-2xl
+                bg-[var(--bg-surface)]
+                border-0 sm:border border-[var(--border-soft)]
+                rounded-none sm:rounded-3xl
+                shadow-2xl
+                flex flex-col
+                max-h-screen sm:max-h-[92vh]
+                overflow-hidden">
+
+        <!-- ================= HEADER ================= -->
+        <div class="p-4 sm:p-6 border-b border-[var(--border-soft)] flex items-start justify-between gap-4 shrink-0">
+
+            <div class="min-w-0 flex-1">
+
+                <h3 class="text-lg sm:text-xl
+                           font-semibold
+                           text-[var(--text-primary)]">
+
+                    Repetir {{ uiTerms.appointments.singularLower }}
+
+                </h3>
+
+                <p class="text-sm
+                          text-[var(--text-secondary)]
+                          mt-2 leading-relaxed">
+
+                    Configura cómo se crearán automáticamente futuras
+                    {{ uiTerms.appointments.pluralLower }}.
+
+                </p>
+
+            </div>
+
+            <!-- Close -->
+            <button type="button" (click)="showRecurringModal=false" class="shrink-0
+                           w-10 h-10
+                           rounded-xl
+                           flex items-center justify-center
+                           hover:bg-[var(--bg-base)]
+                           text-[var(--text-secondary)]
+                           hover:text-[var(--text-primary)]
+                           transition
+                           cursor-pointer">
+
+                ✕
+
+            </button>
+
+        </div>
+
+        <!-- ================= BODY ================= -->
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6">
+
+            @if(isFreePlan){
+
+            <div class="mb-6
+                rounded-2xl
+                border border-yellow-500/20
+                bg-yellow-500/10
+                p-4">
+
+                <div class="flex items-start gap-3">
+
+                    <div class="w-10 h-10 rounded-xl bg-yellow-500/15 flex items-center justify-center shrink-0">
+
+                        <lucide-icon [name]="Lock" class="w-5 h-5 text-yellow-400">
+                        </lucide-icon>
+
+                    </div>
+
+                    <div>
+
+                        <h4 class="font-semibold text-[var(--text-primary)]">
+
+                            Disponible en plan Basic
+
+                        </h4>
+
+                        <p class="text-sm text-[var(--text-secondary)] mt-1">
+
+                            Programa automáticamente {{ uiTerms.services.pluralLower }} semanales,
+                            quincenales o mensuales para tus {{ uiTerms.clients.pluralLower }}.
+
+                        </p>
+
+                        <button type="button"
+                            class="mt-3 inline-flex items-center gap-2 text-green-400 font-medium cursor-pointer"
+                            (click)="goToPlans()">
+
+                            <lucide-icon [name]="Sparkles" class="w-4 h-4">
+                            </lucide-icon>
+
+                            Actualizar plan
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            }
+
+            <div [formGroup]="recurringForm" class="space-y-6">
+
+                <!-- ================= FRECUENCIA ================= -->
+                <div class="space-y-2">
+
+                    <label class="text-sm font-medium text-[var(--text-primary)]">
+
+                        Frecuencia
+
+                    </label>
+
+                    <select formControlName="frequency" [disabled]="isFreePlan" class="input-primary">
+                        <option value="daily">
+                            Diario
+                        </option>
+                        <option value="weekly">
+                            Semanal
+                        </option>
+                        <option value="monthly">
+                            Mensual
+                        </option>
+                    </select>
+
+                    <p class="text-xs text-[var(--text-secondary)]">
+                        Define cada cuánto tiempo se repetirá la
+                        {{ uiTerms.appointments.singularLower }}.
+                    </p>
+
+                </div>
+
+                <!-- ================= INTERVALO ================= -->
+                <div class="space-y-3">
+
+                    <div class="flex items-center gap-2">
+
+                        <label class="text-sm font-medium text-[var(--text-primary)]">
+
+                            Repetir cada
+
+                        </label>
+
+                        <button type="button" (click)="showRecurringHelp = true" class="text-[var(--text-secondary)]
+                                       hover:text-[var(--system-accent)]
+                                       transition
+                                       cursor-pointer">
+
+                            <lucide-icon [name]="Info" class="w-4 h-4">
+                            </lucide-icon>
+
+                        </button>
+
+                    </div>
+
+                    <div class="flex items-center gap-3">
+
+                        <input type="number" [disabled]="isFreePlan" min="1" formControlName="interval" class="input-primary w-24">
+
+                        <span class="text-sm text-[var(--text-secondary)]">
+
+                            @if(form.get('recurring.frequency')?.value==='daily'){
+
+                            día(s)
+
+                            }
+
+                            @if(form.get('recurring.frequency')?.value==='weekly'){
+
+                            semana(s)
+
+                            }
+
+                            @if(form.get('recurring.frequency')?.value==='monthly'){
+
+                            mes(es)
+
+                            }
+
+                        </span>
+
+
+
+                    </div>
+                    @if(getRecurringError('interval')){
+
+                    <small class="text-red-400 text-xs block">
+
+                        {{ getRecurringError('interval') }}
+
+                    </small>
+
+                    }
+
+                    <!-- resumen -->
+                    <div class="rounded-xl
+                                border border-[var(--border-soft)]
+                                bg-[var(--bg-base)]
+                                p-3">
+
+                        <p class="text-sm text-[var(--text-secondary)] leading-relaxed">
+
+                            @if(form.get('recurring.frequency')?.value==='daily'){
+
+                            Se creará una
+                            {{ uiTerms.appointments.singularLower }}
+                            cada
+                            <span class="font-medium text-[var(--text-primary)]">
+                                {{ form.get('recurring.interval')?.value || 1 }}
+                            </span>
+                            día(s).
+
+                            }
+
+                            @if(form.get('recurring.frequency')?.value==='weekly'){
+
+                            Se creará una
+                            {{ uiTerms.appointments.singularLower }}
+                            cada
+                            <span class="font-medium text-[var(--text-primary)]">
+                                {{ form.get('recurring.interval')?.value || 1 }}
+                            </span>
+                            semana(s).
+
+                            }
+
+                            @if(form.get('recurring.frequency')?.value==='monthly'){
+
+                            Se creará una
+                            {{ uiTerms.appointments.singularLower }}
+                            cada
+                            <span class="font-medium text-[var(--text-primary)]">
+                                {{ form.get('recurring.interval')?.value || 1 }}
+                            </span>
+                            mes(es).
+
+                            }
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- ================= FINALIZAR ================= -->
+                <div class="space-y-3">
+
+                    <label class="text-sm font-medium text-[var(--text-primary)]">
+
+                        ¿Cuándo terminará?
+
+                    </label>
+
+                    <select formControlName="end_type" [disabled]="isFreePlan" class="input-primary">
+
+                        <!-- <option value="never">
+                            Continuar indefinidamente
+                        </option> Esto es una bomba de tiempo, si ocurré un bug, pumba se crean citas infinitas man-->
+
+                        <option value="occurrences">
+                            Después de cierto número de {{ uiTerms.appointments.pluralLower
+                            }}
+                        </option>
+
+                        <option value="date">
+                            En una fecha específica
+                        </option>
+
+                    </select>
+
+                    <div class="rounded-xl
+                                border border-[var(--border-soft)]
+                                bg-[var(--bg-base)]
+                                p-3">
+
+                        <p class="text-xs
+                                  text-[var(--text-secondary)]
+                                  leading-relaxed">
+
+                            Puedes modificar o detener la repetición
+                            de estas
+                            {{ uiTerms.appointments.pluralLower }}
+                            cuando lo necesites.
+
+                        </p>
+
+                    </div>
+
+                    <!-- occurrences -->
+                    @if(form.get('recurring.end_type')?.value==='occurrences'){
+
+                    <div class="space-y-2">
+
+                        <label class="text-sm text-[var(--text-secondary)]">
+
+                            Número de
+                            {{ uiTerms.appointments.pluralLower }}
+
+                        </label>
+
+                        <input type="number" min="1" formControlName="occurrences" class="input-primary"
+                            placeholder="Ej. 12">
+
+                        @if(getRecurringError('occurrences')){
+                        <small class="text-red-400 text-xs block">
+                            {{ getRecurringError('occurrences') }}
+                        </small>
+                        }
+
+                    </div>
+
+                    }
+
+                    <!-- date -->
+                    @if(form.get('recurring.end_type')?.value==='date'){
+
+                    <div class="space-y-2">
+
+                        <label class="text-sm text-[var(--text-secondary)]">
+
+                            Fecha final
+
+                        </label>
+
+                        <input type="date" formControlName="end_date" class="input-primary">
+                        @if(getRecurringError('end_date')){
+
+                        <small class="text-red-400 text-xs block">
+
+                            {{ getRecurringError('end_date') }}
+
+                        </small>
+
+                        }
+
+                    </div>
+
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ================= FOOTER ================= -->
+        <div class="p-4 sm:p-6
+                    border-t border-[var(--border-soft)]
+                    flex flex-col sm:flex-row
+                    justify-end gap-3
+                    shrink-0">
+
+            <button type="button" class="mar-btn-secondary" (click)="showRecurringModal=false">
+
+                Cancelar
+
+            </button>
+
+            <button type="button" [disabled]="isFreePlan" class="mar-btn-primary" (click)="saveRecurring()">
+
+                Guardar configuración
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+}
+
+@if (showRecurringHelp) {
+
+<div class="fixed inset-0 z-[999] flex items-center justify-center px-4">
+
+    <!-- backdrop -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showRecurringHelp = false">
+    </div>
+
+    <!-- modal -->
+    <div class="relative
+        w-full
+        max-w-sm
+        p-4
+        bg-[var(--bg-surface)]
+        border border-[var(--border-soft)]
+        rounded-2xl
+        shadow-xl">
+
+        <p class="font-semibold text-base mb-2
+                  text-[var(--text-primary)]">
+
+            Repetición de {{ uiTerms.appointments.pluralLower }}
+
+        </p>
+
+        <p class="text-sm
+                  text-[var(--text-secondary)]
+                  leading-relaxed">
+
+            ROMBI puede crear automáticamente futuras
+            {{ uiTerms.appointments.pluralLower }}
+            usando la frecuencia que configures.
+
+        </p>
+
+        <div class="mt-4
+                    rounded-xl
+                    border border-[var(--border-soft)]
+                    bg-[var(--bg-muted)]
+                    p-4">
+
+            <p class="font-medium
+                      text-[var(--text-primary)]
+                      mb-2">
+
+                Ejemplos:
+
+            </p>
+
+            <ul class="space-y-2
+                       text-sm
+                       text-[var(--text-secondary)]">
+
+                <li>
+                    • 1 semana =
+                    <span class="font-medium text-[var(--text-primary)]">
+                        Una {{uiTerms.appointments.singularLower}} cada semana
+                    </span>
+                </li>
+
+                <li>
+                    • 2 semanas =
+                    <span class="font-medium text-[var(--text-primary)]">
+                        Una {{uiTerms.appointments.singularLower}} cada 15 días
+                    </span>
+                </li>
+
+                <li>
+                    • 1 mes =
+                    <span class="font-medium text-[var(--text-primary)]">
+                        Una {{uiTerms.appointments.singularLower}} cada mes
+                    </span>
+                </li>
+
+                <li>
+                    • 2 meses =
+                    <span class="font-medium text-[var(--text-primary)]">
+                        Una {{uiTerms.appointments.singularLower}} cada 2 meses
+                    </span>
+                </li>
+
+            </ul>
+
+        </div>
+
+        <button class="mar-btn-help mt-4" (click)="showRecurringHelp = false">
 
             Entendido
 

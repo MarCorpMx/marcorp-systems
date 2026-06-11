@@ -63,8 +63,8 @@
                     <label class="text-sm text-[var(--text-secondary)]">
                         Nombre del servicio *
                     </label>
-
-                    <input type="text" formControlName="name" class="input-primary" placeholder="Ej. Consulta inicial">
+                    <!-- placeholder="Ej. Consulta inicial" -->
+                    <input type="text" formControlName="name" class="input-primary" [placeholder]="namePlaceholder" >
 
 
                     @if (presets.length > 0) {

@@ -6,6 +6,12 @@ export interface ServiceVariantListItem {
   label: string;
   duration: number;
   price: number | null;
+
+  max_capacity: number | null;
+  mode: string | null;
+  includes_material: boolean;
+  requires_meeting_link: boolean;
+  meeting_provider: string | null;
 }
 
 export interface ServiceVariantModel {
@@ -18,6 +24,8 @@ export interface ServiceVariantModel {
   mode: ServiceMode;
   includes_material?: boolean;
   active: boolean;
+
+  image_url?: string;
   //staff: StaffModel[];
 }
 

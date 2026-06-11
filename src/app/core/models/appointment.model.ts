@@ -67,16 +67,49 @@ export interface AppointmentModel {
 export interface CreateAppointmentDto {
 
   client_id: number;
-
+  pet_id?: number | null;
   staff_member_id: number;
+  branch_service_variant_id: number;
+  notes?: string | null;
 
-  service_variant_id: number;
+  /*
+  |--------------------------------------------------------------------------
+  | Modalidad
+  |--------------------------------------------------------------------------
+  */
 
-  date: string;
+  mode: 'online' | 'presential' | 'hybrid';
 
-  time: string;
+  /*
+  |--------------------------------------------------------------------------
+  | Meeting
+  |--------------------------------------------------------------------------
+  */
+  meeting_url?: string | null;
+  meeting_provider?: string | null;
 
-  notes?: string;
+  /*
+  |--------------------------------------------------------------------------
+  | Datetime local
+  |--------------------------------------------------------------------------
+  */
+
+  start_datetime_local: string;
+  timezone: string;
+
+  /*
+  |--------------------------------------------------------------------------
+  | Recurrencia
+  |--------------------------------------------------------------------------
+  */
+
+  recurring?: {
+    frequency: 'daily' | 'weekly' | 'monthly';
+    interval: number;
+    end_type: 'never' | 'occurrences' | 'date';
+    occurrences?: number | null;
+    end_date?: string | null;
+  } | null;
 
 }
 

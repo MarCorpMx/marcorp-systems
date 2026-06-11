@@ -6,6 +6,8 @@ export interface Organization {
   reference_prefix: string;
   business_niche: string | null;
 
+  logo_url: string | null;
+
   email: string | null;
   phone: any | null; // luego lo tipamos mejor si quieres
   website: string | null;

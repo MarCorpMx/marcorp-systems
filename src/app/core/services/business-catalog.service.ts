@@ -18,12 +18,14 @@ type BusinessNiche = {
     informal?: string;
   };
 
+
   terminology: {
     clients: TerminologyItem;
     appointments: TerminologyItem;
     services: TerminologyItem;
     team: TerminologyItem;
     booking: TerminologyItem;
+    owner: TerminologyItem;
   };
 
   ui: {
@@ -125,7 +127,11 @@ export class BusinessCatalogService {
         booking: {
           singular: 'agenda online',
           plural: 'agenda online'
-        }
+        },
+        owner: {
+          singular: 'cliente',
+          plural: 'clientes'
+        },
       },
 
 
@@ -224,7 +230,11 @@ export class BusinessCatalogService {
         booking: {
           singular: 'reserva online',
           plural: 'reservas online'
-        }
+        },
+        owner: {
+          singular: 'cliente',
+          plural: 'clientes'
+        },
       },
 
       ui: {
@@ -322,7 +332,11 @@ export class BusinessCatalogService {
         booking: {
           singular: 'reserva online',
           plural: 'reservas online'
-        }
+        },
+        owner: {
+          singular: 'cliente',
+          plural: 'clientes'
+        },
       },
 
       ui: {
@@ -418,7 +432,11 @@ export class BusinessCatalogService {
         booking: {
           singular: 'reserva online',
           plural: 'reservas online'
-        }
+        },
+        owner: {
+          singular: 'cliente',
+          plural: 'clientes'
+        },
       },
 
       ui: {
@@ -514,7 +532,11 @@ export class BusinessCatalogService {
         booking: {
           singular: 'agenda online',
           plural: 'agendas online'
-        }
+        },
+        owner: {
+          singular: 'paciente',
+          plural: 'pacientes'
+        },
       },
 
       ui: {
@@ -602,17 +624,21 @@ export class BusinessCatalogService {
           plural: 'consultas'
         },
         services: {
-          singular: 'servicio médico',
-          plural: 'servicios médicos'
+          singular: 'servicio',
+          plural: 'servicios'
         },
         team: {
-          singular: 'personal médico',
-          plural: 'personal médico'
+          singular: 'personal',
+          plural: 'personal'
         },
         booking: {
           singular: 'agenda online',
           plural: 'agenda online'
-        }
+        },
+        owner: {
+          singular: 'paciente',
+          plural: 'pacientes'
+        },
       },
 
       ui: {
@@ -708,7 +734,11 @@ export class BusinessCatalogService {
         booking: {
           singular: 'agenda online',
           plural: 'agenda online'
-        }
+        },
+        owner: {
+          singular: 'paciente',
+          plural: 'pacientes'
+        },
       },
 
       ui: {
@@ -769,6 +799,106 @@ export class BusinessCatalogService {
     },
 
     // =========================================================
+    // MASCOTAS
+    // =========================================================
+
+    {
+      value: 'pet_grooming',
+      label: 'Veterinaria / Mascotas',
+
+      icon: 'paw-print',
+      color: '#84CC16',
+
+      audience: {
+        singular: 'cliente',
+        plural: 'clientes y mascotas',
+      },
+
+      terminology: {
+        clients: {
+          singular: 'cliente',
+          plural: 'clientes y mascotas'
+        },
+        appointments: {
+          singular: 'cita',
+          plural: 'citas'
+        },
+        services: {
+          singular: 'servicio',
+          plural: 'servicios'
+        },
+        team: {
+          singular: 'colaborador',
+          plural: 'colaboradores'
+        },
+        booking: {
+          singular: 'reserva online',
+          plural: 'reservas online'
+        },
+        owner: {
+          singular: 'cliente',
+          plural: 'clientes'
+        }
+      },
+
+      ui: {
+        dashboard_description: 'Visualiza citas, servicios y actividad de tus mascotas atendidas.',
+        dashboard_empty_state: 'Aquí aparecerá el resumen de citas y servicios.',
+
+        clients_description: 'Administra clientes, mascotas y seguimiento de sus servicios.',
+        clients_empty_state: 'Agrega tu primer cliente y registra su mascota para comenzar.',
+        clients_cta: 'Nuevo cliente',
+
+        services_description: 'Configura consultas, tratamientos, baños, cortes y otros servicios para mascotas.',
+        services_empty_state: 'Crea tu primer servicio para comenzar a recibir reservas.',
+        services_cta: 'Nuevo servicio',
+
+        appointments_description: 'Organiza citas y servicios para mascotas fácilmente.',
+        appointments_empty_state: 'Tus próximas citas aparecerán aquí.',
+        appointments_cta: 'Nueva cita',
+
+        booking_description: 'Permite reservas online para servicios de mascotas.',
+        booking_empty_state: 'Configura las reservas online para comenzar a recibir citas.',
+        booking_cta: 'Activar reservas',
+
+        team_description: 'Administra estilistas y personal de atención.',
+        team_empty_state: 'Agrega integrantes a tu equipo para asignar servicios.',
+        team_cta: 'Agregar integrante'
+      },
+
+      marketing: {
+        headline: 'Organiza baños, cortes y citas fácilmente.',
+        empty_state: 'Tus próximas mascotas agendadas aparecerán aquí.',
+        cta: 'Compartir reservas online'
+      },
+
+      suggestion: {
+        name: 'Baño y corte',
+        duration: 60,
+        price: 300,
+        mode: 'presential'
+      },
+
+      presets: [
+        'Baño',
+        'Corte',
+        'Consulta'
+      ],
+
+      agenda: {
+        appointment_duration: 60,
+        break_between_appointments: 10,
+        label: 'clientes y mascotas',
+
+        schedule: {
+          start: '10:00',
+          end: '17:00',
+          working_days: [1, 2, 3, 4, 5, 6]
+        }
+      }
+    },
+
+    // =========================================================
     // NUTRIÓLOGOS
     // =========================================================
 
@@ -804,6 +934,10 @@ export class BusinessCatalogService {
         booking: {
           singular: 'agenda online',
           plural: 'agenda online'
+        },
+        owner: {
+          singular: 'paciente',
+          plural: 'pacientes'
         }
       },
 
@@ -900,6 +1034,10 @@ export class BusinessCatalogService {
         booking: {
           singular: 'agenda online',
           plural: 'agenda online'
+        },
+        owner: {
+          singular: 'paciente',
+          plural: 'pacientes'
         }
       },
 
@@ -996,6 +1134,10 @@ export class BusinessCatalogService {
         booking: {
           singular: 'reserva online',
           plural: 'reservas online'
+        },
+        owner: {
+          singular: 'cliente',
+          plural: 'clientes'
         }
       },
 
@@ -1092,6 +1234,10 @@ export class BusinessCatalogService {
         booking: {
           singular: 'reserva online',
           plural: 'reservas online'
+        },
+        owner: {
+          singular: 'cliente',
+          plural: 'clientes'
         }
       },
 
@@ -1188,6 +1334,10 @@ export class BusinessCatalogService {
         booking: {
           singular: 'inscripción',
           plural: 'inscripciones'
+        },
+        owner: {
+          singular: 'alumno',
+          plural: 'alumnos'
         }
       },
 
@@ -1284,6 +1434,10 @@ export class BusinessCatalogService {
         booking: {
           singular: 'reserva online',
           plural: 'reservas online'
+        },
+        owner: {
+          singular: 'cliente',
+          plural: 'clientes'
         }
       },
 
@@ -1380,6 +1534,10 @@ export class BusinessCatalogService {
         booking: {
           singular: 'reserva online',
           plural: 'reservas online'
+        },
+        owner: {
+          singular: 'cliente',
+          plural: 'clientes'
         }
       },
 
@@ -1440,101 +1598,6 @@ export class BusinessCatalogService {
       }
     },
 
-    // =========================================================
-    // MASCOTAS
-    // =========================================================
-
-    {
-      value: 'pet_grooming',
-      label: 'Mascotas',
-
-      icon: 'paw-print',
-      color: '#84CC16',
-
-      audience: {
-        singular: 'cliente',
-        plural: 'clientes y mascotas'
-      },
-
-      terminology: {
-        clients: {
-          singular: 'cliente',
-          plural: 'Clientes y mascotas'
-        },
-        appointments: {
-          singular: 'cita',
-          plural: 'citas'
-        },
-        services: {
-          singular: 'servicio',
-          plural: 'servicios'
-        },
-        team: {
-          singular: 'colaborador',
-          plural: 'colaboradores'
-        },
-        booking: {
-          singular: 'reserva online',
-          plural: 'reservas online'
-        }
-      },
-
-      ui: {
-        dashboard_description: 'Visualiza citas, servicios y actividad de tus mascotas atendidas.',
-        dashboard_empty_state: 'Aquí aparecerá el resumen de citas y servicios.',
-
-        clients_description: 'Administra clientes, mascotas y seguimiento de sus servicios.',
-        clients_empty_state: 'Agrega tu primer cliente y registra su mascota para comenzar.',
-        clients_cta: 'Nuevo cliente',
-
-        services_description: 'Configura baños, cortes y servicios de estética.',
-        services_empty_state: 'Crea tu primer servicio para comenzar a recibir reservas.',
-        services_cta: 'Nuevo servicio',
-
-        appointments_description: 'Organiza citas y servicios para mascotas fácilmente.',
-        appointments_empty_state: 'Tus próximas citas aparecerán aquí.',
-        appointments_cta: 'Nueva cita',
-
-        booking_description: 'Permite reservas online para servicios de mascotas.',
-        booking_empty_state: 'Configura las reservas online para comenzar a recibir citas.',
-        booking_cta: 'Activar reservas',
-
-        team_description: 'Administra estilistas y personal de atención.',
-        team_empty_state: 'Agrega integrantes a tu equipo para asignar servicios.',
-        team_cta: 'Agregar integrante'
-      },
-
-      marketing: {
-        headline: 'Organiza baños, cortes y citas fácilmente.',
-        empty_state: 'Tus próximas mascotas agendadas aparecerán aquí.',
-        cta: 'Compartir reservas online'
-      },
-
-      suggestion: {
-        name: 'Baño y corte',
-        duration: 60,
-        price: 300,
-        mode: 'presential'
-      },
-
-      presets: [
-        'Baño',
-        'Corte',
-        'Spa'
-      ],
-
-      agenda: {
-        appointment_duration: 60,
-        break_between_appointments: 10,
-        label: 'mascotas',
-
-        schedule: {
-          start: '10:00',
-          end: '17:00',
-          working_days: [1, 2, 3, 4, 5, 6]
-        }
-      }
-    },
 
     // =========================================================
     // TATUAJES
@@ -1572,6 +1635,10 @@ export class BusinessCatalogService {
         booking: {
           singular: 'reserva online',
           plural: 'reservas online'
+        },
+        owner: {
+          singular: 'cliente',
+          plural: 'clientes'
         }
       },
 
@@ -1668,6 +1735,10 @@ export class BusinessCatalogService {
         booking: {
           singular: 'reserva online',
           plural: 'reservas online'
+        },
+        owner: {
+          singular: 'cliente',
+          plural: 'clientes'
         }
       },
 

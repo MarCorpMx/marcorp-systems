@@ -84,16 +84,20 @@
                 </div>
 
                 <!-- PHONE -->
-                <div>
+                <div class="md:col-span-2">
                     <label class="text-sm text-[var(--text-secondary)]">
                         Teléfono *
                     </label>
 
-                    <ngx-intl-tel-input [cssClass]="'input-primary'"
-                        [preferredCountries]="[CountryISO.Mexico, CountryISO.UnitedStates]"
-                        [enableAutoCountrySelect]="false" [enablePlaceholder]="true" [searchCountryFlag]="true"
-                        [selectFirstCountry]="false" [selectedCountryISO]="CountryISO.Mexico" [phoneValidation]="true"
-                        formControlName="phone">
+                    <ngx-intl-tel-input [preferredCountries]="preferredCountries" [enableAutoCountrySelect]="true"
+                        [searchCountryFlag]="true" [searchCountryField]="[
+                                    SearchCountryField.Name,
+                                    SearchCountryField.DialCode,
+                                    SearchCountryField.Iso2
+                                    ]" [selectedCountryISO]="CountryISO.Mexico" [phoneValidation]="true"
+                        [separateDialCode]="true" [numberFormat]="PhoneNumberFormat.International"
+                        formControlName="phone" [cssClass]="'input-primary'">
+
                     </ngx-intl-tel-input>
 
                     @if (getError('phone')) {
@@ -138,7 +142,7 @@
                 </div>
 
                 <!-- CITY -->
-                <div>
+                <div class="md:col-span-2">
                     <label class="text-sm text-[var(--text-secondary)]">
                         Ciudad
                     </label>

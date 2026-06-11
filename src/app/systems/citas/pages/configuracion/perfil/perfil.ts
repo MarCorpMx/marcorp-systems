@@ -1,8 +1,13 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, computed } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgxIntlTelInputModule, CountryISO, PhoneNumberFormat } from 'ngx-intl-tel-input';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, HelpCircle } from 'lucide-angular';
+import {
+  LucideAngularModule, HelpCircle, Image, ChevronUp, ChevronDown,
+  Link, PhoneCall, FileText, MapPinned, Sparkles, Scissors, Hand,
+  Brain, Stethoscope, Heart, Flower, Dumbbell, GraduationCap, Presentation, Target, PawPrint,
+  PenTool, Circle, Apple, ShieldPlus
+} from 'lucide-angular';
 
 
 import { BusinessCatalogService } from '../../../../../core/services/business-catalog.service';
@@ -20,12 +25,99 @@ import { AuthService } from '../../../../../core/services/auth.service';
 export class Perfil implements OnInit {
 
   readonly HelpCircle = HelpCircle;
+  readonly Image = Image;
+  readonly ChevronUp = ChevronUp;
+  readonly ChevronDown = ChevronDown;
+  readonly Link = Link;
+  readonly PhoneCall = PhoneCall;
+  readonly FileText = FileText;
+  readonly MapPinned = MapPinned;
+
+  // business niches
+  ICON_MAP: any = {
+    Sparkles,
+    Scissors,
+    Hand,
+    Brain,
+    Stethoscope,
+    Heart,
+    Flower,
+    Dumbbell,
+    GraduationCap,
+    Presentation,
+    Target,
+    PawPrint,
+    PenTool,
+    Circle,
+    Apple,
+    ShieldPlus,
+  };
+
+  // Iconos para Niches
+  ICON_NAME_MAP: Record<string, string> = {
+    'sparkles': 'Sparkles',
+    'scissors': 'Scissors',
+    'hand': 'Hand',
+    'brain': 'Brain',
+    'stethoscope': 'Stethoscope',
+    'heart': 'Heart',
+    'flower': 'Flower',
+    'dumbbell': 'Dumbbell',
+    'graduation-cap': 'GraduationCap',
+    'presentation': 'Presentation',
+    'target': 'Target',
+    'paw-print': 'PawPrint',
+    'pen-tool': 'PenTool',
+    'circle': 'Circle',
+    'apple': 'Apple',
+    'shield-plus': 'ShieldPlus'
+  };
 
   private fb = inject(FormBuilder);
   private notify = inject(Notification);
   private organizationService = inject(OrganizationService);
   private auth = inject(AuthService);
-  private catalog = inject(BusinessCatalogService);
+  private businessCatalogService = inject(BusinessCatalogService);
+
+  // Contexto de la organización
+  organization = this.auth.organization$;
+
+  niche = computed(() =>
+    this.organization()?.business_niche ?? 'other'
+  );
+
+  nicheColor = computed(() =>
+    this.businessCatalogService.getColor(this.niche())
+  );
+
+  // Catálogos
+  niches = this.businessCatalogService.getNiches();
+
+  // iconos
+  sidebarNicheIcon = computed(() => {
+
+    const iconName =
+      this.businessCatalogService.getIcon(this.niche());
+
+    const mapped =
+      this.ICON_NAME_MAP[iconName] || 'Circle';
+
+    return this.ICON_MAP[mapped];
+  });
+
+  // Estado del componente (secciones)
+  expandedSections = {
+    visualIdentity: true,
+    reservations: false,
+    contact: false,
+    billing: false,
+    location: false,
+  };
+
+  toggleSection(section: keyof typeof this.expandedSections): void {
+    this.expandedSections[section] =
+      !this.expandedSections[section];
+  }
 
   form!: FormGroup;
 
@@ -34,12 +126,16 @@ export class Perfil implements OnInit {
   submitted = false;
   success = false;
   billingEnabled = false;
+  locationEnabled = false;
 
   showSlugHelp = false;
   showReferencePrefixHelp = false;
 
-  // Catálogos
-  niches = this.catalog.getNiches();
+  // Para logo
+  logoPreview: string | null = null;
+  selectedLogoFile: File | null = null;
+
+  uploadingLogo = false;
 
   // Configuración ngx-intl-tel-input
   PhoneNumberFormat = PhoneNumberFormat;
@@ -56,6 +152,92 @@ export class Perfil implements OnInit {
     'Europe/Madrid',
     'Europe/London'
   ];
+
+  uiTerms = computed(() => ({
+    appointments: {
+      singular: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'singular',
+        true
+      ),
+
+      plural: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'plural',
+        true
+      ),
+
+      singularLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'singular'
+      ),
+
+      pluralLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'plural'
+      )
+    },
+
+    audienceOwner: {
+      singular: this.businessCatalogService.getTerm(
+        this.niche(),
+        'owner',
+        'singular',
+        true
+      ),
+
+      plural: this.businessCatalogService.getTerm(
+        this.niche(),
+        'owner',
+        'plural',
+        true
+      ),
+
+      singularLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'owner',
+        'singular'
+      ),
+
+      pluralLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'owner',
+        'plural'
+      )
+    },
+
+    clients: {
+      singular: this.businessCatalogService.getTerm(
+        this.niche(),
+        'clients',
+        'singular',
+        true
+      ),
+
+      plural: this.businessCatalogService.getTerm(
+        this.niche(),
+        'clients',
+        'plural',
+        true
+      ),
+
+      singularLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'clients',
+        'singular'
+      ),
+
+      pluralLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'clients',
+        'plural'
+      )
+    }
+  }));
 
   ngOnInit(): void {
     this.initForm();
@@ -155,6 +337,8 @@ export class Perfil implements OnInit {
     this.organizationService.getOrganization().subscribe({
       next: (org) => {
 
+        console.log('la orga:', JSON.stringify(org, null, 2));
+
         this.form.patchValue({
           name: org.name ?? '',
           slogan: org.slogan ?? '',
@@ -180,6 +364,8 @@ export class Perfil implements OnInit {
           cfdi_email: org.cfdi_email ?? '',
         });
 
+        this.logoPreview = org.logo_url ?? null;
+
         this.loading = false;
       },
       error: () => {
@@ -187,6 +373,95 @@ export class Perfil implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  onLogoSelected(event: Event): void {
+
+    const input = event.target as HTMLInputElement;
+
+    if (!input.files?.length) {
+      return;
+    }
+
+    const file = input.files[0];
+
+    const allowedTypes = [
+      'image/png',
+      'image/jpeg',
+      'image/webp'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+
+      this.notify.error(
+        'Solo se permiten imágenes PNG, JPG o WEBP'
+      );
+
+      return;
+    }
+
+    const maxSize = 2 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+
+      this.notify.error(
+        'La imagen no puede superar 2 MB'
+      );
+
+      return;
+    }
+
+    this.selectedLogoFile = file;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      this.logoPreview = reader.result as string;
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  uploadLogo(): void {
+
+    if (!this.selectedLogoFile) {
+      this.notify.error('Subiendo logo');
+      return;
+    }
+
+    this.uploadingLogo = true;
+
+    const formData = new FormData();
+
+    formData.append(
+      'logo',
+      this.selectedLogoFile
+    );
+
+    this.organizationService
+      .uploadLogo(formData)
+      .subscribe({
+
+        next: (res: any) => {
+
+          this.logoPreview = res.logo_url;
+
+          this.selectedLogoFile = null;
+
+          this.uploadingLogo = false;
+
+          this.notify.success(
+            'Logo actualizado'
+          );
+
+          this.auth.refreshAuthContext().subscribe();
+        },
+        error: (err) => {
+          this.uploadingLogo = false;
+
+          this.handleError(err, 'No se pudo subir el logo');
+        }
+      });
   }
 
   save() {

@@ -1,0 +1,8 @@
+.section-tip-info {
+  border: 1px solid var(--system-primary);
+  background: rgb(from var(--system-primary) r g b / 0.05);
+}
+
+.section-tip-info-text {
+  color: var(--system-primary);
+}

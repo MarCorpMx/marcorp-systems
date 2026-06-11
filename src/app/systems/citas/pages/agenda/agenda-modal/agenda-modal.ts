@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import {
   LucideAngularModule,
-  Calendar, X, HelpCircle
+  Calendar, X, Info, Lock, Sparkles
 } from 'lucide-angular';
 import {
   debounceTime,
@@ -14,6 +15,7 @@ import {
 import { NgxIntlTelInputModule, CountryISO, PhoneNumberFormat, SearchCountryField } from 'ngx-intl-tel-input';
 
 
+import { AuthService } from '../../../../../core/services/auth.service';
 import { ClientService } from '../../../../../core/services/client.service';
 import { ClientApi, ClientSelectItem, PetSelectItem } from '../../../../../core/models/client.model';
 
@@ -23,6 +25,8 @@ import { ServiceVariantListItem } from '../../../../../core/models/service.model
 
 import { ProfessionalsService } from '../../../../../core/services/professionals.service';
 import { StaffListItem } from '../../../../../core/models/staff.model';
+
+import { AppointmentModel, CreateAppointmentDto } from '../../../../../core/models/appointment.model';
 
 import { Notification } from '../../../../../services/notification.service';
 import { ConfirmDialogService } from '../../../../../shared/services/confirm-dialog.service';
@@ -34,12 +38,24 @@ import { ConfirmDialogService } from '../../../../../shared/services/confirm-dia
   styleUrl: './agenda-modal.css',
 })
 
+/**
+ * Para recurrencias poner límites aunque exita plan
+ * Plan free: 0 recurrencias
+ * Plan Basic: 24 recurrencias
+ * Plan Pro: 100 recurrencias
+ * Plan Premium: 500 recurrencias
+ */
+
 export class AgendaModal implements OnInit, OnChanges {
 
   readonly Calendar = Calendar;
   readonly X = X;
-  readonly HelpCircle = HelpCircle;
+  //readonly HelpCircle = HelpCircle;
+  readonly Info = Info;
+  readonly Lock = Lock;
+  readonly Sparkles = Sparkles;
 
+  private auth = inject(AuthService);
   private fb = inject(FormBuilder);
   private clientService = inject(ClientService);
   private servicesApi = inject(CitasServicesService);
@@ -47,6 +63,7 @@ export class AgendaModal implements OnInit, OnChanges {
   private appointmentsService = inject(CitasAgendaService);
   private notify = inject(Notification);
   private confirm = inject(ConfirmDialogService);
+  private router = inject(Router);
 
   @Input() niche!: string;
   @Input() selectedDate!: string;
@@ -83,6 +100,11 @@ export class AgendaModal implements OnInit, OnChanges {
     };
   };
 
+  currentBranch = this.auth.getCurrentBranch();
+  branchTimezone = this.currentBranch?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  isFreePlan = true;
+
   form!: FormGroup;
   saving = false;
   serverErrors: any = {};
@@ -93,6 +115,7 @@ export class AgendaModal implements OnInit, OnChanges {
   variants: ServiceVariantListItem[] = [];
   selectedVariant?: ServiceVariantListItem;
   staffMembers: StaffListItem[] = [];
+  loadingStaff = false;
 
   //selectedClient?: ClientDetailApi;
   clientPets: PetSelectItem[] = [];
@@ -106,6 +129,27 @@ export class AgendaModal implements OnInit, OnChanges {
 
   savingQuickClient = false;
 
+  teamLimit: number | null = null;
+
+  // Cita recurrente
+  showRecurringModal = false;
+  recurringEnabled = false;
+  recurringSummary = '';
+
+  recurringConfig = {
+    frequency: 'weekly',
+    interval: 1,
+    endType: 'never',
+    occurrences: null,
+    endDate: null
+  };
+
+  showRecurringHelp = false;
+
+  // Prioridades
+  showAdditionalOptions = false;
+  showRecurringInline = false;
+
   // Configuración ngx-intl-tel-input
   PhoneNumberFormat = PhoneNumberFormat;
   CountryISO = CountryISO;
@@ -116,11 +160,20 @@ export class AgendaModal implements OnInit, OnChanges {
 
 
   ngOnInit() {
+    this.teamLimit = this.auth.getFeatureLimit('team');
+    this.showAdditionalOptions = this.shouldOpenAdditionalOptions();
+
     this.initForm();
     this.loadVariants();
 
     this.watchClientSearch();
+    this.watchRecurringChanges();
+    this.watchModeChanges();
+
+    console.log('el timezone:', this.branchTimezone);
   }
+
+
 
   initForm() {
     this.form = this.fb.group({
@@ -131,13 +184,30 @@ export class AgendaModal implements OnInit, OnChanges {
       quick_client:
         this.fb.group({
 
-          first_name: ['', Validators.required],
+          first_name: [''], // es requerido, lo validamos despues
           phone: [null],
 
-          pet_name: ['', this.isPetNiche ? Validators.required : []],
+          // this.isPetNiche ? Validators.required : []
+          pet_name: [''], // es requerido, lo validamos despues
           pet_species: ['']
 
         }),
+
+      // Cita recurrente  
+      recurring: this.fb.group({
+        enabled: [false],
+
+        /*frequency: ['weekly', Validators.required],
+        interval: [1, [Validators.required, Validators.min(1)]],
+        end_type: ['never', Validators.required],*/
+
+        frequency: ['weekly'],
+        interval: [1],
+        end_type: ['never'],
+
+        occurrences: [null],
+        end_date: [null]
+      }),
 
       client_id: [null, Validators.required],
 
@@ -151,11 +221,22 @@ export class AgendaModal implements OnInit, OnChanges {
       // Fecha/Hora
       date: [this.selectedDate, Validators.required],
       time: [null, Validators.required],
-      // Futuro
-      mode: ['in_person'],
+
+      // Tipo de cita
+      mode: ['presential'],  // 'online' | 'presential' | 'hybrid';
+
+      // Online
+      meeting_url: [null],
+      meeting_provider: [null],
+
       // Extra
       notes: [null]
+
     });
+  }
+
+  get recurringForm() {
+    return this.form.get('recurring') as FormGroup;
   }
 
   clearClient() {
@@ -175,22 +256,88 @@ export class AgendaModal implements OnInit, OnChanges {
 
   }
 
+  clearQuickClientValidators() {
+
+    const quickClient = this.form.get('quick_client') as FormGroup;
+
+    quickClient
+      .get('first_name')
+      ?.clearValidators();
+
+    quickClient
+      .get('pet_name')
+      ?.clearValidators();
+
+    quickClient
+      .get('first_name')
+      ?.updateValueAndValidity();
+
+    quickClient
+      .get('pet_name')
+      ?.updateValueAndValidity();
+
+  }
+
   createQuickClient() {
 
-    const quickClient = this.form.get('quick_client');
+    const quickClient =
+      this.form.get('quick_client') as FormGroup;
 
-    quickClient?.markAllAsTouched();
+    /*
+    |--------------------------------------------------------------------------
+    | Validators dinámicos
+    |--------------------------------------------------------------------------
+    */
 
-    if (quickClient?.invalid) {
+    quickClient
+      .get('first_name')
+      ?.setValidators([
+        Validators.required
+      ]);
+
+    if (this.isPetNiche) {
+
+      quickClient
+        .get('pet_name')
+        ?.setValidators([
+          Validators.required
+        ]);
+
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Refrescar validaciones
+    |--------------------------------------------------------------------------
+    */
+
+    quickClient
+      .get('first_name')
+      ?.updateValueAndValidity();
+
+    quickClient
+      .get('pet_name')
+      ?.updateValueAndValidity();
+
+    quickClient.markAllAsTouched();
+
+    /*
+    |--------------------------------------------------------------------------
+    | Validar
+    |--------------------------------------------------------------------------
+    */
+
+    if (quickClient.invalid) {
+
+      this.notify.error(
+        'Completa correctamente los campos requeridos'
+      );
+
       return;
+
     }
 
     const data = this.form.value.quick_client;
-
-    if (!data.first_name) {
-      this.notify.error('Nombre requerido');
-      return;
-    }
 
     this.savingQuickClient = true;
 
@@ -202,39 +349,92 @@ export class AgendaModal implements OnInit, OnChanges {
           this.showQuickClient = false;
           this.savingQuickClient = false;
 
+          this.form.get('quick_client')?.reset();
+
+          this.clearQuickClientValidators();
+
           this.selectClient(client);
 
-          this.notify.success(this.uiTerms.clients.singular + ' creado');
+          this.notify.success(
+            this.uiTerms.clients.singular + ' creado'
+          );
 
         },
         error: (err) => {
+
           this.savingQuickClient = false;
 
-          const existingClient = err?.error?.existing_client;
+          const existingClient =
+            err?.error?.existing_client;
 
           if (existingClient) {
+
             this.confirm.open(
               `${this.uiTerms.clients.singular} encontrado`,
               `El teléfono ya existe y pertenece a "${existingClient.full_name}".\n\n ¿Deseas usar este ${this.uiTerms.clients.singularLower}?`,
               () => {
-                this.selectClient(
-                  existingClient
-                );
+
+                this.selectClient(existingClient);
 
                 this.showQuickClient = false;
+
               },
               'Cancelar',
               `Usar ${this.uiTerms.clients.singularLower}`
             );
-          } else {
-            console.log('no entra en el if');
-            this.handleError(err, 'Error al crear ' + this.uiTerms.clients.singular);
-          }
 
+          } else {
+
+            this.handleError(
+              err,
+              'Error al crear ' +
+              this.uiTerms.clients.singular
+            );
+
+          }
 
         }
 
       });
+
+  }
+
+  saveRecurring() {
+
+    const recurringGroup = this.form.get('recurring');
+
+    if (!recurringGroup) {
+      this.notify.error('Ocurrió un error con la configuración recurrente');
+      return;
+    }
+
+    recurringGroup.markAllAsTouched();
+
+    if (recurringGroup.invalid) {
+      this.notify.error('Completa correctamente los campos requeridos');
+      return;
+    }
+
+    const recurring = recurringGroup.value;
+
+    this.recurringEnabled = true;
+
+    const labels: any = {
+      daily: 'todos los días',
+      weekly: 'cada semana',
+      monthly: 'cada mes'
+    };
+
+    this.recurringSummary = labels[recurring?.frequency];
+
+    this.form.patchValue({
+      recurring: {
+        ...recurring,
+        enabled: true
+      }
+    });
+
+    this.showRecurringModal = false;
 
   }
 
@@ -298,6 +498,8 @@ export class AgendaModal implements OnInit, OnChanges {
           this.clients = clients;
 
           this.searchingClients = false;
+
+          this.showQuickClient = false;
 
         },
 
@@ -378,21 +580,14 @@ export class AgendaModal implements OnInit, OnChanges {
     }
   }
 
-  getClientLabel(
-    client: ClientSelectItem
-  ): string {
+  getClientLabel(client: ClientSelectItem): string {
 
     const fullName = client.full_name?.trim();
 
     const preferredName = client.preferred_name?.trim();
 
-    if (
-      preferredName &&
-      preferredName !== fullName
-    ) {
-
+    if (preferredName && preferredName !== fullName) {
       return `${fullName} (${preferredName})`;
-
     }
 
     return (
@@ -407,22 +602,43 @@ export class AgendaModal implements OnInit, OnChanges {
   loadVariants() {
     this.servicesApi.getVariantList()
       .subscribe({
-        next: (data) => {
-          this.variants = data;
-          //console.log(data);
+        next: (res) => {
+          this.variants = res;
+
+          console.log('dataVariants:', JSON.stringify(res, null, 2));
+
+        },
+        error: (err) => {
+          this.handleError(err, 'Error al consultar variantes');
         }
       });
   }
 
 
   save() {
+
     this.form.markAllAsTouched();
 
     if (!this.form.value.client_id) {
+      this.notify.error('Error al consultar ' + this.uiTerms.clients.singularLower);
       return;
     }
 
+    //console.log('FORM ERROR STATUS');
+    //console.log(this.form);
+
+    /*Object.keys(this.form.controls).forEach(key => {
+      const control = this.form.get(key);
+
+      if (control?.invalid) {
+        console.log('INVALID CONTROL:', key);
+        console.log(control.errors);
+        console.log(control.value);
+      }
+    });*/
+
     if (this.form.invalid) {
+      this.notify.error('Completa correctamente los campos requeridos');
       return;
     }
 
@@ -430,31 +646,77 @@ export class AgendaModal implements OnInit, OnChanges {
 
     const form = this.form.value;
 
-    const payload = {
+    // michelle
+
+    const payload: CreateAppointmentDto = {
       client_id: form.client_id,
+      pet_id: form.pet_id,
       staff_member_id: form.staff_member_id,
-      service_variant_id: form.service_variant_id,
-      date: form.date,
-      time: form.time,
-      notes: form.notes
+      branch_service_variant_id: form.service_variant_id,
+      notes: form.notes,
+      mode: form.mode, // Verificar el modo
+
+      meeting_url:
+        form.mode !== 'presential'
+          ? form.meeting_url
+          : null,
+
+      meeting_provider:
+        form.meeting_url
+          ? 'manual'
+          : null,
+
+      // LOCAL datetime (timezone branch)
+      start_datetime_local: `${form.date} ${form.time}:00`,
+
+      // timezone branch
+      timezone: this.branchTimezone,
+
+      recurring: form.recurring.enabled
+        ? {
+          frequency: form.recurring.frequency,
+          interval: form.recurring.interval,
+          end_type: form.recurring.end_type,
+          occurrences: form.recurring.occurrences,
+          end_date: form.recurring.end_date
+        }
+        : null
     };
+
+    console.log('payload:', JSON.stringify(payload, null, 2));
 
     this.appointmentsService.create(payload).subscribe({
       next: () => {
-        this.notify.success('Cita creada correctamente');
+        this.notify.success(this.uiTerms.appointments.singular + ' creada correctamente');
         this.saving = false;
         this.closed.emit(true);
       },
       error: (err) => {
         this.saving = false;
-
-        this.notify.error('Ocurrió un error al crear la cita');
-
-        if (err.status === 422) {
-          this.serverErrors = err.error.errors;
-        }
+        this.handleError(err, 'Error al crear la' + this.uiTerms.appointments.singularLower);
       }
     });
+
+  }
+
+
+  shouldOpenAdditionalOptions(): boolean {
+
+    const expandedNiches = [
+      'psychology',
+      'therapy',
+      'wellness',
+      'clinic',
+      'medical',
+      'dentist',
+      'nutrition',
+      'education',
+      'consulting',
+      'coaching'
+    ];
+
+    return expandedNiches.includes(this.niche);
+
   }
 
   closeModal() {
@@ -463,6 +725,15 @@ export class AgendaModal implements OnInit, OnChanges {
 
   get isPetNiche(): boolean {
     return this.niche === 'pet_grooming';
+  }
+
+  // Helper para detectar online
+  get isOnlineAppointment(): boolean {
+    return this.form?.value?.mode === 'online';
+  }
+
+  get isHybridAppointment(): boolean {
+    return this.selectedVariant?.mode === 'hybrid';
   }
 
   getClientName(client: ClientApi): string {
@@ -480,6 +751,206 @@ export class AgendaModal implements OnInit, OnChanges {
       'Sin nombre'
     );
 
+  }
+
+
+  // Calcular automáticamente end_datetime
+  onVariantChange(event: any) {
+
+    const variantId = +event.target.value;
+
+    this.selectedVariant = this.variants.find(v => v.id === variantId);
+
+    console.log('la variante: ', JSON.stringify(this.selectedVariant, null, 2));
+
+    if (!this.selectedVariant) {
+      this.notify.error(`Error en el ${this.uiTerms.services.singularLower}`);
+      return;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Configurar modo automáticamente
+    |--------------------------------------------------------------------------
+    */
+
+    if (this.selectedVariant.mode === 'online') {
+      this.form.patchValue({
+        mode: 'online'
+      });
+    }
+
+    if (this.selectedVariant.mode === 'presential') {
+      this.form.patchValue({
+        mode: 'presential',
+        meeting_url: null
+      });
+    }
+
+    if (this.selectedVariant.mode === 'hybrid') {
+      this.form.patchValue({
+        mode: 'presential'
+      });
+    }
+
+    // limpiar estado anterior
+    this.loadingStaff = true;
+    this.staffMembers = [];
+
+    this.form.patchValue({
+      staff_member_id: null
+    });
+
+    this.staffService.getStaffByVariant(variantId)
+      .subscribe({
+        next: (staff) => {
+
+          this.staffMembers = staff;
+          this.loadingStaff = false;
+
+          console.log('el staff:', staff);
+
+          // limpiar selección anterior
+          this.form.patchValue({ staff_member_id: null });
+
+          // Asignamos si solo hay un miembro del staff con la variante del servicio
+          if (staff.length === 1) {
+
+            this.form.patchValue({
+              staff_member_id: staff[0].id
+            });
+
+          }
+        },
+        error: (err) => {
+          this.loadingStaff = false;
+          this.handleError(err, 'Error al consultar staff');
+        }
+      });
+
+    const start = new Date(this.form.value.start_datetime);
+
+    if (!start) return;
+
+    const end = new Date(start);
+    end.setMinutes(end.getMinutes() + this.selectedVariant.duration);
+
+    this.form.patchValue({
+      end_datetime: end
+    });
+
+  }
+
+  goToAgenda() {
+    this.router.navigate(['/sistemas/citas/configuracion/agenda']);
+  }
+
+  getServiceArticle(capitalize = false): string {
+
+    const feminineWords = [
+      'terapia',
+      'sesión',
+      'consulta',
+      'clase',
+      'cita'
+    ];
+
+    const article = feminineWords.includes(
+      this.uiTerms.services.singularLower
+        .toLowerCase()
+        .trim()
+    )
+      ? 'esta'
+      : 'este';
+
+    return capitalize
+      ? article.charAt(0).toUpperCase() + article.slice(1)
+      : article;
+
+  }
+
+  // Validators dinámicos para meeting_url
+  watchModeChanges() {
+
+    this.form
+      .get('mode')
+      ?.valueChanges
+      .subscribe((mode) => {
+
+        const meetingUrl = this.form.get('meeting_url');
+
+        if (!meetingUrl) {
+          return;
+        }
+
+        meetingUrl.clearValidators();
+
+        if (mode === 'online') {
+          meetingUrl.setValidators([
+            Validators.pattern(/^https?:\/\/.+$/)
+          ]);
+        } else {
+          meetingUrl.setValue(null);
+        }
+
+        meetingUrl.updateValueAndValidity();
+
+      });
+
+  }
+
+  watchRecurringChanges() {
+
+    const recurringGroup =
+      this.form.get('recurring');
+
+    recurringGroup
+      ?.get('end_type')
+      ?.valueChanges
+      .subscribe((value) => {
+
+        const occurrences =
+          recurringGroup.get('occurrences');
+
+        const endDate =
+          recurringGroup.get('end_date');
+
+        // limpiar validaciones
+        occurrences?.clearValidators();
+        endDate?.clearValidators();
+
+        // resetear errores viejos
+        occurrences?.updateValueAndValidity();
+        endDate?.updateValueAndValidity();
+
+        // occurrences
+        if (value === 'occurrences') {
+
+          occurrences?.setValidators([
+            Validators.required,
+            Validators.min(1)
+          ]);
+
+        }
+
+        // end_date
+        if (value === 'date') {
+
+          endDate?.setValidators([
+            Validators.required
+          ]);
+
+        }
+
+        occurrences?.updateValueAndValidity();
+        endDate?.updateValueAndValidity();
+
+      });
+
+  }
+
+  goToPlans() {
+    this.router.navigate(['/account/subscriptions']);
   }
 
   getError(field: string): string | null {
@@ -510,39 +981,28 @@ export class AgendaModal implements OnInit, OnChanges {
     return null;
   }
 
+  getRecurringError(field: string): string | null {
 
-  // Calcular automáticamente end_datetime
-  onVariantChange(event: any) {
-    const variantId = +event.target.value;
+    const control =
+      this.form.get(`recurring.${field}`);
 
-    this.selectedVariant = this.variants.find(v => v.id === variantId);
+    if (
+      control?.touched &&
+      control?.invalid
+    ) {
 
-    if (!this.selectedVariant) return;
+      if (control.errors?.['required']) {
+        return 'Este campo es obligatorio';
+      }
 
-    this.staffService.getStaffByVariant(variantId)
-      .subscribe({
-        next: (staff) => {
-          this.staffMembers = staff;
+      if (control.errors?.['min']) {
+        return 'Debe ser mayor a 0';
+      }
 
-          // limpiar selección anterior
-          this.form.patchValue({ staff_member_id: null });
-        }
-      });
+    }
 
-    const start = new Date(this.form.value.start_datetime);
+    return null;
 
-    if (!start) return;
-
-    const end = new Date(start);
-    end.setMinutes(end.getMinutes() + this.selectedVariant.duration);
-
-    this.form.patchValue({
-      end_datetime: end
-    });
-  }
-
-  useOccasionalClient() {
-    this.isOccasionalClient = true;
   }
 
   handleError(err: any, fallbackMessage: string) {

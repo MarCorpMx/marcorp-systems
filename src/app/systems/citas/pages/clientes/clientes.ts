@@ -12,7 +12,7 @@ import {
   FileText,
   MoreVertical,
   Search, X, UserRound, Eye, Pencil, PauseCircle, PlayCircle, Lock, Unlock, Trash2, HelpCircle, Phone, Mail,
-  MessageCircle
+  MessageCircle, SearchX
 } from 'lucide-angular';
 
 import { AuthService } from '../../../../core/services/auth.service';
@@ -63,6 +63,7 @@ export class Clientes implements OnInit {
   readonly Phone = Phone;
   readonly Mail = Mail;
   readonly MessageCircle = MessageCircle;
+  readonly SearchX = SearchX;
 
   private auth = inject(AuthService);
   public businessCatalogService = inject(BusinessCatalogService);
@@ -137,7 +138,7 @@ export class Clientes implements OnInit {
   SearchCountryField = SearchCountryField;
 
   // Variables para texto 
-  clientLabel = computed(() =>
+  /*clientLabel = computed(() =>
     this.businessCatalogService.getTerm(
       this.niche(),
       'clients',
@@ -169,17 +170,70 @@ export class Clientes implements OnInit {
       'clients',
       'plural'
     )
-  );
+  );*/
+
+//https://www.instagram.com/parultiwari158/
+
+  uiTerms = computed(() => ({
+    appointments: {
+      singular: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'singular',
+        true
+      ),
+
+      plural: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'plural',
+        true
+      ),
+
+      singularLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'singular'
+      ),
+
+      pluralLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'plural'
+      )
+    },
+
+    clients: {
+      singular: this.businessCatalogService.getTerm(
+        this.niche(),
+        'clients',
+        'singular',
+        true
+      ),
+
+      plural: this.businessCatalogService.getTerm(
+        this.niche(),
+        'clients',
+        'plural',
+        true
+      ),
+
+      singularLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'clients',
+        'singular'
+      ),
+
+      pluralLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'clients',
+        'plural'
+      )
+    }
+  }));
 
 
   ngOnInit() {
-
-    //console.log("el nicho: ", this.niche());
-    //console.log("clientLabel: ", this.clientLabel());
-    //console.log("clientsLabel: ", this.clientsLabel());
-    //console.log("clientLabelLower: ", this.clientLabelLower());
-    //console.log("clientsLabelLower: ", this.clientsLabelLower());
-
     this.initForm();
     this.loadClients();
   }
@@ -384,7 +438,7 @@ export class Clientes implements OnInit {
   openView(client: ClientApi): void {
 
     if (this.loadingViewClientId) {
-      this.notify.error('Procesando ' + this.clientLabel());
+      this.notify.error('Procesando ' + this.uiTerms().clients.singularLower);
       return;
     }
 
@@ -409,7 +463,7 @@ export class Clientes implements OnInit {
 
           this.handleError(
             err,
-            'Error cargando información'
+            'Error al cargar información'
           );
         }
 
@@ -420,7 +474,7 @@ export class Clientes implements OnInit {
   toggleClientStatus(client: ClientApi): void {
 
     if (this.processingClientId) {
-      this.notify.error('Procesando ' + this.clientLabel());
+      this.notify.error('Procesando ' + this.uiTerms().clients.singularLower);
       return;
     }
 
@@ -445,8 +499,8 @@ export class Clientes implements OnInit {
 
             this.notify.success(
               res.data.is_active
-                ? this.clientLabel() + ' activado correctamente'
-                : this.clientLabel() + ' desactivado correctamente'
+                ? this.uiTerms().clients.singular + ' activado correctamente'
+                : this.uiTerms().clients.singular + ' desactivado correctamente'
             );
 
             this.processingClientId = null;
@@ -465,8 +519,8 @@ export class Clientes implements OnInit {
     // Solo confirmar si se va a desactivar
     if (client.is_active) {
       this.confirm.open(
-        'Desactivar ' + this.clientLabelLower(),
-        'Este ' + this.clientLabelLower() + ' dejará de aparecer en nuevas reservas y listas activas. \nSu historial, citas y datos permanecerán guardados.\n\n¿Deseas continuar?',
+        'Desactivar ' + this.uiTerms().clients.singularLower,
+        'Este ' + this.uiTerms().clients.singularLower + ' dejará de aparecer en nuevas reservas y listas activas. \nSu historial, citas y datos permanecerán guardados.\n\n¿Deseas continuar?',
         execute,
         'Cancelar',
         'Desactivar'
@@ -487,8 +541,8 @@ export class Clientes implements OnInit {
     if (client.is_blocked) {
 
       this.confirm.open(
-        'Desbloquear ' + this.clientLabelLower(),
-        'Este ' + this.clientLabelLower() + ' volverá a aparecer en reservas y procesos activos.\n\n¿Deseas continuar?',
+        'Desbloquear ' + this.uiTerms().clients.singularLower,
+        'Este ' + this.uiTerms().clients.singularLower + ' volverá a aparecer en reservas y procesos activos.\n\n¿Deseas continuar?',
         () => this.executeBlock(client, false),
         'Cancelar',
         'Desbloquear'
@@ -512,7 +566,7 @@ export class Clientes implements OnInit {
   closeBlockModal() {
 
     if (this.processingBlockId) {
-      this.notify.error('Procesando ' + this.clientLabel());
+      this.notify.error('Procesando ' + this.uiTerms().clients.singularLower);
       return;
     }
 
@@ -529,7 +583,7 @@ export class Clientes implements OnInit {
     }
 
     if (!this.blockingClient || this.processingBlockId) {
-      this.notify.error('Procesando ' + this.clientLabel());
+      this.notify.error('Procesando ' + this.uiTerms().clients.singularLower);
       return;
     }
 
@@ -573,8 +627,8 @@ export class Clientes implements OnInit {
 
           this.notify.success(
             blocked
-              ? this.clientLabel() + ' bloqueado'
-              : this.clientLabel() + ' desbloqueado'
+              ? this.uiTerms().clients.singular + ' bloqueado'
+              : this.uiTerms().clients.singular + ' desbloqueado'
           );
 
           this.processingBlockId = null;
@@ -624,7 +678,7 @@ export class Clientes implements OnInit {
   openEdit(client: ClientApi) {
 
     if (this.loadingClientDetailId) {
-      this.notify.error('Procesando ' + this.clientLabel());
+      this.notify.error('Procesando ' + this.uiTerms().clients.singularLower);
       return;
     }
 
@@ -690,7 +744,7 @@ export class Clientes implements OnInit {
         error: (err) => {
           this.loadingClientDetailId = null;
 
-          this.handleError(err, 'Error cargando cliente');
+          this.handleError(err, 'Error al cargar información');
         }
 
       });
@@ -778,7 +832,7 @@ export class Clientes implements OnInit {
           next: (res) => {
 
             this.notify.success(
-              this.clientLabel() + ' actualizado correctamente'
+              this.uiTerms().clients.singular + ' actualizado correctamente'
             );
 
             this.saving = false;
@@ -809,7 +863,7 @@ export class Clientes implements OnInit {
         .createClient(payload)
         .subscribe({
           next: () => {
-            this.notify.success(this.clientLabel() + ' creado correctamente');
+            this.notify.success(this.uiTerms().clients.singular + ' creado correctamente');
 
             this.saving = false;
             this.submitted = false;
@@ -822,7 +876,20 @@ export class Clientes implements OnInit {
             this.saving = false;
             this.submitted = false;
 
-            this.handleError(err, 'Error al guardar');
+            const data_existing = err?.error?.data_existing;
+            const existingClient = err?.error?.existing_client;
+
+            if (data_existing == 'email') {
+              this.notify.info(`El email ya existe y pertenece a "${existingClient.full_name}" `);
+            } else if (data_existing == 'phone') {
+              this.notify.info(`El teléfono ya existe y pertenece a "${existingClient.full_name}" `);
+            } else {
+              this.handleError(err, 'Error al guardar');
+            }
+
+            // michelle
+
+
           }
         });
     }
@@ -831,13 +898,13 @@ export class Clientes implements OnInit {
   delete(client: ClientApi) {
 
     if (this.processingDeleteId) {
-      this.notify.error('Procesando ' + this.clientLabel());
+      this.notify.error('Procesando ' + this.uiTerms().clients.singularLower);
       return;
     }
 
     this.confirm.open(
-      'Eliminar ' + this.clientLabelLower(),
-      '¿Seguro que deseas eliminar el ' + this.clientLabelLower() + ' ?',
+      'Eliminar ' + this.uiTerms().clients.singularLower,
+      '¿Seguro que deseas eliminar el ' + this.uiTerms().clients.singularLower + ' ?',
       () => {
 
         this.processingDeleteId = client.id;
@@ -846,7 +913,7 @@ export class Clientes implements OnInit {
           .deleteClient(client.id)
           .subscribe({
             next: () => {
-              this.notify.success(this.clientLabel() + ' eliminado correctamente');
+              this.notify.success(this.uiTerms().clients.singular + ' eliminado correctamente');
 
               this.processingDeleteId = null;
 

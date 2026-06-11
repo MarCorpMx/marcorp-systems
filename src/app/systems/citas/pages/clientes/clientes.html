@@ -9,7 +9,7 @@
       <div class="flex items-center gap-2">
 
         <h2 class="text-2xl font-semibold text-[var(--text-primary)]">
-          {{ clientsLabel() }}
+          {{ uiTerms().clients.plural }}
         </h2>
 
         <button type="button" (click)="showClientActionsHelp = !showClientActionsHelp" class="group
@@ -50,7 +50,7 @@
 
       <!-- Input -->
       <input type="text" [value]="searchTerm" (input)="onSearch($any($event.target).value)"
-        [placeholder]="'Buscar ' + clientLabelLower() + '...'" class="input-primary w-full pl-10 pr-10
+        [placeholder]="'Buscar ' + uiTerms().clients.singularLower + '...' " class="input-primary w-full pl-10 pr-10
              transition-all duration-200
              focus:ring-2
              focus:ring-[var(--system-primary)]" />
@@ -97,40 +97,84 @@
   <!-- ===============================
        EMPTY STATE
   =============================== -->
+  <!-- EMPTY STATE -->
   @else if (!loading && clients.length === 0) {
+
   <div class="bg-[var(--bg-surface)]
-             border border-dashed border-[var(--border-soft)]
-             rounded-xl p-10 text-center space-y-4">
+           border border-dashed border-[var(--border-soft)]
+           rounded-xl p-10 text-center space-y-4">
 
     <div class="mx-auto w-12 h-12 rounded-full
-           bg-[var(--system-accent)]
-           flex items-center justify-center
-           text-[var(--system-secondary)] text-xl">
-      <lucide-icon [name]="UserCheck" class="w-6 h-6 text-[var(--system-secondary)]"></lucide-icon>
+         bg-[var(--system-accent)]
+         flex items-center justify-center
+         text-[var(--system-secondary)] text-xl">
+
+      <lucide-icon [name]="searchTerm ? SearchX : UserCheck" class="w-6 h-6 text-[var(--system-secondary)]">
+      </lucide-icon>
+
     </div>
 
+    <!-- TÍTULO -->
     <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+
+      @if(searchTerm){
+
+      No se encontraron resultados
+
+      } @else {
+
       {{
       niche() === 'pet_grooming'
       ? 'No tienes clientes'
-      : 'No tienes ' + clientsLabelLower()
+      : 'No tienes ' + uiTerms().clients.pluralLower
       }}
 
+      }
 
     </h3>
 
+    <!-- DESCRIPCIÓN -->
     <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+
+      @if(searchTerm){
+
+      No encontramos coincidencias para
+      <span class="font-medium text-[var(--text-primary)]">
+        "{{ searchTerm }}"
+      </span>.
+
+      } @else {
+
       {{ businessCatalogService.getUiText(niche(), 'clients_empty_state') }}
+
+      }
+
     </p>
 
-    <button (click)="openCreate()" class="inline-flex items-center gap-2
-             px-4 py-2 rounded-lg
-             bg-[var(--system-primary)]
-             text-white
-             hover:bg-[var(--system-secondary)]
-             transition cursor-pointer">
-      + {{ businessCatalogService.getUiText(niche(), 'clients_cta') }}
+    <!-- ACCIONES -->
+    @if(searchTerm){
+
+    <button (click)="clearSearch()" class="mar-btn-secondary">
+
+      Limpiar búsqueda
+
     </button>
+
+    } @else {
+
+    <button (click)="openCreate()" class="inline-flex items-center gap-2
+           px-4 py-2 rounded-lg
+           bg-[var(--system-primary)]
+           text-white
+           hover:bg-[var(--system-secondary)]
+           transition cursor-pointer">
+
+      + {{ businessCatalogService.getUiText(niche(), 'clients_cta') }}
+
+    </button>
+
+    }
+
   </div>
   }
 
@@ -412,7 +456,7 @@ text-gray-400">
         <p class="text-xs
                 text-[var(--text-secondary)]">
 
-          Última cita
+          Última {{ uiTerms().appointments.singularLower }}
 
         </p>
 
@@ -422,7 +466,7 @@ text-gray-400">
           {{
           client.last_appointment
           ? (client.last_appointment | appDate:'datetime')
-          : 'Sin citas'
+          : 'Sin ' + uiTerms().appointments.pluralLower
           }}
 
         </p>
@@ -439,7 +483,7 @@ text-gray-400">
 
           <p class="text-xs text-[var(--text-secondary)]">
 
-            Citas
+            {{ uiTerms().appointments.plural }}
 
           </p>
 
@@ -780,7 +824,7 @@ cursor-pointer" [class.opacity-50]="processingDeleteId===client.id">
     <div class="flex justify-center sm:justify-between items-center">
       <p class="hidden sm:block text-sm text-[var(--text-secondary)]">
         Página {{ currentPage }} de {{ lastPage }}
-        • {{ total }} clientes
+        • {{ total }} {{ uiTerms().clients.pluralLower }}
       </p>
     </div>
 
@@ -880,13 +924,13 @@ cursor-pointer" [class.opacity-50]="processingDeleteId===client.id">
 
             <h3 class="text-xl font-semibold text-[var(--text-primary)]">
               {{ editingClient
-              ? 'Editar ' + clientLabelLower()
-              : 'Nuevo ' + clientLabelLower() }}
+              ? 'Editar ' + uiTerms().clients.singularLower
+              : 'Nuevo ' + uiTerms().clients.singularLower }}
             </h3>
 
             <p class="text-sm text-[var(--text-secondary)]">
               {{ editingClient
-              ? 'Actualiza la información del ' + clientLabelLower() + '.'
+              ? 'Actualiza la información del ' + uiTerms().clients.singularLower + '.'
               : 'Agrega la información principal para comenzar a agendar.' }}
             </p>
 
@@ -932,7 +976,7 @@ cursor-pointer" [class.opacity-50]="processingDeleteId===client.id">
               {{
               niche() === 'pet_grooming'
               ? 'Datos de contacto del responsable de la mascota.'
-              : 'Lo necesario para comenzar a gestionar citas.'
+              : 'Lo necesario para comenzar a gestionar ' + uiTerms().appointments.pluralLower + '.'
               }}
             </p>
           </div>
@@ -1358,7 +1402,7 @@ cursor-pointer" [class.opacity-50]="processingDeleteId===client.id">
           ? 'Guardando...'
           : (editingClient
           ? 'Actualizar'
-          : 'Crear ' + clientLabelLower()) }}
+          : 'Crear ' + uiTerms().clients.singularLower ) }}
 
         </button>
 
@@ -1394,7 +1438,7 @@ cursor-pointer" [class.opacity-50]="processingDeleteId===client.id">
     <h3 class="text-lg font-semibold
                text-[var(--text-primary)]">
 
-      Acciones de clientes
+      Acciones para el {{ uiTerms().clients.singularLower }}
 
     </h3>
 
@@ -1410,7 +1454,7 @@ cursor-pointer" [class.opacity-50]="processingDeleteId===client.id">
 
         <p class="text-[var(--text-secondary)]">
 
-          Oculta o vuelve a mostrar un cliente para nuevas reservas.
+          Oculta o vuelve a mostrar un {{ uiTerms().clients.singularLower }} para nuevas reservas.
           Su historial y datos permanecen intactos.
 
         </p>
@@ -1427,7 +1471,7 @@ cursor-pointer" [class.opacity-50]="processingDeleteId===client.id">
 
         <p class="text-[var(--text-secondary)]">
 
-          Restringe al cliente para evitar nuevas reservas
+          Restringe al {{ uiTerms().clients.singularLower }} para evitar nuevas reservas
           o acciones dentro del sistema.
 
         </p>
@@ -1444,7 +1488,7 @@ cursor-pointer" [class.opacity-50]="processingDeleteId===client.id">
 
         <p class="text-[var(--text-secondary)]">
 
-          Si el cliente ya tiene historial se archivará.
+          Si el {{ uiTerms().clients.singularLower }} ya tiene historial se archivará.
           Si nunca tuvo actividad se eliminará completamente.
 
         </p>
@@ -1480,7 +1524,7 @@ cursor-pointer" [class.opacity-50]="processingDeleteId===client.id">
       rounded-2xl shadow-xl">
 
     <h3 class="text-lg font-semibold mb-2">
-      Bloquear {{ clientLabelLower() }}
+      Bloquear {{ uiTerms().clients.singularLower }}
     </h3>
 
     <p class="text-sm text-[var(--text-muted)] mb-4">
@@ -1670,7 +1714,7 @@ cursor-pointer" [class.opacity-50]="processingDeleteId===client.id">
                             p-4">
 
           <p class="text-xs text-[var(--text-secondary)]">
-            Citas
+            {{ uiTerms().appointments.plural }}
           </p>
 
           <p class="mt-1 text-xl font-semibold">
@@ -1728,7 +1772,7 @@ cursor-pointer" [class.opacity-50]="processingDeleteId===client.id">
                             p-4">
 
           <p class="text-xs text-[var(--text-secondary)]">
-            Última cita
+            Última {{ uiTerms().appointments.singularLower }}
           </p>
 
           <p class="mt-1 text-sm font-medium">
@@ -1736,7 +1780,7 @@ cursor-pointer" [class.opacity-50]="processingDeleteId===client.id">
             {{
             viewingClient.last_appointment
             ? (viewingClient.last_appointment | appDate:'datetime')
-            : 'Sin citas'
+            : 'Sin ' + uiTerms().appointments.pluralLower
             }}
 
           </p>
@@ -1756,7 +1800,7 @@ cursor-pointer" [class.opacity-50]="processingDeleteId===client.id">
 
         <h4 class="font-semibold mb-4">
 
-          Información
+          Información de contacto
 
         </h4>
 

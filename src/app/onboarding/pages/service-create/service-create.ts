@@ -5,7 +5,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray } fr
 import {
   LucideAngularModule, Video, MapPin,
   Sparkles, Scissors, Hand, Brain, Stethoscope, Heart, Flower, Dumbbell, GraduationCap, Briefcase,
-  Target, PawPrint, PenTool, Circle, Apple, ShieldPlus, Presentation 
+  Target, PawPrint, PenTool, Circle, Apple, ShieldPlus, Presentation
 
 } from 'lucide-angular';
 
@@ -32,7 +32,7 @@ export class ServiceCreate implements OnInit {
     sparkles: Sparkles,
     hand: Hand,
     brain: Brain,
-    apple: Apple, 
+    apple: Apple,
     'shield-plus': ShieldPlus,
     stethoscope: Stethoscope,
     heart: Heart,
@@ -66,10 +66,15 @@ export class ServiceCreate implements OnInit {
 
   presets = this.catalog.getPresets(this.niche);
 
+  namePlaceholder: string = '';
+
   ngOnInit() {
     this.initForm();
 
     const suggestion = this.catalog.getSuggestion(this.niche);
+    this.namePlaceholder = suggestion?.name
+      ? `Ej. ${suggestion.name}`
+      : 'Ej. Consulta inicial';
 
     if (suggestion) {
       this.form.patchValue({

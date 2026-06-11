@@ -2,7 +2,10 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LucideAngularModule, HelpCircle } from 'lucide-angular';
+import { LucideAngularModule, HelpCircle,
+  Sparkles, Scissors, Hand, Brain, Stethoscope, Heart, Flower, Dumbbell, GraduationCap, Briefcase,
+  Target, PawPrint, PenTool, Circle, Apple, ShieldPlus, Presentation
+ } from 'lucide-angular';
 
 import { AuthService } from '../../../core/services/auth.service';
 import { CitasServicesService } from '../../../core/services/citas-services.service';
@@ -31,6 +34,26 @@ export class AvailabilitySetup implements OnInit {
 
   readonly HelpCircle = HelpCircle;
 
+  ICON_MAP: any = {
+    scissors: Scissors,
+    sparkles: Sparkles,
+    hand: Hand,
+    brain: Brain,
+    apple: Apple,
+    'shield-plus': ShieldPlus,
+    stethoscope: Stethoscope,
+    heart: Heart,
+    flower: Flower,
+    dumbbell: Dumbbell,
+    'graduation-cap': GraduationCap,
+    briefcase: Briefcase,
+    presentation: Presentation,
+    target: Target,
+    'paw-print': PawPrint,
+    'pen-tool': PenTool,
+    circle: Circle
+  };
+
   private auth = inject(AuthService);
   private citasService = inject(CitasServicesService);
   private agendaService = inject(AgendaSettingsService);
@@ -48,6 +71,10 @@ export class AvailabilitySetup implements OnInit {
 
   org = JSON.parse(localStorage.getItem('organization') || '{}');
   niche = this.org.business_niche;
+
+  nicheLabel = this.catalog.getLabel(this.niche);
+  nicheIcon = this.catalog.getIcon(this.niche);
+  nicheColor = this.catalog.getColor(this.niche);
 
 
   // Configuración por defecto

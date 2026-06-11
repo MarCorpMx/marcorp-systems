@@ -10,22 +10,29 @@ import { ONBOARDING_ROUTES_MAP } from '../../onboarding/models/onboarding.model'
 
 export class OrganizationService {
 
+  private endpoint = 'me/organization';
+
   constructor(private api: Api) { }
 
   /**
    * GET /api/me/organization
    */
   getOrganization(): Observable<Organization> {
-    return this.api.get<Organization>('me/organization');
+    return this.api.get<Organization>(this.endpoint);
   }
 
   /**
    * PUT /api/me/organization
    */
   updateOrganization(data: Partial<Organization>): Observable<any> {
-    return this.api.put('me/organization', data);
+    return this.api.put(this.endpoint, data);
+  }
+
+  // Subir / actualizar logo
+  uploadLogo(formData: FormData) {
+    return this.api.post(`${this.endpoint}/logo`, formData);
   }
 
 
-  
+
 }

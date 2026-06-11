@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NgxIntlTelInputModule, CountryISO, PhoneNumberFormat } from 'ngx-intl-tel-input';
+import { NgxIntlTelInputModule, CountryISO, PhoneNumberFormat, SearchCountryField } from 'ngx-intl-tel-input';
 
 import { ONBOARDING_ROUTES_MAP } from '../../models/onboarding.model';
 import { BusinessCatalogService } from '../../../core/services/business-catalog.service';
@@ -39,6 +39,7 @@ export class BusinessSetup implements OnInit {
   preferredCountries: CountryISO[] = [CountryISO.Mexico, CountryISO.UnitedStates];
   countryEnum = CountryISO;
   countries: { code: CountryISO, name: string }[] = [];
+  SearchCountryField = SearchCountryField;
 
   ngOnInit() {
     // Generar lista de países para el select

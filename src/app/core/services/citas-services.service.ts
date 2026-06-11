@@ -27,7 +27,6 @@ export class CitasServicesService {
   private variantsEndpoint = 'me/service-variants';
 
 
-
   // ---------------------------
   // SERVICES (ADMIN)
   // ---------------------------
@@ -90,6 +89,14 @@ export class CitasServicesService {
     }>(`${this.variantsEndpoint}/${id}/status`, payload);
   }
 
+  // Subir imagen
+  uploadImage(id: number, formData: FormData) {
+    return this.api.post(`${this.variantsEndpoint}/${id}/image`, formData);
+  }
 
+  // Eliminar imagen
+  deleteImage(id: number) {
+    return this.api.delete(`${this.variantsEndpoint}/${id}/image`);
+  }
 
 }

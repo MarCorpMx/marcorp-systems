@@ -102,7 +102,8 @@ export class Configuracion implements OnInit {
   */
 
   ngOnInit() {
-    console.log('features:', this.system?.features);
+    
+    //console.log('features:', JSON.stringify(this.system?.features, null, 2));
 
     if (!this.system?.features) return;
 
@@ -114,7 +115,7 @@ export class Configuracion implements OnInit {
       }))
       .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
 
-    console.log('sections:', this.sections);
+    //console.log('sections:', this.sections);
   }
 
 

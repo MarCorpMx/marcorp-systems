@@ -3,7 +3,7 @@
   <!-- ===============================
        HEADER
   =============================== -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <!-- <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <h2 class="text-xl font-semibold text-[var(--text-primary)]">
       Servicios
     </h2>
@@ -17,6 +17,23 @@
 
       <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
       Nuevo servicio
+    </button>
+  </div> -->
+
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+    <div>
+      <h2 class="text-2xl font-semibold text-[var(--text-primary)]">
+        {{ uiTerms().services.plural }}
+      </h2>
+
+      <p class="text-sm text-[var(--text-secondary)] mt-1">
+        {{ businessCatalogService.getUiText(niche(), 'services_description') }}
+      </p>
+    </div>
+
+    <button (click)="openCreate()" class="mar-btn-primary">
+      + {{ businessCatalogService.getUiText(niche(), 'services_cta') }}
     </button>
   </div>
 
@@ -53,11 +70,13 @@
     </div>
 
     <h3 class="text-lg font-semibold text-[var(--text-primary)]">
-      Aún no tienes servicios creados
+      <!-- Aún no tienes servicios creados -->
+      Aún no cuentas con {{ uiTerms().services.pluralLower }}
     </h3>
 
     <p class="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
-      Crea servicios para poder agendar citas y definir duración, precio y modalidad.
+      <!-- Crea servicios para poder agendar citas y definir duración, precio y modalidad. -->
+      {{ businessCatalogService.getUiText(niche(), 'services_empty_state') }}
     </p>
 
     <button (click)="openCreate()" class="inline-flex items-center gap-2
@@ -67,7 +86,7 @@
              hover:bg-[var(--system-secondary)]
              transition cursor-pointer">
       <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
-      Crear primer servicio
+      {{ businessCatalogService.getUiText(niche(), 'services_cta') }}
     </button>
   </div>
   }
@@ -79,10 +98,49 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
     @for (service of services; track service.id) {
+
     <div class="bg-[var(--bg-surface)]
             border border-[var(--border-soft)]
-            rounded-2xl p-5 space-y-4
-            hover:shadow-soft transition">
+            rounded-2xl
+            p-5
+            space-y-4
+            transition-all duration-300
+            hover:shadow-lg
+            hover:shadow-black/5
+            hover:border-[var(--system-primary)]
+            hover:-translate-y-0.5" [class.opacity-60]="processingServiceId === service.id">
+
+      <!-- LOADING OVERLAY -->
+      @if(isOverlayProcessing(service.id)){
+
+      <div class="absolute inset-0
+            rounded-2xl
+            bg-[var(--bg-surface)]/70
+            backdrop-blur-[2px]
+            z-40
+            flex items-center justify-center">
+
+        <div class="flex items-center gap-3">
+
+          <div class="w-5 h-5
+                    border-2 border-[var(--system-primary)]
+                    border-t-transparent
+                    rounded-full
+                    animate-spin">
+          </div>
+
+          <span class="text-sm font-medium
+                   text-[var(--text-primary)]">
+
+            Procesando...
+
+          </span>
+
+        </div>
+
+      </div>
+
+      }
 
       <!-- TOP -->
       <div class="flex justify-between items-start gap-3">
@@ -125,6 +183,15 @@
         <span class="px-2 py-1 rounded-lg bg-[var(--bg-base)]">
           {{ service.variants.length }} modalidad(es)
         </span>
+
+        @if (hasVariantImages(service)) {
+        <span class="px-2 py-1 rounded-lg bg-[var(--bg-base)]
+               inline-flex items-center gap-1">
+          <lucide-icon [name]="Image" class="w-3.5 h-3.5"></lucide-icon>
+          {{ getVariantImageCount(service) }} con imagen
+        </span>
+        }
+
 
         <span class="px-2 py-1 rounded-lg bg-[var(--bg-base)]">
           Desde {{ formatMoney(getMinPrice(service)) }}
@@ -187,74 +254,160 @@
 
       </div>
 
-      <!-- FOOTER -->
+      <!-- Footer / Actions -->
       <div class="pt-4 border-t border-[var(--border-soft)]">
+        <div class="flex items-center justify-between">
 
-        <div class="flex flex-wrap items-center
-              gap-x-5 gap-y-3
-              sm:justify-between">
+          <!-- LEFT -->
+          <div class="flex items-center gap-4">
 
-          <!-- Ver -->
-          <button (click)="openView(service)" class="inline-flex items-center gap-2
-             text-sm font-medium
-             text-[var(--text-secondary)]
-             hover:text-white
-             transition cursor-pointer">
+            <!-- Ver -->
+            <button (click)="openView(service)" [disabled]="isProcessing(service.id, 'view')" class="inline-flex items-center gap-2
+                            text-sm font-medium
+                            text-[var(--text-secondary)]
+                            hover:text-[var(--text-primary)]
+                            transition cursor-pointer
+                            disabled:opacity-50
+                            disabled:cursor-not-allowed">
 
-            <lucide-icon [name]="Eye" class="w-4 h-4 shrink-0"></lucide-icon>
 
-            <span>Ver</span>
+              @if(isProcessing(service.id, 'view')){
 
-          </button>
+              <div class="w-4 h-4
+                                border-2 border-current
+                                border-t-transparent
+                                rounded-full
+                                animate-spin">
+              </div>
 
-          <!-- Editar -->
-          @if (service.active) {
+              }
+              @else{
 
-          <button (click)="openEdit(service)" class="inline-flex items-center gap-2
-             text-sm font-medium
-             text-[var(--system-primary)]
-             hover:text-[var(--system-secondary)]
-             transition cursor-pointer">
+              <lucide-icon [name]="Eye" class="w-4 h-4 shrink-0">
+              </lucide-icon>
 
-            <lucide-icon [name]="Pencil" class="w-4 h-4 shrink-0">
-            </lucide-icon>
+              }
 
-            <span>Editar</span>
+              <span>
 
-          </button>
+                {{ isProcessing(service.id, 'view')
+                ? 'Cargando...'
+                : 'Ver'
+                }}
 
-          }
+              </span>
 
-          <!-- Toggle -->
-          <button (click)="toggleServiceStatus(service)" [disabled]="processingServiceId === service.id" class="inline-flex items-center gap-2
-             text-sm font-medium
-             transition cursor-pointer" [class.text-amber-500]="service.active"
-            [class.text-green-500]="!service.active">
+            </button>
 
-            @if (processingServiceId === service.id) {
+            <!-- Editar -->
+            @if (service.active) {
+            <button (click)="openEdit(service)" [disabled]="isProcessing(service.id, 'edit')" class="inline-flex items-center gap-2
+                            text-sm font-medium
+                            text-[var(--system-primary)]
+                            hover:text-[var(--system-secondary)]
+                            transition cursor-pointer
+                            disabled:opacity-50
+                            disabled:cursor-not-allowed">
 
-            <div class="w-4 h-4 border-2 border-current
-                  border-t-transparent rounded-full animate-spin shrink-0">
-            </div>
+              @if(isProcessing(service.id, 'edit')){
 
-            <span>Procesando...</span>
+              <div class="w-4 h-4
+                                border-2 border-current
+                                border-t-transparent
+                                rounded-full
+                                animate-spin">
+              </div>
 
-            } @else {
+              }
+              @else{
 
-            <lucide-icon [name]="service.active ? PauseCircle : PlayCircle" class="w-4 h-4 shrink-0">
-            </lucide-icon>
+              <lucide-icon [name]="Pencil" class="w-4 h-4 shrink-0">
+              </lucide-icon>
 
-            <span>
-              {{ service.active ? 'Desactivar' : 'Activar' }}
-            </span>
+              }
+
+              <span>
+
+                {{ isProcessing(service.id, 'edit')
+                ? 'Cargando...'
+                : 'Editar'
+                }}
+
+              </span>
+
+            </button>
 
             }
 
-          </button>
+          </div>
+
+          <!-- RIGHT -->
+          <div class="relative" (click)="$event.stopPropagation()">
+            <button (click)="toggleMenu(service.id)" class="w-9 h-9
+               rounded-xl
+               flex items-center justify-center
+               hover:bg-[var(--bg-base)]
+               transition cursor-pointer">
+
+              <lucide-icon [name]="MoreVertical" class="w-5 h-5 text-[var(--text-secondary)]">
+              </lucide-icon>
+
+            </button>
+
+            @if(activeMenu===service.id){
+            <div class="absolute
+                  right-0
+                  bottom-full
+                  mb-2
+                  w-52
+                  bg-[var(--bg-surface)]
+                  border border-[var(--border-soft)]
+                  rounded-xl
+                  shadow-xl
+                  overflow-hidden
+                  z-50">
+
+              <!-- ACTIVAR / DESACTIVAR -->
+              <button (click)="toggleServiceStatus(service)" [disabled]="isProcessing(service.id, 'status')" class="w-full
+                                px-4 py-3
+                                flex items-center gap-3
+                                text-sm font-medium
+                                transition
+                                cursor-pointer" [class.text-amber-500]="service.active"
+                [class.hover:bg-amber-500/10]="service.active" [class.text-green-500]="!service.active"
+                [class.hover:bg-green-500/10]="!service.active" [class.opacity-50]="isProcessing(service.id, 'status')">
+
+                @if(isProcessing(service.id, 'status')){
+
+                <div class="w-4 h-4
+                                    border-2 border-current
+                                    border-t-transparent
+                                    rounded-full
+                                    animate-spin">
+                </div>
+
+                <span>Procesando...</span>
+
+                } @else {
+
+                <lucide-icon [name]="service.active ? PauseCircle : PlayCircle" class="w-4 h-4">
+                </lucide-icon>
+
+                <span>
+                  {{ service.active ? 'Desactivar' : 'Activar' }}
+                </span>
+
+                }
+
+              </button>
+            </div>
+            }
+
+          </div>
 
         </div>
-
       </div>
+
 
     </div>
     }
@@ -268,7 +421,7 @@
 
 
 @if (showModal) {
-  
+
 <div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64
           z-50 flex items-end sm:items-center justify-center
           p-0 sm:p-4">
@@ -310,7 +463,8 @@
 
           <div>
             <h3 class="text-xl font-semibold text-[var(--text-primary)]">
-              {{ editingService ? 'Editar servicio' : 'Nuevo servicio' }}
+              {{ editingService ? 'Editar ' + uiTerms().services.singularLower :
+              businessCatalogService.getUiText(niche(), 'services_cta') }}
             </h3>
 
             <p class="text-sm text-[var(--text-secondary)]">
@@ -351,7 +505,8 @@
             </h4>
 
             <p class="text-sm text-[var(--text-secondary)] mt-1">
-              Describe el servicio principal que verá el cliente.
+              Describe {{ serviceGrammar().article }} {{ uiTerms().services.singularLower }} principal que verá el {{
+              uiTerms().audienceOwner.singularLower }}.
             </p>
           </div>
 
@@ -359,12 +514,11 @@
           <div class="space-y-2">
 
             <label class="text-sm text-[var(--text-secondary)]">
-              Nombre del servicio
+              Nombre {{ serviceGrammar().contractionOf }} {{ uiTerms().services.singularLower }}
             </label>
 
             <input type="text" formControlName="name" class="input-primary" [class.border-red-400]="getError('name')"
-              [class.focus:ring-red-400]="getError('name')"
-              placeholder="Ej: Psicoterapia, Corte de cabello, Consulta nutricional">
+              [class.focus:ring-red-400]="getError('name')" [placeholder]="nicheNamePlaceholder">
 
             @if (getError('name')) {
             <small class="text-red-400 block">
@@ -382,15 +536,28 @@
             </label>
 
             <textarea rows="4" formControlName="description" class="input-primary resize-none"
-              [class.border-red-400]="getError('description')"
-              placeholder="Explica brevemente qué incluye, para quién es o qué resultado obtiene el cliente.">
+              [class.border-red-400]="getError('description')" [placeholder]="nicheDescriptionPlaceholder">
             </textarea>
 
-            @if (getError('description')) {
-            <small class="text-red-400 block">
-              {{ getError('description') }}
-            </small>
-            }
+            <div class="flex justify-between items-center mt-1">
+
+              <div>
+
+                @if (getError('description')) {
+                <small class="text-red-400">
+                  {{ getError('description') }}
+                </small>
+                }
+
+              </div>
+
+              <small class="text-[var(--text-secondary)]">
+
+                {{ form.get('description')?.value?.length || 0 }}/300
+
+              </small>
+
+            </div>
 
           </div>
 
@@ -488,18 +655,64 @@
              flex items-center justify-between gap-4
              text-left cursor-pointer">
 
-              <div class="min-w-0">
-
-                <p class="font-medium text-[var(--text-primary)] truncate">
-                  {{ variant.value.name || ('Modalidad ' + (i + 1)) }}
-                </p>
 
 
-                <p class="text-xs text-[var(--text-secondary)] mt-1">
-                  {{ variant.value.duration_minutes || 0 }} min ·
-                  {{ formatMoney(variant.value.price) || 0 }} ·
-                  {{ getModeLabel(variant.value.mode) }}
-                </p>
+              <div class="flex items-center gap-3">
+
+                <!-- IMAGE -->
+                <div class="w-14 h-14 rounded-xl overflow-hidden
+               border border-[var(--border-soft)]
+               bg-[var(--bg-surface-soft)]">
+
+                  @if (variant.value.image_url || variant.value.image_preview) {
+
+                  <img [src]="variant.value.image_preview || variant.value.image_url"
+                    class="w-full h-full object-cover">
+
+
+                  } @else {
+
+                  @if (editingService && variant.value.id) {
+                  <div class="w-full h-full flex items-center justify-center">
+                    <lucide-icon [name]="Image" class="w-5 h-5 text-gray-400">
+                    </lucide-icon>
+                  </div>
+
+
+                  }@else {
+
+
+                  <div class="w-full h-full flex items-center justify-center
+         hover:bg-[var(--bg-surface)]
+         transition
+         cursor-pointer" (click)="showImageInfo($event)">
+
+                    <lucide-icon [name]="Image" class="w-5 h-5 text-gray-400">
+                    </lucide-icon>
+
+                  </div>
+
+
+                  }
+
+
+                  }
+
+                </div>
+
+                <div>
+
+                  <p class="font-medium text-[var(--text-primary)]">
+                    {{ variant.value.name || ('Modalidad ' + (i + 1)) }}
+                  </p>
+
+                  <p class="text-xs text-[var(--text-secondary)]">
+                    {{ variant.value.duration_minutes || 0 }} min ·
+                    {{ formatMoney(variant.value.price) || 0 }}
+                    {{ getModeLabel(variant.value.mode) }}
+                  </p>
+
+                </div>
 
               </div>
 
@@ -513,16 +726,62 @@
             <!-- Body -->
             @if (expandedIndex === i) {
 
-            <!-- Activar/Desactivar variante -->
+            <!-- Acciones variante -->
 
             @if (editingService && variant.value.id) {
+
+            <!-- Imagen -->
+
+            <div class="border-t border-[var(--border-soft)] p-4 sm:p-5">
+
+              <label class="text-sm text-[var(--text-secondary)] block mb-3">
+                Imagen de la modalidad (PNG, JPG o WEBP)
+              </label>
+
+              <div class="flex flex-wrap gap-3">
+
+                <input #imageInput type="file" accept="image/png,image/jpeg,image/webp" class="hidden"
+                  (change)="onImageSelected($event, i)">
+
+                <button type="button" class="mar-btn-secondary" [disabled]="imageActionDisabled"
+                  (click)="imageInput.click()">
+
+                  Cambiar imagen
+
+                </button>
+
+                @if(variant.value.image_file){
+
+                <button type="button" class="mar-btn-primary" [disabled]="imageActionDisabled" (click)="uploadImage(i)">
+
+                  {{ uploadingImage ? 'Subiendo...' : 'Guardar imagen' }}
+
+                </button>
+
+                }
+
+                @if(variant.value.image_url || variant.value.image_file){
+
+                <button type="button" class="mar-btn-danger" [disabled]="imageActionDisabled" (click)="removeImage(i)">
+
+                  {{ removingImage ? 'Eliminando...' : 'Eliminar imagen' }}
+
+                </button>
+
+                }
+
+              </div>
+
+            </div>
+
+            <!-- Activar/Desactivar variante -->
             <div class="border-t border-[var(--border-soft)] p-4 sm:p-5 space-y-5">
               <div class="flex items-center justify-between">
 
                 <div class="text-xs font-medium" [class.text-green-500]="variant.value.active"
                   [class.text-amber-500]="!variant.value.active">
 
-                  {{ variant.value.active ? 'Activa' : 'Desactivada' }}
+                  {{ variant.value.active ? 'Activa' : 'Inactiva' }}
 
                 </div>
 
@@ -548,6 +807,7 @@
      p-4 sm:p-5 space-y-5" [class.pointer-events-none]="!variant.value.active"
               [class.opacity-50]="!variant.value.active">
 
+
               <!-- Name -->
               <div class="space-y-2">
 
@@ -555,7 +815,7 @@
                   Nombre de la modalidad
                 </label>
 
-                <input type="text" formControlName="name" placeholder="Ej: Individual, Premium, Online, Express"
+                <input type="text" formControlName="name" [placeholder]="nicheVariantNamePlaceholder"
                   class="input-primary" [class.border-red-400]="getVariantError(i, 'name')">
 
                 @if (getVariantError(i, 'name')) {
@@ -574,15 +834,29 @@
                 </label>
 
                 <textarea rows="3" formControlName="description" class="input-primary resize-none"
-                  placeholder="Detalles específicos de esta modalidad"
+                  [placeholder]="nicheVariantDescriptionPlaceholder"
                   [class.border-red-400]="getVariantError(i, 'description')">
       </textarea>
 
-                @if (getVariantError(i, 'description')) {
-                <small class="text-red-400 text-xs">
-                  {{ getVariantError(i, 'description') }}
-                </small>
-                }
+                <div class="flex justify-between items-center mt-1">
+
+                  <div>
+
+                    @if (getVariantError(i, 'description')) {
+                    <small class="text-red-400 text-xs">
+                      {{ getVariantError(i, 'description') }}
+                    </small>
+                    }
+
+                  </div>
+
+                  <small class="text-[var(--text-secondary)]">
+
+                    {{ variant.value.description?.length || 0 }}/300
+
+                  </small>
+
+                </div>
 
               </div>
 
@@ -1028,7 +1302,7 @@ VIEW SERVICE MODAL (insert near bottom of template)
         <div class="flex items-center justify-between">
 
           <h4 class="text-base font-semibold text-[var(--text-primary)]">
-            Modalidades del servicio
+            Modalidades {{ serviceGrammar().contractionOf }} {{ uiTerms().services.singularLower }}
           </h4>
 
         </div>
@@ -1036,88 +1310,148 @@ VIEW SERVICE MODAL (insert near bottom of template)
         @for (variant of viewingService.variants; track variant.id) {
 
         <div class="rounded-2xl
-                    border border-[var(--border-soft)]
-                    bg-[var(--bg-surface)]
-                    p-4 sm:p-5
-                    space-y-4
-                    transition-all duration-200" [class.opacity-60]="!variant.active">
+         border border-[var(--border-soft)]
+         bg-[var(--bg-surface)]
+         overflow-hidden
+         transition-all duration-200" [class.opacity-60]="!variant.active">
 
-          <!-- top -->
-          <div class="flex flex-col sm:flex-row
-                      sm:items-start sm:justify-between
-                      gap-4">
+          <!-- HERO IMAGE -->
+          @if (variant.image_url) {
 
-            <div class="min-w-0 flex-1">
+          <div class="relative">
 
-              <div class="flex flex-wrap items-center gap-2">
+            <img [src]="variant.image_url" [alt]="variant.name" class="w-full h-56 sm:h-72 object-cover">
 
-                <h5 class="font-medium text-[var(--text-primary)] break-words">
-                  {{ variant.name }}
-                </h5>
+            <div class="absolute top-3 right-3">
 
-                @if (variant.active) {
-                <span class="px-2 py-1 rounded-full text-[11px]
-                             bg-green-500/10 text-green-400">
-                  Disponible
-                </span>
-                } @else {
-                <span class="px-2 py-1 rounded-full text-[11px]
-                             bg-red-500/10 text-red-400">
-                  Inactiva
-                </span>
-                }
+              @if (variant.active) {
 
-              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-medium
+               bg-green-500/90 text-white backdrop-blur">
 
-              <p class="text-sm text-[var(--text-secondary)]
-                        mt-2 leading-relaxed break-words">
-                {{ variant.description || 'Sin descripción.' }}
-              </p>
+                Disponible
 
-            </div>
+              </span>
 
-            <div class="sm:text-right shrink-0">
+              } @else {
 
-              <p class="text-xl font-semibold text-[var(--text-primary)]">
-                {{ formatMoney(variant.price) }}
-              </p>
+              <span class="px-3 py-1 rounded-full text-xs font-medium
+               bg-red-500/90 text-white backdrop-blur">
 
-              <p class="text-xs text-[var(--text-secondary)] mt-1">
-                {{ variant.duration_minutes }} min
-              </p>
+                Inactiva
+
+              </span>
+
+              }
 
             </div>
 
           </div>
 
-          <!-- meta -->
-          <div class="flex flex-wrap gap-2">
+          }
 
-            <span class="px-3 py-1 rounded-full text-xs
-                         bg-[var(--bg-base)]
-                         text-[var(--text-secondary)]">
+          <!-- CONTENT -->
+          <div class="p-4 sm:p-5 space-y-4">
 
-              {{ getModeLabel(variant.mode) }}
+            <!-- HEADER -->
+            <div class="flex justify-between items-start gap-4">
 
-            </span>
+              <div>
 
-            <span class="px-3 py-1 rounded-full text-xs
-                         bg-[var(--bg-base)]
-                         text-[var(--text-secondary)]">
+                <h5 class="text-lg font-semibold
+                 text-[var(--text-primary)]">
 
-              Capacidad: {{ variant.max_capacity }}
+                  {{ variant.name }}
 
-            </span>
+                </h5>
 
-            @if (variant.includes_material) {
-            <span class="px-3 py-1 rounded-full text-xs
-                         bg-[var(--bg-base)]
-                         text-[var(--text-secondary)]">
+                @if (!variant.image_url) {
 
-              Incluye material
+                @if (variant.active) {
 
-            </span>
-            }
+                <span class="inline-flex mt-2
+                   px-2 py-1 rounded-full text-[11px]
+                   bg-green-500/10 text-green-400">
+
+                  Disponible
+
+                </span>
+
+                } @else {
+
+                <span class="inline-flex mt-2
+                   px-2 py-1 rounded-full text-[11px]
+                   bg-red-500/10 text-red-400">
+
+                  Inactiva
+
+                </span>
+
+                }
+
+                }
+
+              </div>
+
+              <div class="text-right shrink-0">
+
+                <p class="text-2xl font-bold
+                 text-[var(--text-primary)]">
+
+                  {{ formatMoney(variant.price) }}
+
+                </p>
+
+                <p class="text-xs text-[var(--text-secondary)]">
+
+                  {{ variant.duration_minutes }} min
+
+                </p>
+
+              </div>
+
+            </div>
+
+            <!-- DESCRIPTION -->
+            <p class="text-sm leading-relaxed
+             text-[var(--text-secondary)]">
+
+              {{ variant.description || 'Sin descripción.' }}
+
+            </p>
+
+            <!-- CHIPS -->
+            <div class="flex flex-wrap gap-2">
+
+              <span class="px-3 py-1 rounded-full text-xs
+               bg-[var(--bg-base)]
+               text-[var(--text-secondary)]">
+
+                {{ getModeLabel(variant.mode) }}
+
+              </span>
+
+              <span class="px-3 py-1 rounded-full text-xs
+               bg-[var(--bg-base)]
+               text-[var(--text-secondary)]">
+
+                Capacidad: {{ variant.max_capacity }}
+
+              </span>
+
+              @if (variant.includes_material) {
+
+              <span class="px-3 py-1 rounded-full text-xs
+               bg-[var(--bg-base)]
+               text-[var(--text-secondary)]">
+
+                Incluye material
+
+              </span>
+
+              }
+
+            </div>
 
           </div>
 
@@ -1140,11 +1474,6 @@ VIEW SERVICE MODAL (insert near bottom of template)
 
       </button>
 
-      <!-- <button type="button" (click)="showViewModal = false; openEdit(viewingService)" class="mar-btn-primary">
-
-          Editar servicio
-
-        </button> -->
 
     </div>
 
@@ -1152,4 +1481,86 @@ VIEW SERVICE MODAL (insert near bottom of template)
 
 </div>
 
+}
+
+@if(showVariantImageHelp){
+<div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64
+            z-50 flex items-end sm:items-center justify-center
+            p-0 sm:p-4">
+
+  <!-- Overlay -->
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showVariantImageHelp = false">
+  </div>
+
+  <!-- Modal -->
+  <div class="relative w-full h-full sm:h-auto
+              sm:max-w-md
+              bg-[var(--bg-surface)]
+              border-0 sm:border border-[var(--border-soft)]
+              rounded-none sm:rounded-2xl
+              shadow-xl
+              flex flex-col
+              max-h-screen sm:max-h-[90vh]">
+
+    <!-- HEADER -->
+    <div class="p-4 sm:p-5 border-b border-[var(--border-soft)]">
+
+      <h3 class="font-semibold text-base text-[var(--text-primary)]">
+        Imágenes de modalidades
+      </h3>
+
+      <p class="text-sm text-[var(--text-secondary)] leading-relaxed mt-2">
+        Las imágenes pueden agregarse después de crear el servicio y/o modalidad(es).
+      </p>
+
+
+    </div>
+
+    <!-- BODY -->
+    <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5">
+
+      <!-- Recomendaciones -->
+      <div class="space-y-3">
+
+        <p class="font-semibold text-[var(--text-secondary)]">
+          Esto te permite:
+        </p>
+
+        <div class="rounded-xl border border-[var(--border-soft)]
+                    bg-[var(--bg-muted)] p-3">
+
+          <ul class="list-disc ml-4 space-y-1">
+            <li>Mostrar fotografías en el portal público</li>
+            <li>Mejorar la conversión de reservas</li>
+            <li>Diferenciar modalidades visualmente</li>
+          </ul>
+
+        </div>
+
+      </div>
+
+      <!-- Importante -->
+      <div class="rounded-xl border border-amber-500/20
+                bg-amber-500/5 p-3">
+
+        <p class="text-xs text-amber-400">
+          Primero guarda el servicio y después podrás cargar imágenes.
+        </p>
+
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="p-4 border-t border-[var(--border-soft)]">
+
+      <button class="mar-btn-help w-full" (click)="showVariantImageHelp = false">
+        Entendido
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
 }

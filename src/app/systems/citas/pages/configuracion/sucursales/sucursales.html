@@ -258,17 +258,66 @@
         border rounded-2xl p-5
         transition-all duration-200
         space-y-5
-        hover:shadow-soft" [class.opacity-60]="!branch.is_active" [class.border-yellow-500/40]="branch.is_primary"
-            [class.shadow-yellow-500/10]="branch.is_primary" [class.shadow-lg]="branch.is_primary"
-            [class.border-[var(--border-soft)]]="!branch.is_primary"
+        border border-[var(--border-soft)]
+           transition-all duration-300
+           hover:shadow-xl
+           hover:shadow-black/5
+           hover:border-[var(--system-primary)]
+           hover:-translate-y-1" [class.opacity-60]="!branch.is_active"
+            [class.border-yellow-500/40]="branch.is_primary" [class.shadow-yellow-500/10]="branch.is_primary"
+            [class.shadow-lg]="branch.is_primary" [class.border-[var(--border-soft)]]="!branch.is_primary"
             [class.opacity-60]="processingBranchId === branch.id">
+
+            <!-- LOADING OVERLAY -->
+            @if(isOverlayProcessing(branch.id)){
+
+            <div class="absolute inset-0
+            rounded-2xl
+            bg-[var(--bg-surface)]/70
+            backdrop-blur-[2px]
+            z-40
+            flex items-center justify-center">
+
+                <div class="flex items-center gap-3">
+
+                    <div class="w-5 h-5
+                    border-2 border-[var(--system-primary)]
+                    border-t-transparent
+                    rounded-full
+                    animate-spin">
+                    </div>
+
+                    <span class="text-sm font-medium
+                   text-[var(--text-primary)]">
+
+                        Procesando...
+
+                    </span>
+
+                </div>
+
+            </div>
+
+            }
+
 
             <!-- TOP -->
             <div class="flex items-start justify-between gap-3">
 
-                <div class="min-w-0">
+                <div class="w-11 h-11 rounded-xl
+                    bg-[var(--system-accent)]
+                    flex items-center justify-center shrink-0">
 
-                    <div class="flex items-center flex-wrap gap-2">
+                    <lucide-icon [name]="Store" class="w-5 h-5"
+                        [class.text-[var(--system-secondary)]]="branch.is_active"
+                        [class.text-gray-400]="!branch.is_active">
+                    </lucide-icon>
+
+                </div>
+
+                <div class="min-w-0 flex-1">
+
+                    <div class="flex items-center flex-wrap gap-2 justify-start">
 
                         <h3 class="font-semibold text-[var(--text-primary)] truncate">
                             {{ branch.name }}
@@ -319,16 +368,7 @@
 
                 </div>
 
-                <div class="w-11 h-11 rounded-xl
-                    bg-[var(--system-accent)]
-                    flex items-center justify-center shrink-0">
 
-                    <lucide-icon [name]="Store" class="w-5 h-5"
-                        [class.text-[var(--system-secondary)]]="branch.is_active"
-                        [class.text-gray-400]="!branch.is_active">
-                    </lucide-icon>
-
-                </div>
 
             </div>
 
@@ -368,82 +408,202 @@
 
             </div>
 
-            <!-- ACTIONS -->
-            <div class="pt-4 border-t border-[var(--border-soft)]
-     flex flex-col sm:flex-row
-     sm:items-center sm:justify-between
-     gap-3">
+            <!-- Footer / Actions -->
+            <div class="pt-4 border-t border-[var(--border-soft)]">
 
-                <!-- ACTIONS -->
-                <div class="flex flex-wrap items-center gap-3 sm:gap-4">
+                <div class="flex items-center justify-between">
 
-                    <!-- Edit -->
-                    @if (branch.is_active) {
-                    <button (click)="openEdit(branch)" class="inline-flex items-center gap-2
-                   text-sm font-medium
-                   text-[var(--system-primary)]
-                   hover:text-[var(--system-secondary)]
-                   transition cursor-pointer">
+                    <!-- LEFT -->
+                    <div class="flex items-center gap-4">
 
-                        <lucide-icon [name]="Pencil" class="w-4 h-4"></lucide-icon>
+                        <!-- Ver -->
+                        <button (click)="openView(branch)" [disabled]="isProcessing(branch.id, 'view')" class="inline-flex items-center gap-2
+                            text-sm font-medium
+                            text-[var(--text-secondary)]
+                            hover:text-[var(--text-primary)]
+                            transition cursor-pointer
+                            disabled:opacity-50
+                            disabled:cursor-not-allowed">
 
-                        <span>Editar</span>
-                    </button>
-                    }
+                            @if(isProcessing(branch.id, 'view')){
 
-                    <!-- TOGGLE -->
+                            <div class="w-4 h-4
+                                border-2 border-current
+                                border-t-transparent
+                                rounded-full
+                                animate-spin">
+                            </div>
+
+                            }
+                            @else{
+
+                            <lucide-icon [name]="Eye" class="w-4 h-4 shrink-0">
+                            </lucide-icon>
+
+                            }
+
+                            <span>
+
+                                {{ isProcessing(branch.id, 'view')
+                                ? 'Cargando...'
+                                : 'Ver'
+                                }}
+
+                            </span>
+
+                        </button>
+
+                        <!-- Editar solo activos y no bloqueados -->
+                        @if(
+                        branch.is_active
+                        && !branch.is_blocked
+                        ){
+
+                        <button (click)="openEdit(branch)" [disabled]="isProcessing(branch.id, 'edit')" class="inline-flex items-center gap-2
+                            text-sm font-medium
+                            text-[var(--system-primary)]
+                            hover:text-[var(--system-secondary)]
+                            transition cursor-pointer
+                            disabled:opacity-50
+                            disabled:cursor-not-allowed">
+
+                            @if(isProcessing(branch.id, 'edit')){
+
+                            <div class="w-4 h-4
+                                border-2 border-current
+                                border-t-transparent
+                                rounded-full
+                                animate-spin">
+                            </div>
+
+                            }
+                            @else{
+
+                            <lucide-icon [name]="Pencil" class="w-4 h-4 shrink-0">
+                            </lucide-icon>
+
+                            }
+
+                            <span>
+
+                                {{ isProcessing(branch.id, 'edit')
+                                ? 'Cargando...'
+                                : 'Editar'
+                                }}
+
+                            </span>
+
+                        </button>
+                        }
+
+
+                    </div>
+
+
+                    <!-- RIGHT -->
                     @if (!branch.is_primary) {
+                    <div class="relative" (click)="$event.stopPropagation()">
 
-                    <button (click)="toggleBranchStatus(branch)" [disabled]="processingBranchId === branch.id" class="inline-flex items-center gap-2
-                   text-sm font-medium
-                   transition cursor-pointer" [class.text-amber-500]="branch.is_active"
-                        [class.hover:text-amber-600]="branch.is_active" [class.text-green-500]="!branch.is_active"
-                        [class.hover:text-green-600]="!branch.is_active"
-                        [class.opacity-50]="processingBranchId === branch.id">
+                        <button (click)="toggleMenu(branch.id)" class="w-9 h-9
+               rounded-xl
+               flex items-center justify-center
+               hover:bg-[var(--bg-base)]
+               transition cursor-pointer">
 
-                        @if (processingBranchId === branch.id) {
+                            <lucide-icon [name]="MoreVertical" class="w-5 h-5 text-[var(--text-secondary)]">
+                            </lucide-icon>
 
-                        <div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin">
+                        </button>
+
+                        @if(activeMenu===branch.id){
+                        <div class="absolute
+                            right-0
+                            bottom-full
+                            mb-2
+                            w-52
+                            bg-[var(--bg-surface)]
+                            border border-[var(--border-soft)]
+                            rounded-xl
+                            shadow-xl
+                            overflow-hidden
+                            z-50">
+
+                            <!-- ACTIVAR / DESACTIVAR -->
+                            <button (click)="toggleBranchStatus(branch)" [disabled]="isProcessing(branch.id, 'status')"
+                                class="w-full
+                                px-4 py-3
+                                flex items-center gap-3
+                                text-sm font-medium
+                                transition
+                                cursor-pointer" [class.text-amber-500]="branch.is_active"
+                                [class.hover:bg-amber-500/10]="branch.is_active"
+                                [class.text-green-500]="!branch.is_active"
+                                [class.hover:bg-green-500/10]="!branch.is_active"
+                                [class.opacity-50]="isProcessing(branch.id, 'status')">
+
+                                @if(isProcessing(branch.id, 'status')){
+
+                                <div class="w-4 h-4
+                                    border-2 border-current
+                                    border-t-transparent
+                                    rounded-full
+                                    animate-spin">
+                                </div>
+
+                                <span>Procesando...</span>
+
+                                } @else {
+
+                                <lucide-icon [name]="branch.is_active ? PauseCircle : PlayCircle" class="w-4 h-4">
+                                </lucide-icon>
+
+                                <span>
+                                    {{ branch.is_active ? 'Desactivar' : 'Activar' }}
+                                </span>
+
+                                }
+
+                            </button>
+
+                            <!-- ELIMINAR -->
+                            <!--<button (click)="delete(branch)" [disabled]="isProcessing(branch.id, 'delete')" class="w-full
+                                px-4 py-3
+                                flex items-center gap-3
+                                text-sm font-medium
+                                text-red-400
+                                hover:bg-red-500/10
+                                transition
+                                cursor-pointer" [class.opacity-50]="isProcessing(branch.id, 'delete')">
+
+                                @if(isProcessing(branch.id, 'delete')){
+
+                                <div class="w-4 h-4
+                                    border-2 border-current
+                                    border-t-transparent
+                                    rounded-full
+                                    animate-spin">
+                                </div>
+
+                                <span>Procesando...</span>
+
+                                } @else {
+
+                                <lucide-icon [name]="Trash2" class="w-4 h-4">
+                                </lucide-icon>
+
+                                <span>
+                                     Eliminar
+                                </span>
+
+                                }
+
+                            </button>  -->
+
                         </div>
-
-                        <span>Procesando...</span>
-
                         }
 
-                        @else {
-
-                        <lucide-icon [name]="branch.is_active ? PauseCircle : PlayCircle" class="w-4 h-4">
-                        </lucide-icon>
-
-                        <span>
-                            {{ branch.is_active ? 'Desactivar' : 'Activar' }}
-                        </span>
-
-                        }
-
-                    </button>
-
+                    </div>
                     }
-
-                    <span *ngIf="isLockedByPlan(branch)" class="text-xs text-red-400">
-                        Bloqueada por tu plan
-                    </span>
-
-                    <!-- DELETE -->
-                    <!-- @if (!branch.is_primary) {
-
-                    <button (click)="deleteBranch(branch)" class="inline-flex items-center gap-2
-                   text-sm font-medium
-                   text-red-500
-                   hover:text-red-600
-                   transition cursor-pointer">
-
-                        <lucide-icon [name]="Trash2" class="w-4 h-4"></lucide-icon>
-
-                        <span>Eliminar</span>
-                    </button>
-
-                    } -->
 
                 </div>
 
@@ -457,22 +617,24 @@
 
     }
 
+    } <!-- FIN DE SIN ACCESO -->
+</section>
 
-    <!-- ===============================
+<!-- ===============================
        MODAL
   =============================== -->
-    @if (showModal) {
+@if (showModal) {
 
-    <div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64
+<div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64
         z-50 flex items-end sm:items-center justify-center
         p-0 sm:p-4">
 
-        <!-- Overlay -->
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeModal()">
-        </div>
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeModal()">
+    </div>
 
-        <!-- Modal -->
-        <div class="relative w-full h-full sm:h-auto
+    <!-- Modal -->
+    <div class="relative w-full h-full sm:h-auto
         sm:max-w-3xl
         bg-[var(--bg-surface)]
         border-0 sm:border border-[var(--border-soft)]
@@ -481,44 +643,253 @@
         flex flex-col
         max-h-screen sm:max-h-[90vh]">
 
-            <!-- ================= HEADER ================= -->
-            <div class="p-4 sm:p-6 border-b border-[var(--border-soft)]
-        flex items-center justify-between shrink-0">
+        <!-- ================= HEADER ================= -->
+        <div class="p-4 sm:p-6
+                border-b border-[var(--border-soft)]
+                flex items-center justify-between shrink-0">
 
-                <div>
-                    <h3 class="text-lg font-semibold text-[var(--text-primary)]">
-                        {{ editingBranch ? 'Editar sucursal' : 'Nueva sucursal' }}
-                    </h3>
+            <div class="space-y-1">
 
-                    <p class="hidden sm:block text-sm text-[var(--text-secondary)] mt-1">
-                        Configura la información de la sucursal.
-                    </p>
+                <div class="flex items-center gap-3 flex-wrap">
+
+                    <div class="hidden sm:flex
+                      w-11 h-11 rounded-2xl
+                      bg-[var(--system-accent)]
+                      items-center justify-center">
+
+                        <lucide-icon [name]="Store" class="w-5 h-5 text-[var(--system-secondary)]">
+                        </lucide-icon>
+
+                    </div>
+
+                    <div>
+
+                        <h3 class="text-xl font-semibold text-[var(--text-primary)]">
+                            {{ editingBranch ? 'Editar sucursal' : 'Nueva sucursal' }}
+                        </h3>
+
+                        <p class="text-sm text-[var(--text-secondary)]">
+                            {{ editingBranch
+                            ? 'Actualiza la información de la sucursal.'
+                            : 'Configura la información de la sucursal.'
+                            }}
+                        </p>
+
+                    </div>
+
                 </div>
-
-                <button (click)="closeModal()" class="text-[var(--text-secondary)]
-                           hover:text-[var(--text-primary)]
-                           transition cursor-pointer">
-
-                    ✕
-
-                </button>
 
             </div>
 
-            <!-- ================= FORM ================= -->
-            <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col flex-1 min-h-0">
+            <button (click)="closeModal()" class="text-[var(--text-secondary)]
+               hover:text-[var(--text-primary)]
+               transition cursor-pointer">
 
-                <!-- ================= SCROLLABLE BODY ================= -->
-                <div class="flex-1 overflow-y-auto p-6 space-y-8">
+                ✕
 
-                    <!-- ================= INFO GENERAL ================= -->
-                    <div class="space-y-4">
+            </button>
+
+        </div>
+
+        <!-- ================= FORM ================= -->
+        <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col flex-1 min-h-0">
+
+            <!-- ================= SCROLLABLE BODY ================= -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-8">
+
+
+                <!-- ================= PORCENTAJE ================= -->
+                <div class="mb-6 p-5 rounded-2xl
+            border border-[var(--border-soft)]
+            bg-[var(--bg-base)]">
+
+                    <div class="flex items-start justify-between gap-4">
 
                         <div>
-                            <h3 class="text-lg font-semibold text-[var(--text-primary)]">
-                                Información general
-                            </h3>
+
+                            <div class="flex items-center gap-2">
+
+                                <lucide-icon [name]="currentLevelConfig.icon" class="w-5 h-5"
+                                    [class]="currentLevelConfig.color">
+                                </lucide-icon>
+
+                                <h3 class="font-semibold" [class]="currentLevelConfig.color">
+
+                                    {{ profileProgress.level.label }}
+
+                                </h3>
+
+                            </div>
+
+                            <p class="text-sm text-[var(--text-secondary)] mt-1">
+
+                                {{ currentProfileMessage }}
+
+                            </p>
+
                         </div>
+
+                        <div class="text-right">
+
+                            <div class="text-2xl font-bold text-[var(--system-primary)]">
+
+                                {{ profileProgress.percentage }}%
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mt-4">
+
+                        <div class="h-3 rounded-full bg-[var(--border-soft)] overflow-hidden">
+
+                            <div class="h-full bg-[var(--system-primary)] transition-all duration-500"
+                                [style.width.%]="profileProgress.percentage">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mt-4">
+
+                        <!-- <app-section-tip>
+
+                            La información marcada como visible podrá mostrarse
+                            en tu página de reservas y comunicaciones con
+                            tus {{ uiTerms().audienceOwner.pluralLower }}.
+
+                        </app-section-tip> -->
+
+                    </div>
+
+                    @if (profileProgress.missing.length) {
+
+                    <div class="mt-4">
+
+                        <p class="text-xs font-medium text-[var(--text-secondary)] mb-2">
+
+                            Te falta completar:
+
+                        </p>
+
+                        <div class="flex flex-wrap gap-2">
+
+                            @for(item of profileProgress.missing; track item.field){
+
+                            @if(item.isExternal){
+
+                            <button type="button" (click)="goToMissingItem(item)" class="px-2 py-1 rounded-full text-xs
+             border
+             border-amber-500/40
+             bg-amber-500/10
+             text-amber-500
+             hover:bg-amber-500/20
+             transition">
+
+                                {{ item.label }}
+
+                            </button>
+
+                            } @else {
+
+                            <span class="px-2 py-1 rounded-full text-xs
+             bg-[var(--bg-surface)]
+             border border-[var(--border-soft)]">
+
+                                {{ item.label }}
+
+                            </span>
+
+                            }
+
+                            }
+
+                        </div>
+
+                    </div>
+
+                    }
+
+
+                </div>
+
+
+
+                <!-- ================= HELP ================= -->
+                <!-- <div class="mb-6 p-4 rounded-2xl
+                    bg-[var(--bg-base)]
+                    border border-[var(--border-soft)]">
+
+                    <div class="flex items-start gap-3">
+
+                        <lucide-icon [name]="Info" class="w-5 h-5 mt-0.5 text-[var(--system-primary)]">
+                        </lucide-icon>
+
+                        <div>
+
+                            <p class="font-medium text-[var(--text-primary)]">
+                                Configura la información que verán tus {{ uiTerms().audienceOwner.pluralLower }}
+                            </p>
+
+                            <p class="text-sm text-[var(--text-secondary)] mt-1">
+
+                                Estos datos podrán mostrarse en tu página de reservas, correos automáticos,
+                                recordatorios y otros espacios que verán tus
+                                {{ uiTerms().audienceOwner.pluralLower }}.
+
+                            </p>
+
+                            <p class="text-sm text-[var(--text-secondary)] mt-2">
+
+                                Tú decides qué información mostrar u ocultar, incluyendo teléfonos, ubicación, sitio web
+                                y redes sociales.
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div> -->
+
+                <!-- ================= INFO GENERAL  ================= -->
+                <div class="rounded-2xl border border-[var(--border-soft)] overflow-hidden">
+
+                    <button type="button" (click)="toggleSection('general')" class="w-full flex items-center justify-between p-5
+               bg-[var(--bg-surface)]
+               hover:bg-[var(--bg-base)]
+               transition cursor-pointer">
+
+                        <div class="flex items-center gap-3">
+
+                            <lucide-icon [name]="Building2" class="w-5 h-5 text-[var(--system-primary)]">
+                            </lucide-icon>
+
+                            <div class="text-left">
+
+                                <h3 class="font-semibold text-[var(--text-primary)]">
+                                    Información general
+                                </h3>
+
+                                <p class="text-xs text-[var(--text-secondary)]">
+                                    Datos principales de la sucursal
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <lucide-icon [name]="expandedSections.general ? ChevronUp : ChevronDown" class="w-5 h-5">
+                        </lucide-icon>
+
+                    </button>
+
+                    @if(expandedSections.general){
+
+                    <div class="p-5 border-t border-[var(--border-soft)]">
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -529,7 +900,6 @@
                                 </label>
 
                                 <input formControlName="name" class="input-primary" placeholder="Ej. Sucursal Centro">
-
                                 @if (getError('name')) {
                                 <small class="text-red-400">
                                     {{ getError('name') }}
@@ -540,7 +910,7 @@
                             <!-- Slug -->
                             <div>
                                 <label class="text-sm text-[var(--text-secondary)] flex items-center gap-2">
-                                    Enlace público de reservas *
+                                    Enlace público *
                                     <span class="relative group cursor-pointer">
                                         <lucide-icon [name]="HelpCircle"
                                             class="w-4 h-4 cursor-pointer text-gray-400 transition-colors duration-200 group-hover:text-emerald-500"
@@ -551,10 +921,8 @@
 
                                     </span>
                                 </label>
-                                <input formControlName="slug" class="input-primary" placeholder="Ej. sucursal-centro">
 
-
-
+                                <input formControlName="slug" class="input-primary" placeholder="ejemplo-centro">
                                 @if (getError('slug')) {
                                 <small class="text-red-400">
                                     {{ getError('slug') }}
@@ -562,11 +930,10 @@
                                 }
                             </div>
 
-                            <!-- Reference prefix -->
+                            <!-- Prefijo -->
                             <div>
-                                <!-- <label class="text-sm text-[var(--text-secondary)]">Prefijo de citas *</label> -->
                                 <label class="text-sm text-[var(--text-secondary)] flex items-center gap-2">
-                                    Prefijo de citas *
+                                    Prefijo de {{ uiTerms().appointments.pluralLower }} *
 
                                     <span class="relative group cursor-pointer">
                                         <lucide-icon [name]="HelpCircle"
@@ -579,85 +946,136 @@
                                     </span>
                                 </label>
 
-                                <input formControlName="reference_prefix" class="input-primary uppercase"
-                                    placeholder="Ej. PDC" maxlength="5">
+                                <input formControlName="reference_prefix" maxlength="5" class="input-primary uppercase"
+                                    placeholder="PDC">
+
                                 @if (getError('reference_prefix')) {
                                 <small class="text-red-400">{{ getError('reference_prefix') }}</small>
                                 }
                             </div>
 
-                            <!-- Email -->
+                            <!-- Tagline -->
                             <div>
-                                <label class="text-sm text-[var(--text-secondary)]">
-                                    Email
+                                <label class="text-sm text-[var(--text-secondary)] flex items-center gap-2">
+
+                                    Frase principal
+
+                                    <lucide-icon [name]="HelpCircle" class="w-4 h-4 text-gray-400 cursor-pointer"
+                                        (click)="showTaglineHelp = !showTaglineHelp">
+                                    </lucide-icon>
+
                                 </label>
 
-                                <input formControlName="email" class="input-primary"
-                                    placeholder="Ej. sucursal@empresa.com">
 
-                                @if (getError('email')) {
-                                <small class="text-red-400">
-                                    {{ getError('email') }}
-                                </small>
+                                <input formControlName="tagline" class="input-primary"
+                                    [placeholder]="nicheTaglinePlaceholder">
+
+
+
+                                @if (getError('tagline')) {
+                                <small class="text-red-400">{{ getError('tagline') }}</small>
                                 }
                             </div>
 
-                            <!-- Teléfono -->
-                            <div>
-                                <label class="text-sm text-[var(--text-secondary)]">
-                                    Teléfono
-                                </label>
-
-                                <ngx-intl-tel-input [cssClass]="'input-primary'"
-                                    [preferredCountries]="[CountryISO.Mexico, CountryISO.UnitedStates]"
-                                    [enableAutoCountrySelect]="false" [enablePlaceholder]="true"
-                                    [searchCountryFlag]="true" [selectFirstCountry]="false"
-                                    [selectedCountryISO]="CountryISO.Mexico" [phoneValidation]="true"
-                                    formControlName="phone">
-
-                                </ngx-intl-tel-input>
-
-                                @if (getError('phone')) {
-                                <small class="text-red-400">
-                                    {{ getError('phone') }}
-                                </small>
-                                }
-                            </div>
-
-                            <!-- Website -->
+                            <!-- Descripción -->
                             <div class="md:col-span-2">
-                                <label class="text-sm text-[var(--text-secondary)]">
-                                    Sitio web
+
+                                <label class="text-sm text-[var(--text-secondary)] flex items-center gap-2">
+
+                                    Descripción
+
+                                    <lucide-icon [name]="HelpCircle" class="w-4 h-4 text-gray-400 cursor-pointer"
+                                        (click)="showDescriptionHelp = !showDescriptionHelp">
+                                    </lucide-icon>
+
                                 </label>
 
-                                <input formControlName="website" class="input-primary"
-                                    placeholder="Ej. https://miempresa.com">
+                                <textarea rows="4" formControlName="description" class="input-primary resize-none"
+                                    [placeholder]="nicheDescriptionPlaceholder">
+                                </textarea>
 
-                                @if (getError('website')) {
-                                <small class="text-red-400">
-                                    {{ getError('website') }}
-                                </small>
-                                }
+                                <div class="flex justify-between items-center mt-1">
+
+                                    <div>
+
+                                        @if (getError('description')) {
+                                        <small class="text-red-400">
+                                            {{ getError('description') }}
+                                        </small>
+                                        }
+
+                                    </div>
+
+                                    <small class="text-[var(--text-secondary)]">
+
+                                        {{ form.get('description')?.value?.length || 0 }}/500
+
+                                    </small>
+
+                                </div>
+
+
                             </div>
+
+
 
                         </div>
 
                     </div>
 
-                    <!-- ================= DIRECCIÓN ================= -->
-                    <div class="space-y-4">
+                    }
 
-                        <div>
-                            <h3 class="text-lg font-semibold text-[var(--text-primary)]">
-                                Dirección
-                            </h3>
+                </div>
+
+                <!-- ================= UBICACIÓN ================= -->
+                <div class="rounded-2xl border border-[var(--border-soft)] overflow-hidden">
+
+                    <button type="button" (click)="toggleSection('location')"
+                        class="w-full flex items-center justify-between p-5">
+
+                        <div class="flex items-center gap-3">
+
+                            <lucide-icon [name]="MapPinned" class="w-5 h-5 text-[var(--system-primary)]">
+                            </lucide-icon>
+
+                            <div class="text-left">
+
+                                <h3 class="font-semibold text-[var(--text-primary)]">
+                                    Ubicación
+                                </h3>
+
+                                <p class="text-xs text-[var(--text-secondary)]">
+                                    Dirección y localización de la sucursal
+                                </p>
+
+                            </div>
+
                         </div>
+
+                        <lucide-icon [name]="expandedSections.location ? ChevronUp : ChevronDown">
+                        </lucide-icon>
+
+                    </button>
+
+                    @if(expandedSections.location){
+
+                    <div class="p-5 border-t border-[var(--border-soft)]">
+
+                        <app-section-tip variant="info">
+                            Mantén esta información actualizada para que tus
+                            {{ uiTerms().audienceOwner.pluralLower }}
+                            puedan ubicar tu sucursal correctamente en reservas,
+                            correos, confirmaciones y futuras herramientas de visibilidad
+                            dentro de ROMBI.
+
+                        </app-section-tip>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                             <!-- País -->
                             <div>
-                                <label class="text-sm text-[var(--text-secondary)]">
+
+                                <label class="text-sm">
                                     País
                                 </label>
 
@@ -680,26 +1098,29 @@
                                     {{ getError('country') }}
                                 </small>
                                 }
+
                             </div>
 
                             <!-- Estado -->
                             <div>
-                                <label class="text-sm text-[var(--text-secondary)]">
+
+                                <label class="text-sm">
                                     Estado
                                 </label>
 
                                 <input formControlName="state" class="input-primary" placeholder="Ej. Morelos">
-
                                 @if (getError('state')) {
                                 <small class="text-red-400">
                                     {{ getError('state') }}
                                 </small>
                                 }
+
                             </div>
 
                             <!-- Ciudad -->
                             <div>
-                                <label class="text-sm text-[var(--text-secondary)]">
+
+                                <label class="text-sm">
                                     Ciudad
                                 </label>
 
@@ -712,14 +1133,14 @@
                                 }
                             </div>
 
-                            <!-- ZIP -->
+                            <!-- Código postal -->
                             <div>
-                                <label class="text-sm text-[var(--text-secondary)]">
+
+                                <label class="text-sm">
                                     Código postal
                                 </label>
 
-                                <input formControlName="zip_code" class="input-primary" placeholder="Ej. 06000">
-
+                                <input formControlName="zip_code" class="input-primary" placeholder="62000">
                                 @if (getError('zip_code')) {
                                 <small class="text-red-400">
                                     {{ getError('zip_code') }}
@@ -729,13 +1150,12 @@
 
                             <!-- Dirección -->
                             <div class="md:col-span-2">
-                                <label class="text-sm text-[var(--text-secondary)]">
+
+                                <label class="text-sm">
                                     Dirección
                                 </label>
 
-                                <input formControlName="address" class="input-primary"
-                                    placeholder="Ej. Av. Reforma 123">
-
+                                <input formControlName="address" class="input-primary" placeholder="Av. Reforma 123">
                                 @if (getError('address')) {
                                 <small class="text-red-400">
                                     {{ getError('address') }}
@@ -747,85 +1167,815 @@
 
                     </div>
 
+                    }
+
                 </div>
 
+                <!-- ================= CONTACTO ================= -->
+                <div class="rounded-2xl border border-[var(--border-soft)] overflow-hidden">
+
+                    <button type="button" (click)="toggleSection('contact')"
+                        class="w-full flex items-center justify-between p-5">
+
+                        <div class="flex items-center gap-3">
+
+                            <lucide-icon [name]="PhoneCall" class="w-5 h-5 text-[var(--system-primary)]">
+                            </lucide-icon>
+
+                            <div class="text-left">
+
+                                <h3 class="font-semibold text-[var(--text-primary)]">
+                                    Contacto
+                                </h3>
+
+                                <p class="text-xs text-[var(--text-secondary)]">
+                                    Canales para tus {{ uiTerms().audienceOwner.pluralLower }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <lucide-icon [name]="expandedSections.contact ? ChevronUp : ChevronDown">
+                        </lucide-icon>
+
+                    </button>
+
+                    @if(expandedSections.contact){
+
+                    <div class="p-5 border-t border-[var(--border-soft)]">
+
+                        <app-section-tip variant="info">
+                            Mantén esta información actualizada para que tus
+                            {{ uiTerms().audienceOwner.pluralLower }}
+                            puedan comunicarse contigo fácilmente.
+                        </app-section-tip>
 
 
-                <!-- ================= FOOTER ================= -->
-                <div class="p-6 border-t border-[var(--border-soft)]
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                            <!-- Teléfono -->
+                            <div>
+
+                                <label class="text-sm">
+                                    Teléfono
+                                </label>
+
+                                <ngx-intl-tel-input [preferredCountries]="preferredCountries"
+                                    [enableAutoCountrySelect]="true" [searchCountryFlag]="true" [searchCountryField]="[
+                                    SearchCountryField.Name,
+                                    SearchCountryField.DialCode,
+                                    SearchCountryField.Iso2
+                                    ]" [selectedCountryISO]="CountryISO.Mexico" [phoneValidation]="true"
+                                    [separateDialCode]="true" [numberFormat]="PhoneNumberFormat.International"
+                                    formControlName="phone" [cssClass]="'input-primary'">
+
+                                </ngx-intl-tel-input>
+
+                                @if (getError('phone')) {
+                                <small class="text-red-400">
+                                    {{ getError('phone') }}
+                                </small>
+                                }
+
+                            </div>
+
+                            <!-- WhatsApp -->
+                            <div>
+
+                                <label class="text-sm">
+                                    WhatsApp
+                                </label>
+
+                                <ngx-intl-tel-input [preferredCountries]="preferredCountries"
+                                    [enableAutoCountrySelect]="true" [searchCountryFlag]="true" [searchCountryField]="[
+                                    SearchCountryField.Name,
+                                    SearchCountryField.DialCode,
+                                    SearchCountryField.Iso2
+                                    ]" [selectedCountryISO]="CountryISO.Mexico" [phoneValidation]="true"
+                                    [separateDialCode]="true" [numberFormat]="PhoneNumberFormat.International"
+                                    formControlName="whatsapp_phone" [cssClass]="'input-primary'">
+
+                                </ngx-intl-tel-input>
+
+                                @if (getError('whatsapp_phone')) {
+                                <small class="text-red-400">
+                                    {{ getError('whatsapp_phone') }}
+                                </small>
+                                }
+
+                            </div>
+
+                            <!-- Correo -->
+                            <div>
+
+                                <label class="text-sm">
+                                    Correo
+                                </label>
+
+                                <input formControlName="email" class="input-primary"
+                                    placeholder="Ej. sucursal@empresa.com">
+
+                                @if (getError('email')) {
+                                <small class="text-red-400">
+                                    {{ getError('email') }}
+                                </small>
+                                }
+
+                            </div>
+
+                            <!-- Website -->
+                            <div>
+
+                                <label class="text-sm">
+                                    Sitio web
+                                </label>
+
+                                <input formControlName="website" class="input-primary"
+                                    placeholder="Ej. https://miempresa.com">
+
+                                @if (getError('website')) {
+                                <small class="text-red-400">
+                                    {{ getError('website') }}
+                                </small>
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    }
+
+                </div>
+
+                <!-- ================= REDES SOCIALES / PRESENCIA DIGITAL ================= -->
+                <div class="rounded-2xl border border-[var(--border-soft)] overflow-hidden">
+
+                    <button type="button" (click)="toggleSection('social')"
+                        class="w-full flex items-center justify-between p-5">
+
+                        <div class="flex items-center gap-3">
+
+                            <lucide-icon [name]="Globe" class="w-5 h-5 text-[var(--system-primary)]">
+                            </lucide-icon>
+
+                            <div class="text-left">
+
+                                <h3 class="font-semibold text-[var(--text-primary)]">
+                                    Presencia digital
+                                </h3>
+
+                                <p class="text-xs text-[var(--text-secondary)]">
+                                    Promociona tus redes sociales
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <lucide-icon [name]="expandedSections.social ? ChevronUp : ChevronDown">
+                        </lucide-icon>
+
+                    </button>
+
+                    @if(expandedSections.social){
+
+                    <div class="p-5 border-t border-[var(--border-soft)]">
+
+                        <app-section-tip variant="info">
+                            Agrega tus redes sociales para que tus
+                            {{ uiTerms().audienceOwner.pluralLower }}
+                            puedan conocerte mejor, ver tu trabajo y mantenerse en contacto
+                            contigo desde tu página pública y futuras herramientas de visibilidad
+                            dentro de ROMBI.
+                        </app-section-tip>
+
+                        <div class="space-y-4">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <!-- Instagram -->
+                                <div class="space-y-1">
+
+                                    <div class="flex items-center gap-2 mb-2">
+
+                                        <img src="https://cdn-icons-png.flaticon.com/24/733/733558.png" alt="Instagram"
+                                            class="w-4 h-4">
+
+                                        <span class="text-sm font-medium">
+                                            Instagram
+                                        </span>
+
+                                    </div>
+
+                                    <input formControlName="instagram" class="input-primary"
+                                        placeholder="https://instagram.com/...">
+
+                                    @if (getError('instagram')) {
+                                    <small class="text-red-400">{{ getError('instagram') }}</small>
+                                    }
+
+                                </div>
+
+                                <!-- Facebook -->
+                                <div class="space-y-1">
+
+                                    <div class="flex items-center gap-2 mb-2">
+
+                                        <img src="https://cdn-icons-png.flaticon.com/24/733/733547.png" alt="Facebook"
+                                            class="w-4 h-4">
+
+                                        <span class="text-sm font-medium">
+                                            Facebook
+                                        </span>
+
+                                    </div>
+
+                                    <input formControlName="facebook" class="input-primary"
+                                        placeholder="https://facebook.com/...">
+
+                                    @if (getError('facebook')) {
+                                    <small class="text-red-400">{{ getError('facebook') }}</small>
+                                    }
+
+                                </div>
+                            </div>
+
+                            <div class="grid md:grid-cols-2 gap-4">
+
+
+                                <!-- Tiktok -->
+                                <div class="space-y-1">
+
+                                    <div class="flex items-center gap-2 mb-2">
+
+                                        <img src="https://cdn-icons-png.flaticon.com/24/3046/3046121.png" alt="Tiktok"
+                                            class="w-4 h-4">
+
+                                        <span class="text-sm font-medium">
+                                            Tiktok
+                                        </span>
+
+                                    </div>
+
+                                    <input formControlName="tiktok" class="input-primary"
+                                        placeholder="https://tiktok.com/...">
+
+                                    @if (getError('tiktok')) {
+                                    <small class="text-red-400">{{ getError('tiktok') }}</small>
+                                    }
+
+                                </div>
+
+                                <!-- Youtube -->
+                                <div class="space-y-1">
+
+                                    <div class="flex items-center gap-2 mb-2">
+
+                                        <img src="https://cdn-icons-png.flaticon.com/24/1384/1384060.png" alt="Youtube"
+                                            class="w-4 h-4">
+
+                                        <span class="text-sm font-medium">
+                                            Youtube
+                                        </span>
+
+                                    </div>
+
+                                    <input formControlName="youtube" class="input-primary"
+                                        placeholder="https://youtube.com/...">
+
+                                    @if (getError('youtube')) {
+                                    <small class="text-red-400">{{ getError('youtube') }}</small>
+                                    }
+
+                                </div>
+                            </div>
+
+                            <!-- X -->
+                            <div class="space-y-1">
+
+                                <div class="flex items-center gap-2 mb-2">
+
+                                    <img src="https://cdn-icons-png.flaticon.com/24/5969/5969020.png" alt="X"
+                                        class="w-4 h-4">
+
+                                    <span class="text-sm font-medium">
+                                        X
+                                    </span>
+
+                                </div>
+
+                                <input formControlName="x" class="input-primary" placeholder="https://x.com/...">
+
+                                @if (getError('x')) {
+                                <small class="text-red-400">{{ getError('x') }}</small>
+                                }
+
+                            </div>
+
+
+
+                        </div>
+
+                    </div>
+
+                    }
+
+                </div>
+
+                <!-- ================= Visibilidad pública ================= -->
+                <div class="rounded-2xl border border-[var(--border-soft)] overflow-hidden">
+
+                    <button type="button" (click)="toggleSection('visibility')"
+                        class="w-full flex items-center justify-between p-5">
+
+                        <div class="flex items-center gap-3">
+
+                            <lucide-icon [name]="Eye" class="w-5 h-5 text-[var(--system-primary)]">
+                            </lucide-icon>
+
+                            <div class="text-left">
+
+                                <h3 class="font-semibold text-[var(--text-primary)]">
+                                    Visibilidad pública
+                                </h3>
+
+                                <p class="text-xs text-[var(--text-secondary)]">
+                                    Controla qué información podrán ver tus {{ uiTerms().audienceOwner.pluralLower }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <lucide-icon [name]="expandedSections.visibility ? ChevronUp : ChevronDown">
+                        </lucide-icon>
+
+                    </button>
+
+                    @if(expandedSections.visibility){
+
+                    <div class="p-5 border-t border-[var(--border-soft)]">
+
+                        <app-section-tip variant="info">
+                            Esta información podrá mostrarse en tu página pública y en los correos enviados a tus {{
+                            uiTerms().audienceOwner.pluralLower }}.
+                        </app-section-tip>
+
+                        <div class="space-y-3">
+
+                            <!-- Teléfono -->
+                            <div class="flex items-center justify-between gap-3 p-4 rounded-xl border border-[var(--border-soft)]
+                                hover:border-[var(--system-primary)]
+                                hover:bg-[var(--bg-base)]
+                                transition">
+
+                                <div class="flex items-center gap-3 min-w-0">
+
+                                    <div class="w-10 h-10 rounded-xl bg-[var(--system-accent)]
+                                    flex items-center justify-center shrink-0">
+                                        <lucide-icon [name]="Phone" class="w-5 h-5 text-[var(--system-secondary)]">
+                                        </lucide-icon>
+                                    </div>
+
+                                    <div class="min-w-0">
+
+                                        <p class="font-medium text-sm text-[var(--text-primary)]">
+                                            Teléfono
+                                        </p>
+
+                                        <p class="text-xs text-[var(--text-secondary)]">
+                                            Mostrar número de contacto
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <button type="button" (click)="toggleVisibility('show_phone')"
+                                    class="inline-flex items-center gap-2 shrink-0 cursor-pointer">
+
+                                    <span class="hidden sm:inline text-xs font-medium"
+                                        [class.text-green-500]="form.get('show_phone')?.value"
+                                        [class.text-[var(--text-secondary)]]="!form.get('show_phone')?.value">
+                                        {{ form.get('show_phone')?.value ? 'Visible' : 'Oculto' }}
+                                    </span>
+
+                                    <div class="w-10 h-6 rounded-full relative transition"
+                                        [class.bg-green-500]="form.get('show_phone')?.value"
+                                        [class.bg-gray-300]="!form.get('show_phone')?.value">
+
+                                        <div class="absolute top-0.5 w-5 h-5 bg-white rounded-full transition"
+                                            [class.left-0.5]="!form.get('show_phone')?.value"
+                                            [class.left-4.5]="form.get('show_phone')?.value">
+                                        </div>
+
+                                    </div>
+
+                                </button>
+
+                            </div>
+
+                            <!-- WhatsApp -->
+                            <div class="flex items-center justify-between gap-3 p-4 rounded-xl border border-[var(--border-soft)]
+           hover:border-[var(--system-primary)]
+           hover:bg-[var(--bg-base)]
+           transition">
+
+                                <div class="flex items-center gap-3 min-w-0">
+
+                                    <div class="w-10 h-10 rounded-xl bg-[var(--system-accent)]
+                   flex items-center justify-center shrink-0">
+                                        <lucide-icon [name]="MessageCircle"
+                                            class="w-5 h-5 text-[var(--system-secondary)]">
+                                        </lucide-icon>
+                                    </div>
+
+                                    <div class="min-w-0">
+
+                                        <p class="font-medium text-sm text-[var(--text-primary)]">
+                                            WhatsApp
+                                        </p>
+
+                                        <p class="text-xs text-[var(--text-secondary)]">
+                                            Permite contacto rápido
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <button type="button" (click)="toggleVisibility('show_whatsapp')"
+                                    class="inline-flex items-center gap-2 shrink-0 cursor-pointer">
+
+                                    <span class="hidden sm:inline text-xs font-medium"
+                                        [class.text-green-500]="form.get('show_whatsapp')?.value"
+                                        [class.text-[var(--text-secondary)]]="!form.get('show_whatsapp')?.value">
+                                        {{ form.get('show_whatsapp')?.value ? 'Visible' : 'Oculto' }}
+                                    </span>
+
+                                    <div class="w-10 h-6 rounded-full relative transition"
+                                        [class.bg-green-500]="form.get('show_whatsapp')?.value"
+                                        [class.bg-gray-300]="!form.get('show_whatsapp')?.value">
+
+                                        <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform"
+                                            [class.translate-x-4]="form.get('show_whatsapp')?.value">
+                                        </div>
+
+                                    </div>
+
+                                </button>
+
+                            </div>
+
+                            <!-- Correo -->
+                            <div class="flex items-center justify-between gap-3 p-4 rounded-xl border border-[var(--border-soft)]
+                                hover:border-[var(--system-primary)]
+                                hover:bg-[var(--bg-base)]
+                                transition">
+
+                                <div class="flex items-center gap-3 min-w-0">
+
+                                    <div class="w-10 h-10 rounded-xl bg-[var(--system-accent)]
+                                    flex items-center justify-center shrink-0">
+                                        <lucide-icon [name]="Mail" class="w-5 h-5 text-[var(--system-secondary)]">
+                                        </lucide-icon>
+                                    </div>
+
+                                    <div class="min-w-0">
+
+                                        <p class="font-medium text-sm text-[var(--text-primary)]">
+                                            Correo
+                                        </p>
+
+                                        <p class="text-xs text-[var(--text-secondary)]">
+                                            Mostrar correo electrónico
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <button type="button" (click)="toggleVisibility('show_email')"
+                                    class="inline-flex items-center gap-2 shrink-0 cursor-pointer">
+
+                                    <span class="hidden sm:inline text-xs font-medium"
+                                        [class.text-green-500]="form.get('show_email')?.value"
+                                        [class.text-[var(--text-secondary)]]="!form.get('show_email')?.value">
+                                        {{ form.get('show_email')?.value ? 'Visible' : 'Oculto' }}
+                                    </span>
+
+                                    <div class="w-10 h-6 rounded-full relative transition"
+                                        [class.bg-green-500]="form.get('show_email')?.value"
+                                        [class.bg-gray-300]="!form.get('show_email')?.value">
+
+                                        <div class="absolute top-0.5 w-5 h-5 bg-white rounded-full transition"
+                                            [class.left-0.5]="!form.get('show_email')?.value"
+                                            [class.left-4.5]="form.get('show_email')?.value">
+                                        </div>
+
+                                    </div>
+
+                                </button>
+
+                            </div>
+
+                            <!-- Dirección -->
+                            <div class="flex items-center justify-between gap-3 p-4 rounded-xl border border-[var(--border-soft)]
+                                hover:border-[var(--system-primary)]
+                                hover:bg-[var(--bg-base)]
+                                transition">
+
+                                <div class="flex items-center gap-3 min-w-0">
+
+                                    <div class="w-10 h-10 rounded-xl bg-[var(--system-accent)]
+                                    flex items-center justify-center shrink-0">
+                                        <lucide-icon [name]="MapPin" class="w-5 h-5 text-[var(--system-secondary)]">
+                                        </lucide-icon>
+                                    </div>
+
+                                    <div class="min-w-0">
+
+                                        <p class="font-medium text-sm text-[var(--text-primary)]">
+                                            Dirección
+                                        </p>
+
+                                        <p class="text-xs text-[var(--text-secondary)]">
+                                            Mostrar ubicación física
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <button type="button" (click)="toggleVisibility('show_address')"
+                                    class="inline-flex items-center gap-2 shrink-0 cursor-pointer">
+
+                                    <span class="hidden sm:inline text-xs font-medium"
+                                        [class.text-green-500]="form.get('show_address')?.value"
+                                        [class.text-[var(--text-secondary)]]="!form.get('show_address')?.value">
+                                        {{ form.get('show_address')?.value ? 'Visible' : 'Oculto' }}
+                                    </span>
+
+                                    <div class="w-10 h-6 rounded-full relative transition"
+                                        [class.bg-green-500]="form.get('show_address')?.value"
+                                        [class.bg-gray-300]="!form.get('show_address')?.value">
+
+                                        <div class="absolute top-0.5 w-5 h-5 bg-white rounded-full transition"
+                                            [class.left-0.5]="!form.get('show_address')?.value"
+                                            [class.left-4.5]="form.get('show_address')?.value">
+                                        </div>
+
+                                    </div>
+
+                                </button>
+
+                            </div>
+
+                            <!-- Sitio web -->
+                            <div class="flex items-center justify-between gap-3 p-4 rounded-xl border border-[var(--border-soft)]
+                                hover:border-[var(--system-primary)]
+                                hover:bg-[var(--bg-base)]
+                                transition">
+
+                                <div class="flex items-center gap-3 min-w-0">
+
+                                    <div class="w-10 h-10 rounded-xl bg-[var(--system-accent)]
+                                    flex items-center justify-center shrink-0">
+                                        <lucide-icon [name]="Globe" class="w-5 h-5 text-[var(--system-secondary)]">
+                                        </lucide-icon>
+                                    </div>
+
+                                    <div class="min-w-0">
+
+                                        <p class="font-medium text-sm text-[var(--text-primary)]">
+                                            Sitio web
+                                        </p>
+
+                                        <p class="text-xs text-[var(--text-secondary)]">
+                                            Mostrar página oficial
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <button type="button" (click)="toggleVisibility('show_website')"
+                                    class="inline-flex items-center gap-2 shrink-0 cursor-pointer">
+
+                                    <span class="hidden sm:inline text-xs font-medium"
+                                        [class.text-green-500]="form.get('show_website')?.value"
+                                        [class.text-[var(--text-secondary)]]="!form.get('show_website')?.value">
+                                        {{ form.get('show_website')?.value ? 'Visible' : 'Oculto' }}
+                                    </span>
+
+                                    <div class="w-10 h-6 rounded-full relative transition"
+                                        [class.bg-green-500]="form.get('show_website')?.value"
+                                        [class.bg-gray-300]="!form.get('show_website')?.value">
+
+                                        <div class="absolute top-0.5 w-5 h-5 bg-white rounded-full transition"
+                                            [class.left-0.5]="!form.get('show_website')?.value"
+                                            [class.left-4.5]="form.get('show_website')?.value">
+                                        </div>
+
+                                    </div>
+
+                                </button>
+
+                            </div>
+
+                            <!-- Redes sociales -->
+                            <div class="flex items-center justify-between gap-3 p-4 rounded-xl border border-[var(--border-soft)]
+                                hover:border-[var(--system-primary)]
+                                hover:bg-[var(--bg-base)]
+                                transition">
+
+                                <div class="flex items-center gap-3 min-w-0">
+
+                                    <div class="w-10 h-10 rounded-xl bg-[var(--system-accent)]
+                                    flex items-center justify-center shrink-0">
+                                        <lucide-icon [name]="Share2" class="w-5 h-5 text-[var(--system-secondary)]">
+                                        </lucide-icon>
+                                    </div>
+
+                                    <div class="min-w-0">
+
+                                        <p class="font-medium text-sm text-[var(--text-primary)]">
+                                            Redes sociales
+                                        </p>
+
+                                        <p class="text-xs text-[var(--text-secondary)]">
+                                            Promociona Instagram, Facebook y más
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <button type="button" (click)="toggleVisibility('show_social_links')"
+                                    class="inline-flex items-center gap-2 shrink-0 cursor-pointer">
+
+                                    <span class="hidden sm:inline text-xs font-medium"
+                                        [class.text-green-500]="form.get('show_social_links')?.value"
+                                        [class.text-[var(--text-secondary)]]="!form.get('show_social_links')?.value">
+                                        {{ form.get('show_social_links')?.value ? 'Visible' : 'Oculto' }}
+                                    </span>
+
+                                    <div class="w-10 h-6 rounded-full relative transition"
+                                        [class.bg-green-500]="form.get('show_social_links')?.value"
+                                        [class.bg-gray-300]="!form.get('show_social_links')?.value">
+
+                                        <div class="absolute top-0.5 w-5 h-5 bg-white rounded-full transition"
+                                            [class.left-0.5]="!form.get('show_social_links')?.value"
+                                            [class.left-4.5]="form.get('show_social_links')?.value">
+                                        </div>
+
+                                    </div>
+
+                                </button>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    }
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ================= FOOTER ================= -->
+            <div class="p-6 border-t border-[var(--border-soft)]
                         flex flex-col sm:flex-row
                         justify-end gap-3 shrink-0">
 
-                    <button type="button" (click)="closeModal()" class="mar-btn-secondary">
-                        Cancelar
-                    </button>
+                <button type="button" (click)="closeModal()" class="mar-btn-secondary">
+                    Cancelar
+                </button>
 
-                    <!-- [disabled]="saving || form.invalid" -->
-                    <button type="submit" [disabled]="saving" class="mar-btn-primary">
+                <!-- [disabled]="saving || form.invalid" -->
+                <button type="submit" [disabled]="saving" class="mar-btn-primary">
 
-                        {{ saving
-                        ? 'Guardando...'
-                        : (editingBranch ? 'Actualizar' : 'Guardar') }}
+                    {{ saving
+                    ? 'Guardando...'
+                    : (editingBranch ? 'Actualizar' : 'Guardar') }}
 
-                    </button>
+                </button>
 
 
 
-                </div>
+            </div>
 
-            </form>
-
-        </div>
+        </form>
 
     </div>
 
-    @if (showSlugHelp) {
+</div>
+}
 
-    <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+@if (showSlugHelp) {
+<div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64
+            z-50 flex items-end sm:items-center justify-center
+            p-0 sm:p-4">
 
-        <!-- backdrop -->
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showSlugHelp = false">
-        </div>
-        <!-- <div class="absolute inset-0 bg-black/40" (click)="showSlugHelp = false"></div> -->
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showSlugHelp = false">
+    </div>
 
-        <!-- modal -->
-        <div class="relative w-full max-w-sm p-4 text-xs
-              bg-[var(--bg-surface)] border border-[var(--border-soft)]
-              rounded-2xl shadow-xl">
+    <!-- Modal -->
+    <div class="relative w-full h-full sm:h-auto
+              sm:max-w-md
+              bg-[var(--bg-surface)]
+              border-0 sm:border border-[var(--border-soft)]
+              rounded-none sm:rounded-2xl
+              shadow-xl
+              flex flex-col
+              max-h-screen sm:max-h-[90vh]">
 
-            <p class="font-semibold text-base mb-2">
+        <!-- HEADER -->
+        <div class="p-4 sm:p-5 border-b border-[var(--border-soft)]">
+
+            <h3 class="font-semibold text-base text-[var(--text-primary)]">
                 ¿Para qué sirve?
+            </h3>
+
+            <p class="text-sm text-[var(--text-secondary)] leading-relaxed mt-2">
+                Es el enlace público que compartirás con tus {{ uiTerms().clients.pluralLower }}
+                para que puedan reservar {{ uiTerms().appointments.pluralLower }} en esta sucursal.
             </p>
 
-            <p class="text-[var(--text-muted)] leading-relaxed">
-                Es el enlace público donde tus clientes reservarán citas.
+            <p class="text-sm text-[var(--text-secondary)] leading-relaxed mt-2">
+                Un enlace claro y fácil de recordar ayuda a que tus {{ uiTerms().clients.pluralLower }}
+                te encuentren con mayor facilidad.
             </p>
 
-            <div class="mt-4 space-y-3">
+        </div>
+
+        <!-- BODY -->
+        <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5">
+
+            <!-- Ejemplo -->
+            <div class="space-y-3">
 
                 <p class="font-semibold text-[var(--text-secondary)]">
                     Ejemplo:
                 </p>
 
                 <div class="rounded-xl border border-[var(--border-soft)]
-                bg-[var(--bg-muted)] p-3 space-y-1">
+                    bg-[var(--bg-muted)] p-3 space-y-2">
 
-                    <p class="text-green-400">rombi.com/punto-de-calma</p>
+                    <p class="text-green-400">rombi.com/{{ slug() }}/{{ form.get('slug')?.value || 'sucursal-centro' }}
+                    </p>
 
-                    <p class="mt-2 font-semibold">Reglas:</p>
-                    <ul class="list-disc ml-4">
-                        <li>Solo minúsculas</li>
-                        <li>Usa guiones (-)</li>
-                        <li>Sin espacios ni símbolos</li>
-                    </ul>
-
+                    <p class="text-xs text-[var(--text-secondary)]">
+                        Tus {{ uiTerms().clients.pluralLower }} utilizarán este enlace para acceder a tu agenda online.
+                    </p>
 
                 </div>
 
             </div>
 
+            <!-- Recomendaciones -->
+            <div class="space-y-3">
 
-            <button class="mar-btn-help" (click)="showSlugHelp = false">
+                <p class="font-semibold text-[var(--text-secondary)]">
+                    Recomendaciones:
+                </p>
+
+                <div class="rounded-xl border border-[var(--border-soft)]
+                    bg-[var(--bg-muted)] p-3">
+
+                    <ul class="list-disc ml-4 space-y-1">
+                        <li>Usa solo letras minúsculas</li>
+                        <li>Separa palabras con guiones (-)</li>
+                        <li>Evita espacios y símbolos especiales</li>
+                        <li>Utiliza un nombre fácil de recordar</li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <!-- Importante -->
+            <div class="rounded-xl border border-amber-500/20
+                bg-amber-500/5 p-3">
+
+                <p class="text-xs text-amber-400">
+                    Una vez que tus {{ uiTerms().clients.pluralLower }} comiencen a utilizar este enlace,
+                    evitar cambiarlo frecuentemente para no generar confusión.
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="p-4 border-t border-[var(--border-soft)]">
+
+            <button class="mar-btn-help w-full" (click)="showSlugHelp = false">
                 Entendido
             </button>
 
@@ -833,64 +1983,321 @@
 
     </div>
 
-    }
+</div>
+}
 
-    @if (showReferencePrefixHelp) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+@if (showReferencePrefixHelp) {
+<div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64
+            z-50 flex items-end sm:items-center justify-center
+            p-0 sm:p-4">
 
-        <!-- Overlay -->
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showReferencePrefixHelp = false">
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showReferencePrefixHelp = false">
+    </div>
+
+    <!-- Modal -->
+    <div class="relative w-full h-full sm:h-auto
+              sm:max-w-md
+              bg-[var(--bg-surface)]
+              border-0 sm:border border-[var(--border-soft)]
+              rounded-none sm:rounded-2xl
+              shadow-xl
+              flex flex-col
+              max-h-screen sm:max-h-[90vh]">
+
+        <!-- HEADER -->
+        <div class="p-4 sm:p-5 border-b border-[var(--border-soft)]">
+
+            <h3 class="font-semibold text-base text-[var(--text-primary)]">
+                ¿Para qué sirve?
+            </h3>
+
+            <p class="text-sm text-[var(--text-secondary)] leading-relaxed mt-2">
+                El prefijo identifica rápidamente a qué sucursal pertenece cada
+                {{ uiTerms().appointments.singularLower }}.
+            </p>
+
+            <p class="text-sm text-[var(--text-secondary)] leading-relaxed mt-2">
+                Se utiliza en códigos de referencia, búsquedas internas,
+                notificaciones y reportes del sistema.
+            </p>
+
         </div>
 
-        <!-- modal -->
-        <div class="relative w-full max-w-sm p-4 text-xs
-              bg-[var(--bg-surface)] border border-[var(--border-soft)]
-              rounded-2xl shadow-xl">
+        <!-- BODY -->
+        <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5">
 
-
-            <p class="font-semibold text-base mb-2">
-                ¿Para qué sirve?
-            </p>
-
-            <p class="text-[var(--text-muted)] leading-relaxed">
-                Se usa para generar códigos de citas.
-            </p>
-
-            <div class="mt-4 space-y-3">
+            <!-- Ejemplo -->
+            <div class="space-y-3">
 
                 <p class="font-semibold text-[var(--text-secondary)]">
                     Ejemplo:
                 </p>
 
                 <div class="rounded-xl border border-[var(--border-soft)]
-                bg-[var(--bg-muted)] p-3 space-y-1">
+                    bg-[var(--bg-muted)] p-3 space-y-2">
 
-                    <p class="text-green-400">PDC-2404-AB12</p>
+                    <p class="text-green-400">
+                        {{ form.get('reference_prefix')?.value || 'PDC' }}-2404-AB12
+                    </p>
 
-                    <p class="mt-2 font-semibold">Reglas:</p>
-                    <ul class="list-disc ml-4">
-                        <li>Solo mayúsculas</li>
-                        <li>Sin espacios ni símbolos</li>
-                        <li>2 a 5 caracteres</li>
-                    </ul>
-
+                    <p class="text-xs text-[var(--text-secondary)]">
+                        {{ form.get('reference_prefix')?.value || 'PDC' }} identifica la sucursal y el resto del código
+                        se genera
+                        automáticamente para cada {{ uiTerms().appointments.singularLower }}.
+                    </p>
 
                 </div>
 
             </div>
 
+            <!-- Recomendaciones -->
+            <div class="space-y-3">
 
-            <button class="mar-btn-help" (click)="showReferencePrefixHelp = false">
+                <p class="font-semibold text-[var(--text-secondary)]">
+                    Recomendaciones:
+                </p>
 
+                <div class="rounded-xl border border-[var(--border-soft)]
+                    bg-[var(--bg-muted)] p-3">
+
+                    <ul class="list-disc ml-4 space-y-1">
+
+                        <li>Usa únicamente letras mayúsculas</li>
+
+                        <li>Evita espacios y símbolos especiales</li>
+
+                        <li>Utiliza entre 2 y 5 caracteres</li>
+
+                        <li>Prefiere abreviaturas fáciles de reconocer</li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <!-- Importante -->
+            <div class="rounded-xl border border-amber-500/20
+                bg-amber-500/5 p-3">
+
+                <p class="text-xs text-amber-400">
+
+                    Una vez que existan
+                    {{ uiTerms().appointments.pluralLower }}
+                    asociadas a este prefijo, evita modificarlo con frecuencia para
+                    mantener consistencia en reportes, búsquedas y referencias históricas.
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- FOOTER -->
+        <div class="p-4 border-t border-[var(--border-soft)]">
+
+            <button class="mar-btn-help w-full" (click)="showReferencePrefixHelp = false">
                 Entendido
-
             </button>
 
         </div>
 
     </div>
-    }
 
-    }
-    } <!-- FIN DE SIN ACCESO -->
-</section>
+</div>
+}
+
+@if (showTaglineHelp) {
+<div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64
+            z-50 flex items-end sm:items-center justify-center
+            p-0 sm:p-4">
+
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showTaglineHelp = false">
+    </div>
+
+    <!-- Modal -->
+    <div class="relative w-full h-full sm:h-auto
+              sm:max-w-md
+              bg-[var(--bg-surface)]
+              border-0 sm:border border-[var(--border-soft)]
+              rounded-none sm:rounded-2xl
+              shadow-xl
+              flex flex-col
+              max-h-screen sm:max-h-[90vh]">
+
+        <!-- HEADER -->
+        <div class="p-4 sm:p-5 border-b border-[var(--border-soft)]">
+
+            <h3 class="font-semibold text-base text-[var(--text-primary)]">
+                ¿Para qué sirve?
+            </h3>
+
+            <p class="text-[var(--text-muted)] leading-relaxed">
+                Es una frase corta que resume la especialidad o propuesta principal de esta sucursal.
+            </p>
+
+            <p class="text-[var(--text-muted)] leading-relaxed mt-2">
+                Ayuda a que tus {{ uiTerms().clients.pluralLower }} comprendan rápidamente qué servicios ofreces y qué
+                te
+                diferencia.
+            </p>
+
+        </div>
+
+        <!-- BODY -->
+        <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5">
+
+            <!-- Ejemplo -->
+            <div class="space-y-3">
+
+                <p class="font-semibold text-[var(--text-secondary)]">
+                    Ejemplo:
+                </p>
+
+                <div class="rounded-xl border border-[var(--border-soft)]
+                    bg-[var(--bg-muted)] p-3 space-y-2">
+
+                    <p class="text-green-400">
+                        {{ nicheTaglineExample }}
+                    </p>
+
+                </div>
+
+            </div>
+
+            <!-- Recomendaciones -->
+            <div class="space-y-3">
+
+                <p class="font-semibold text-[var(--text-secondary)]">
+                    Recomendaciones:
+                </p>
+
+                <div class="rounded-xl border border-[var(--border-soft)]
+                    bg-[var(--bg-muted)] p-3">
+
+                    <ul class="list-disc ml-4 space-y-1">
+                        <li>Describe tu especialidad principal</li>
+                        <li>Mantén la frase breve y clara</li>
+                        <li>Evita teléfonos o promociones</li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="p-4 border-t border-[var(--border-soft)]">
+
+            <button class="mar-btn-help w-full" (click)="showTaglineHelp = false">
+                Entendido
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+}
+
+@if (showDescriptionHelp) {
+
+<div class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-64
+            z-50 flex items-end sm:items-center justify-center
+            p-0 sm:p-4">
+
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showDescriptionHelp = false">
+    </div>
+
+    <!-- Modal -->
+    <div class="relative w-full h-full sm:h-auto
+              sm:max-w-md
+              bg-[var(--bg-surface)]
+              border-0 sm:border border-[var(--border-soft)]
+              rounded-none sm:rounded-2xl
+              shadow-xl
+              flex flex-col
+              max-h-screen sm:max-h-[90vh]">
+
+        <!-- HEADER -->
+        <div class="p-4 sm:p-5 border-b border-[var(--border-soft)]">
+
+            <h3 class="font-semibold text-base text-[var(--text-primary)]">
+                ¿Para qué sirve?
+            </h3>
+
+            <p class="text-[var(--text-muted)] leading-relaxed">
+                La descripción permite explicar con más detalle los servicios, especialidades y experiencia de esta
+                sucursal.
+            </p>
+
+            <p class="text-[var(--text-muted)] leading-relaxed mt-2">
+                Tus {{ uiTerms().clients.pluralLower }} podrán conocer mejor tu negocio antes de reservar una {{
+                uiTerms().appointments.singularLower }} o ponerse en contacto contigo.
+            </p>
+
+        </div>
+
+        <!-- BODY -->
+        <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5">
+
+            <!-- Ejemplo -->
+            <div class="space-y-3">
+
+                <p class="font-semibold text-[var(--text-secondary)]">
+                    Ejemplo:
+                </p>
+
+                <div class="rounded-xl border border-[var(--border-soft)]
+                    bg-[var(--bg-muted)] p-3 space-y-2">
+
+                    <p class="text-green-400">
+                        {{ nicheDescriptionExample }}
+                    </p>
+
+                </div>
+
+            </div>
+
+            <!-- Recomendaciones -->
+            <div class="space-y-3">
+
+                <p class="font-semibold text-[var(--text-secondary)]">
+                    Recomendaciones:
+                </p>
+
+                <div class="rounded-xl border border-[var(--border-soft)]
+                    bg-[var(--bg-muted)] p-3">
+
+                    <ul class="list-disc ml-4 space-y-1">
+                        <li>Menciona tus principales servicios</li>
+                        <li>Describe tu experiencia o especialidad</li>
+                        <li>Escribe pensando en tus {{ uiTerms().clients.pluralLower }}</li>
+                        <li>Evita información repetida o promociones</li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="p-4 border-t border-[var(--border-soft)]">
+
+            <button class="mar-btn-help w-full" (click)="showDescriptionHelp = false">
+                Entendido
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+}

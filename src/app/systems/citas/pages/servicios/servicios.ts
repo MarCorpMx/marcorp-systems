@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, computed, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
@@ -25,7 +25,7 @@ import {
   Pencil,
   PauseCircle,
   PlayCircle,
-  Eye
+  Eye, Image, MoreVertical
 } from 'lucide-angular';
 
 import { AuthService } from '../../../../core/services/auth.service';
@@ -35,11 +35,13 @@ import { Notification } from '../../../../services/notification.service';
 import { ConfirmDialogService } from '../../../../shared/services/confirm-dialog.service';
 import { CurrencyService } from '../../../../core/services/currency.service';
 import { BusinessCatalogService } from '../../../../core/services/business-catalog.service';
+import { LanguageService } from '../../../../core/services/language.service';
 
 /** rombito mejoras 
  * Qué pasa cuando se equivocan y create_all_branches=true, entonces pierden servicios sin querer
  * Verificar correctamente los límites
  * Crear el boton y lo necesario para "restaurar servicios/variantes"
+ * Hacer que los ejemplos cambien aleatoriamente
  */
 
 @Component({
@@ -72,18 +74,21 @@ export class Servicios implements OnInit {
   readonly PauseCircle = PauseCircle;
   readonly PlayCircle = PlayCircle;
   readonly Eye = Eye;
+  readonly Image = Image;
+  readonly MoreVertical = MoreVertical;
 
   /* =====================================================
    INJECTIONS
   ===================================================== */
   private auth = inject(AuthService);
+  public businessCatalogService = inject(BusinessCatalogService);
   private fb = inject(FormBuilder);
   private notify = inject(Notification);
   private confirm = inject(ConfirmDialogService);
   private servicesApi = inject(CitasServicesService);
   private currency = inject(CurrencyService);
-  public catalog = inject(BusinessCatalogService);
   private router = inject(Router);
+  private language = inject(LanguageService);
 
   /* =====================================================
    STATE
@@ -123,8 +128,307 @@ export class Servicios implements OnInit {
   servicesLimit: number | null = null;
   canCreateServices = true;
 
-  org = JSON.parse(localStorage.getItem('organization') || '{}');
-  niche = this.org.business_niche;
+  organization = this.auth.organization$;
+  niche = computed(() =>
+    this.organization()?.business_niche ?? 'other'
+  );
+
+  // Variables para texto
+  uiTerms = computed(() => ({
+    appointments: {
+      singular: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'singular',
+        true
+      ),
+
+      plural: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'plural',
+        true
+      ),
+
+      singularLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'singular'
+      ),
+
+      pluralLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'plural'
+      )
+    },
+
+    audienceOwner: {
+      singular: this.businessCatalogService.getTerm(
+        this.niche(),
+        'owner',
+        'singular',
+        true
+      ),
+
+      plural: this.businessCatalogService.getTerm(
+        this.niche(),
+        'owner',
+        'plural',
+        true
+      ),
+
+      singularLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'owner',
+        'singular'
+      ),
+
+      pluralLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'owner',
+        'plural'
+      )
+    },
+
+    clients: {
+      singular: this.businessCatalogService.getTerm(
+        this.niche(),
+        'clients',
+        'singular',
+        true
+      ),
+
+      plural: this.businessCatalogService.getTerm(
+        this.niche(),
+        'clients',
+        'plural',
+        true
+      ),
+
+      singularLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'clients',
+        'singular'
+      ),
+
+      pluralLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'clients',
+        'plural'
+      )
+    },
+
+    services: {
+      singular: this.businessCatalogService.getTerm(
+        this.niche(),
+        'services',
+        'singular',
+        true
+      ),
+
+      plural: this.businessCatalogService.getTerm(
+        this.niche(),
+        'services',
+        'plural',
+        true
+      ),
+
+      singularLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'services',
+        'singular'
+      ),
+
+      pluralLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'services',
+        'plural'
+      )
+    },
+  }));
+
+  serviceGrammar = computed(() =>
+    this.language.getGrammar(
+      this.uiTerms().services.singularLower
+    )
+  );
+
+  public readonly nicheContent: Record<string, {
+    name: string;
+    description: string;
+    nameVariant: string;
+    descriptionVariant: string;
+  }> = {
+
+      psychology: {
+        name: 'Psicoterapia Humanista',
+        description: 'Acompañamiento terapéutico centrado en la persona, que promueve el autoconocimiento, la libertad personal y la construcción de una vida con sentido. ',
+        nameVariant: 'Sesión individual',
+        descriptionVariant: 'Espacio terapéutico individual para trabajar emociones...',
+      },
+
+      medical: {
+        name: 'Consulta médica general',
+        description: 'Atención médica profesional para valoración, diagnóstico y seguimiento de la salud del paciente.',
+        nameVariant: 'Consulta de primera vez',
+        descriptionVariant: 'Valoración inicial completa para conocer antecedentes, síntomas y definir el tratamiento adecuado.',
+      },
+
+      dentist: {
+        name: 'Limpieza dental profesional',
+        description: 'Servicios odontológicos enfocados en la salud, prevención y estética dental.',
+        nameVariant: 'Limpieza dental básica',
+        descriptionVariant: 'Remoción de placa y sarro para mantener una adecuada salud bucal.',
+      },
+
+      nutrition: {
+        name: 'Consulta nutricional',
+        description: 'Planes de alimentación personalizados para mejorar hábitos, salud y bienestar.',
+        nameVariant: 'Consulta inicial',
+        descriptionVariant: 'Evaluación nutricional completa y diseño de un plan alimenticio personalizado.',
+      },
+
+      therapy: {
+        name: 'Masaje terapéutico',
+        description: 'Sesiones orientadas al bienestar físico, emocional y energético de la persona.',
+        nameVariant: 'Sesión individual',
+        descriptionVariant: 'Espacio personalizado para trabajar necesidades específicas de bienestar y equilibrio.',
+      },
+
+      hair_salon: {
+        name: 'Corte y estilizado',
+        description: 'Servicios profesionales para el cuidado, transformación y mantenimiento del cabello.',
+        nameVariant: 'Corte de dama',
+        descriptionVariant: 'Servicio de corte personalizado adaptado al estilo, rostro y preferencias de la clienta.',
+      },
+
+      barbershop: {
+        name: 'Corte de cabello',
+        description: 'Servicios de barbería enfocados en imagen, estilo y cuidado masculino.',
+        nameVariant: 'Corte clásico',
+        descriptionVariant: 'Corte tradicional realizado con técnicas profesionales para un acabado limpio y preciso.',
+      },
+
+      nails: {
+        name: 'Aplicación de uñas',
+        description: 'Servicios especializados de manicure, pedicure y diseño profesional de uñas.',
+        nameVariant: 'Uñas acrílicas',
+        descriptionVariant: 'Aplicación completa de uñas acrílicas con acabado profesional y duradero.',
+      },
+
+      spa: {
+        name: 'Experiencia de relajación',
+        description: 'Tratamientos diseñados para reducir el estrés y promover el bienestar integral.',
+        nameVariant: 'Masaje relajante',
+        descriptionVariant: 'Sesión enfocada en aliviar tensiones musculares y generar una sensación profunda de relajación.',
+      },
+
+      fitness: {
+        name: 'Entrenamiento personalizado',
+        description: 'Programas diseñados para mejorar la condición física y alcanzar objetivos específicos.',
+        nameVariant: 'Sesión individual',
+        descriptionVariant: 'Entrenamiento guiado de forma personalizada según las metas y nivel físico del alumno.',
+      },
+
+      education: {
+        name: 'Clases particulares',
+        description: 'Servicios educativos orientados al aprendizaje, desarrollo académico y capacitación.',
+        nameVariant: 'Clase individual',
+        descriptionVariant: 'Sesión personalizada enfocada en reforzar conocimientos y resolver dudas específicas.',
+      },
+
+      consulting: {
+        name: 'Consultoría empresarial',
+        description: 'Asesoramiento profesional para optimizar procesos, estrategia y toma de decisiones.',
+        nameVariant: 'Sesión estratégica',
+        descriptionVariant: 'Reunión de análisis y planificación para identificar oportunidades y acciones concretas.',
+      },
+
+      coaching: {
+        name: 'Coaching de desarrollo personal',
+        description: 'Procesos de acompañamiento enfocados en objetivos, crecimiento y resultados.',
+        nameVariant: 'Sesión individual',
+        descriptionVariant: 'Espacio personalizado para trabajar metas, desafíos y desarrollo personal o profesional.',
+      },
+
+      pet_grooming: {
+        name: 'Servicios para mascotas',
+        description: 'Atención veterinaria, estética y otros servicios especializados para mascotas.',
+        nameVariant: 'Servicio básico',
+        descriptionVariant: 'Atención personalizada adaptada a las necesidades de cada mascota.',
+      },
+
+      tattoo: {
+        name: 'Tatuaje personalizado',
+        description: 'Diseños artísticos realizados de forma profesional y adaptados a cada cliente.',
+        nameVariant: 'Tatuaje pequeño',
+        descriptionVariant: 'Diseño de tamaño reducido ideal para piezas discretas y de rápida ejecución.',
+      },
+
+      beauty: {
+        name: 'Maquillaje profesional',
+        description: 'Servicios especializados para realzar la belleza y preparar eventos especiales.',
+        nameVariant: 'Maquillaje social',
+        descriptionVariant: 'Aplicación profesional de maquillaje para eventos, celebraciones o sesiones fotográficas.',
+      },
+
+      other: {
+        name: 'Servicio profesional',
+        description: 'Describe el servicio principal que ofrece tu negocio y el valor que aporta a tus clientes.',
+        nameVariant: 'Modalidad estándar',
+        descriptionVariant: 'Versión específica del servicio con características, duración o beneficios definidos.',
+      }
+
+    };
+
+  get nicheNamePlaceholder(): string {
+    return 'Ej. ' + (
+      this.nicheContent[this.niche()]?.name
+      ?? 'Ej. Servicio profesional'
+    );
+  }
+
+  get nicheDescriptionPlaceholder(): string {
+    return 'Ej. ' + (
+      this.nicheContent[this.niche()]?.description
+      ?? 'Describe el servicio principal'
+    );
+  }
+
+  get nicheVariantNamePlaceholder(): string {
+    return 'Ej. ' + (
+      this.nicheContent[this.niche()]?.nameVariant
+      ?? 'Ej. Modalidad estándar'
+    );
+  }
+
+  get nicheVariantDescriptionPlaceholder(): string {
+    return 'Ej. ' + (
+      this.nicheContent[this.niche()]?.descriptionVariant
+      ?? 'Describe esta modalidad'
+    );
+  }
+
+  // Para imagenes
+  //imagePreview: string | null = null;
+  //selectedimageFile: File | null = null;
+  selectImage = false;
+  uploadingImage = false;
+  removingImage = false;
+  showVariantImageHelp = false;
+
+  // Loadings
+  activeMenu: number | null = null;
+
+  processingAction:
+    | 'view'
+    | 'edit'
+    | 'status'
+    | 'delete'
+    | null = null;
+
+
 
   /* =====================================================
    LIFECYCLE
@@ -133,13 +437,65 @@ export class Servicios implements OnInit {
 
     this.servicesLimit = this.auth.getFeatureLimit('services');
 
-    console.log('el limite de los servicios es: ', this.servicesLimit);
-
+    //console.log('el limite de los servicios es: ', this.servicesLimit);
 
     this.initForm();
     this.loadBranches();
     this.loadServices();
     this.listenDraftChanges();
+  }
+
+  toggleMenu(id: number) {
+    this.activeMenu = this.activeMenu === id ? null : id;
+  }
+
+  @HostListener('document:click')
+  closeMenu() {
+    this.activeMenu = null;
+  }
+
+  isProcessing(
+    branchId: number,
+    action: 'view' | 'edit' | 'status' | 'delete'
+  ): boolean {
+
+    return (
+      this.processingServiceId === branchId &&
+      this.processingAction === action
+    );
+  }
+
+  startProcessing(
+    branchId: number,
+    action: 'view' | 'edit' | 'status' | 'delete'
+  ): boolean {
+
+    if (this.processingAction) {
+      this.notify.error('Procesando...');
+      return false;
+    }
+
+    this.processingServiceId = branchId;
+    this.processingAction = action;
+
+    return true;
+  }
+
+  stopProcessing(): void {
+    this.processingServiceId = null;
+    this.processingAction = null;
+  }
+
+  isOverlayProcessing(branchId: number): boolean {
+
+    return (
+      this.processingServiceId === branchId &&
+      (
+        this.processingAction === 'delete'
+        || this.processingAction === 'status'
+
+      )
+    );
   }
 
   /* =====================================================
@@ -148,7 +504,7 @@ export class Servicios implements OnInit {
   private initForm(): void {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(120)]],
-      description: ['', Validators.maxLength(500)],
+      description: ['', [Validators.minLength(10), Validators.maxLength(300)]],
       create_all_branches: [true],
       variants: this.fb.array([])
     });
@@ -160,12 +516,18 @@ export class Servicios implements OnInit {
   }
 
   private createVariant(data?: any): FormGroup {
+
     return this.fb.group({
       _tmpId: [data?._tmpId ?? this.generateId()],
       id: [data?.id ?? null],
 
+      // IMAGENES
+      image_url: [data?.image_url ?? null],
+      image_preview: [null],
+      image_file: [null],
+
       name: [data?.name ?? '', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
-      description: [data?.description ?? '', Validators.maxLength(300)],
+      description: [data?.description ?? '', [Validators.minLength(10), Validators.maxLength(300)]],
       duration_minutes: [data?.duration_minutes ?? 60, [Validators.required, Validators.min(1)]],
       price: [data?.price ?? 0, [Validators.required, Validators.min(0)]],
       max_capacity: [data?.max_capacity ?? 1, [Validators.required, Validators.min(1)]],
@@ -246,6 +608,8 @@ export class Servicios implements OnInit {
       next: (res) => {
         this.services = this.normalizeServices(res);
 
+        console.log('los servicios:', JSON.stringify(res, null, 2));
+
         this.sortServices();
         this.updateCounters();
 
@@ -268,7 +632,7 @@ export class Servicios implements OnInit {
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.notify.warning('Completa los campos requeridos');
+      this.notify.error('Completa los campos requeridos');
       return;
     }
 
@@ -299,8 +663,8 @@ export class Servicios implements OnInit {
         this.afterSave();
 
         this.confirm.open(
-          res.message || 'Servicio creado correctamente',
-          'El servicio ya fue creado, pero aún no está asignado a ningún miembro del personal. \n Asigna quién puede realizar este servicio para comenzar a recibir reservas.',
+          `${this.uiTerms().services.singular} creado correctamente`,
+          `${this.serviceGrammar().articleCap} ${this.uiTerms().services.singularLower} ya fue ${this.serviceGrammar().create}, pero aún no está asignado a ningún miembro del personal. \n Asigna quién puede realizar ${this.serviceGrammar().demonstrative} ${this.uiTerms().services.singularLower} para comenzar a recibir reservas.`,
           () => {
             this.goToAgenda();
           },
@@ -311,7 +675,7 @@ export class Servicios implements OnInit {
       },
       error: (err) => {
         this.saving = false;
-        this.handleError(err, 'No se pudo crear el servicio');
+        this.handleError(err, 'Error al crear...');
       }
     });
   }
@@ -319,7 +683,7 @@ export class Servicios implements OnInit {
   private updateService(payload: any): void {
 
     if (!this.editingService) {
-      this.notify.error('Error al seleccionar el servicio');
+      this.notify.error(`Error al seleccionar el ${this.uiTerms().services.singularLower}`);
       return;
     }
 
@@ -348,7 +712,7 @@ export class Servicios implements OnInit {
 
         this.afterSave();
 
-        this.notify.success(res.message || 'Servicio actualizado');
+        this.notify.success(`${this.uiTerms().services.singular} ${this.serviceGrammar().update} correctamente`);
 
       },
       error: (err) => {
@@ -357,7 +721,7 @@ export class Servicios implements OnInit {
 
         this.handleError(
           err,
-          'No se pudo actualizar el servicio'
+          'Error al actualizar'
         );
       }
     });
@@ -370,6 +734,220 @@ export class Servicios implements OnInit {
 
     this.forceClose();
   }
+
+  /* =====================================================
+  IMAGENES
+ ===================================================== */
+  onImageSelected(event: Event, index: number): void {
+
+    const input = event.target as HTMLInputElement;
+
+    if (!input.files?.length) {
+      return;
+    }
+
+    this.selectImage = true;
+
+    const file = input.files[0];
+
+    const allowedTypes = [
+      'image/png',
+      'image/jpeg',
+      'image/webp'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      this.selectImage = false;
+      this.notify.error(
+        'Solo se permiten imágenes PNG, JPG o WEBP'
+      );
+
+      return;
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5 MB
+
+    if (file.size > maxSize) {
+      this.selectImage = false;
+      this.notify.error(
+        'La imagen no puede superar 5 MB'
+      );
+
+      return;
+    }
+
+    const variant = this.variants.at(index);
+
+    variant.patchValue({
+      image_file: file
+    });
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+
+      variant.patchValue({
+        image_preview: reader.result as string
+      });
+
+    };
+
+    reader.readAsDataURL(file);
+    this.selectImage = false;
+  }
+
+  uploadImage(index: number): void {
+
+    const variant = this.variants.at(index) as FormGroup;
+
+    const file = variant.value.image_file;
+
+    if (!file) {
+      return;
+    }
+
+    const variantId = variant.value.id;
+
+    const formData = new FormData();
+
+    formData.append(
+      'image',
+      file
+    );
+
+    this.uploadingImage = true;
+
+    this.servicesApi.uploadImage(variantId, formData).subscribe({
+      next: (res: any) => {
+
+        const imageUrl = res.image_url
+          ? `${res.image_url}?v=${Date.now()}`
+          : null;
+
+        variant.patchValue({
+          image_url: imageUrl,
+          image_preview: null,
+          image_file: null
+        });
+
+        this.syncVariantImage(variantId, imageUrl);
+
+        this.notify.success('Imagen actualizada');
+
+        this.uploadingImage = false;
+
+      },
+      error: (err) => {
+        this.uploadingImage = false;
+
+        this.handleError(err, 'No se pudo subir la imagen');
+      }
+    });
+
+
+  }
+
+  get imageActionDisabled(): boolean {
+    return this.removingImage
+      || this.uploadingImage
+      || this.selectImage
+      || this.saving;
+  }
+
+  removeImage(index: number): void {
+
+    const variant = this.variants.at(index);
+
+    const execute = () => {
+
+      const variantId = variant.value.id;
+      this.removingImage = true;
+
+      this.servicesApi.deleteImage(variantId).subscribe({
+        next: (res: any) => {
+
+          variant.patchValue({
+            image_url: null,
+            image_preview: null,
+            image_file: null
+          });
+
+          this.syncVariantImage(variantId, null);
+
+          this.notify.success(
+            'Imagen eliminada'
+          );
+
+          this.removingImage = false;
+
+        },
+        error: (err) => {
+          this.removingImage = false;
+
+          this.handleError(err, 'No se pudo eliminar la imagen');
+        }
+      });
+
+      return;
+
+    };
+
+    // Verificamos si existe image_url
+    if (variant.value.image_url) {
+      this.confirm.open(
+        'Eliminar imagen',
+        'La imagen dejará de aparecer en la modalidad. \n ¿Deseas continuar?',
+        execute,
+        'Cancelar',
+        'Eliminar'
+      );
+
+      return;
+    }
+
+    if (variant.value.image_preview) {
+      this.removingImage = true;
+
+      variant.patchValue({
+        image_url: null,
+        image_preview: null,
+        image_file: null
+      });
+
+      this.removingImage = false;
+    }
+
+  }
+
+  showImageInfo(event: Event): void {
+    event.stopPropagation();
+
+    this.showVariantImageHelp = true;
+  }
+
+  hasVariantImages(service: ServiceModel): boolean {
+    return service.variants?.some(v => !!v.image_url) ?? false;
+  }
+
+  getVariantImageCount(service: ServiceModel): number {
+    return service.variants?.filter(v => !!v.image_url).length ?? 0;
+  }
+
+  private syncVariantImage(variantId: number, imageUrl: string | null): void {
+    const service = this.services.find(s =>
+      s.variants?.some(v => v.id === variantId)
+    );
+
+    const variant = service?.variants.find(v => v.id === variantId);
+
+    if (!variant) return;
+
+    variant.image_url = imageUrl ?? undefined;
+
+    this.services = [...this.services];
+  }
+
+
 
   /* =====================================================
    MODALS
@@ -389,7 +967,7 @@ export class Servicios implements OnInit {
     this.resetFormState();
 
     const draft = localStorage.getItem(this.draftKey);
-    const suggestion = this.catalog.getSuggestion(this.niche);
+    const suggestion = this.businessCatalogService.getSuggestion(this.niche());
 
     this.clearVariants();
 
@@ -412,13 +990,15 @@ export class Servicios implements OnInit {
     } else if (suggestion) {
 
       this.form.reset({
-        name: suggestion.name,
+        //name: suggestion.name,
+        name: '',
         description: '',
         create_all_branches: true
       });
 
       this.addVariant({
-        name: this.catalog.getDefaultVariantName(this.niche),
+        //name: this.businessCatalogService.getDefaultVariantName(this.niche()),
+        name: '',
         duration_minutes: suggestion.duration,
         price: suggestion.price,
         mode: suggestion.mode
@@ -444,21 +1024,33 @@ export class Servicios implements OnInit {
 
   openEdit(service: ServiceModel): void {
 
-    this.editingService = service;
-    this.resetFormState();
+    if (!this.startProcessing(service.id, 'edit')) {
+      return;
+    }
 
-    this.form.patchValue({
-      name: service.name,
-      description: service.description
-    });
+    // Simulación temporal - después consultar a backend
+    setTimeout(() => {
 
-    this.clearVariants();
+      this.editingService = service;
+      this.resetFormState();
 
-    service.variants?.forEach(v => this.addVariant(v));
+      this.form.patchValue({
+        name: service.name,
+        description: service.description
+      });
 
-    this.form.markAsPristine();
-    this.expandedIndex = 0;
-    this.showModal = true;
+      this.clearVariants();
+
+      service.variants?.forEach(v => this.addVariant(v));
+
+      this.form.markAsPristine();
+      this.expandedIndex = 0;
+      this.showModal = true;
+
+      this.stopProcessing();
+
+
+    }, 300);
   }
 
 
@@ -521,8 +1113,21 @@ export class Servicios implements OnInit {
   }
 
   openView(service: ServiceModel): void {
-    this.viewingService = service;
-    this.showViewModal = true;
+
+    if (!this.startProcessing(service.id, 'view')) {
+      return;
+    }
+
+    // Simulación temporal - después consultar a backend
+    setTimeout(() => {
+
+      this.viewingService = service;
+      this.showViewModal = true;
+
+      this.stopProcessing();
+
+
+    }, 300);
   }
 
   private resetFormState(): void {
@@ -571,7 +1176,6 @@ export class Servicios implements OnInit {
     };
   }
 
-
   private generateId(): string {
     try {
       return crypto.randomUUID();
@@ -586,15 +1190,11 @@ export class Servicios implements OnInit {
   }
 
   toggleServiceStatus(service: ServiceModel): void {
-    if (this.processingServiceId) {
-      this.notify.error('Procesando servicio');
-      return;
-    }
 
     // Si es el último servicio
     if (service.active && this.activeServicesCount === 1) {
       this.notify.warning(
-        'Debes tener al menos un servicio activo para recibir reservas.'
+        `Debes tener al menos ${this.serviceGrammar().indefinite} ${this.uiTerms().services.singularLower}${this.serviceGrammar().active} para recibir reservas.`
       );
       return;
     }
@@ -604,8 +1204,9 @@ export class Servicios implements OnInit {
 
       // 'Este servicio dejará de estar disponible únicamente en esta sucursal. Las demás sucursales no serán afectadas.',
       this.confirm.open(
-        'Desactivar servicio',
-        'Este servicio dejará de estar disponible para reservas y sus modalidades también se desactivarán.\n ¿Deseas continuar?',
+        `Desactivar ${this.uiTerms().services.singularLower}`,
+        `${this.serviceGrammar().demonstrativeCap} ${this.uiTerms().services.singularLower} dejará de estar disponible para nuevas ${this.uiTerms().appointments.pluralLower}.\n\nTodas sus modalidades también serán desactivadas.\n\n¿Deseas continuar?`,
+
         () => {
           this.executeToggle(service);
         },
@@ -626,14 +1227,14 @@ export class Servicios implements OnInit {
     }
 
     if (!this.editingService) {
-      this.notify.error('No existe servicio seleccionado');
+      this.notify.error(`Error al seleccionar ${this.serviceGrammar().article} ${this.uiTerms().services.singularLower}`);
       return;
     }
 
     const service = this.editingService;
 
     if (!service.active) {
-      this.notify.error('El servicio no se encuentra activo');
+      this.notify.error(`${this.serviceGrammar().articleCap} ${this.uiTerms().services.singularLower} no se encuentra ${this.serviceGrammar().active}`);
       return;
     }
 
@@ -641,7 +1242,7 @@ export class Servicios implements OnInit {
 
     if (v.active && activeVariants <= 1) {
       this.notify.warning(
-        'Este servicio debe tener al menos una modalidad activa.'
+        `${this.serviceGrammar().demonstrativeCap} ${this.uiTerms().services.singularLower} debe tener al menos una modalidad activa.`
       );
       return;
     }
@@ -715,6 +1316,11 @@ export class Servicios implements OnInit {
   }
 
   executeToggle(service: any) {
+
+    if (!this.startProcessing(service.id, 'status')) {
+      return;
+    }
+
     this.processingServiceId = service.id;
 
     const prev = service.active;
@@ -737,21 +1343,23 @@ export class Servicios implements OnInit {
 
           if (res.data.active) {
             this.notify.success(
-              'Servicio activado.\nRevisa y activa sus modalidades si lo deseas.'
+              `${this.uiTerms().services.singular} ${this.serviceGrammar().activate}.\n\nRevisa y activa sus modalidades si lo deseas.`
             );
           } else {
             this.notify.success(
-              'Servicio desactivado junto con sus modalidades.'
+              `${this.uiTerms().services.singular} ${this.serviceGrammar().deactivate} junto con sus modalidades.`
             );
           }
 
           this.processingServiceId = null;
+          this.stopProcessing();
         },
 
         error: (err) => {
 
           service.active = prev; // rollback
           this.processingServiceId = null;
+          this.stopProcessing();
 
           /*if (err?.error?.message?.includes('límite')) {
 
@@ -766,7 +1374,7 @@ export class Servicios implements OnInit {
             return;
           }*/
 
-          this.handleError(err, 'No se pudo actualizar el servicio');
+          this.handleError(err, 'Error al actualizar');
         }
       });
 
@@ -881,7 +1489,7 @@ export class Servicios implements OnInit {
 
   // Variantes inteligentes
   get variantExamples() {
-    return this.catalog.getVariantExamples(this.niche);
+    return this.businessCatalogService.getVariantExamples(this.niche());
   }
 
   applyExample(example: { title: string, items: string[] }) {
@@ -909,17 +1517,18 @@ export class Servicios implements OnInit {
   }
 
   getSuggestedDuration(): number {
-    return this.catalog.getSuggestion(this.niche)?.duration ?? 60;
+    return this.businessCatalogService.getSuggestion(this.niche())?.duration ?? 60;
   }
 
   getSuggestedPrice(): number {
-    return this.catalog.getSuggestion(this.niche)?.price ?? 0;
+    return this.businessCatalogService.getSuggestion(this.niche())?.price ?? 0;
   }
 
   //getSuggestedMode(): ServiceMode {
   getSuggestedMode(): string {
-    return this.catalog.getSuggestion(this.niche)?.mode ?? 'presential';
+    return this.businessCatalogService.getSuggestion(this.niche())?.mode ?? 'presential';
   }
+
 
   /* =====================================================
    ERROR HANDLER

@@ -1,6 +1,10 @@
-import { Component, OnInit, inject, ElementRef, HostListener } from '@angular/core';
+import { Component, OnInit, inject, ElementRef, HostListener, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Users, HelpCircle, PlayCircle, PauseCircle, Building2, Pencil, EyeOff, Eye } from 'lucide-angular';
+import {
+  LucideAngularModule, Users, HelpCircle,
+  PlayCircle, PauseCircle, Building2, Pencil, EyeOff, Eye,
+  MessageCircle, Phone, Mail, MoreVertical
+} from 'lucide-angular';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl, FormsModule } from '@angular/forms';
 import { NgxIntlTelInputModule, CountryISO, PhoneNumberFormat } from 'ngx-intl-tel-input';
 
@@ -10,6 +14,8 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { CitasTeamService } from '../../../../core/services/citas-team.service';
 import { Notification } from '../../../../services/notification.service';
 import { ConfirmDialogService } from '../../../../shared/services/confirm-dialog.service';
+import { BusinessCatalogService } from '../../../../core/services/business-catalog.service';
+import { PhoneApi } from '../../../../core/models/client.model';
 
 type MemberStatus = 'Activo' | 'Invitado' | 'Suspendido' | 'Inactivo';
 type MemberRole = 'Administrador' | 'Terapeuta' | 'Recepción';
@@ -63,6 +69,7 @@ interface TeamMember {
 | - Falta mostrar/activar el botón "Añadir sucursal"
 | - Falta validar chingón los límites (ahorita si tienen 5 vatos trabajando y desactivan pueden estar creando más)
 | - Hacer boton la card para ver los datos del vato
+| - Traer menos datos para las cards principales
 |--------------------------------------------------------------------------
 */
 
@@ -91,8 +98,13 @@ export class Equipo implements OnInit {
   readonly Pencil = Pencil;
   readonly EyeOff = EyeOff;
   readonly Eye = Eye;
+  readonly MessageCircle = MessageCircle;
+  readonly Phone = Phone;
+  readonly Mail = Mail;
+  readonly MoreVertical = MoreVertical;
 
   private auth = inject(AuthService);
+  public businessCatalogService = inject(BusinessCatalogService);
   private teamService = inject(CitasTeamService);
   private notify = inject(Notification);
   private confirm = inject(ConfirmDialogService);
@@ -124,6 +136,81 @@ export class Equipo implements OnInit {
     this.loadTeam();
   }
 
+  // Organizacion y nicho
+  organization = this.auth.organization$;
+  niche = computed(() =>
+    this.organization()?.business_niche ?? 'other'
+  );
+
+  // Variables para texto
+  uiTerms = computed(() => ({
+    appointments: {
+      singular: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'singular',
+        true
+      ),
+
+      plural: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'plural',
+        true
+      ),
+
+      singularLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'singular'
+      ),
+
+      pluralLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'appointments',
+        'plural'
+      )
+    },
+
+    team: {
+      singular: this.businessCatalogService.getTerm(
+        this.niche(),
+        'team',
+        'singular',
+        true
+      ),
+
+      plural: this.businessCatalogService.getTerm(
+        this.niche(),
+        'team',
+        'plural',
+        true
+      ),
+
+      singularLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'team',
+        'singular'
+      ),
+
+      pluralLower: this.businessCatalogService.getTerm(
+        this.niche(),
+        'team',
+        'plural'
+      )
+    },
+
+  }));
+
+  // Modal "ver"
+  showViewModal = false;
+  viewingMember: TeamMember | null = null;
+  showFullNotes = false;
+  loadingViewMemberId: string | null = null;
+
+  // Modal "Editar"
+  loadingMemberDetailId: string | null = null;
+
 
   form!: FormGroup;
   submitted = false;
@@ -154,12 +241,10 @@ export class Equipo implements OnInit {
   ngOnInit() {
     this.role = this.auth.getRole();
 
-    if(this.role == 'owner'){this.isOwnerOrRoot = true;} 
-    
+    if (this.role == 'owner') { this.isOwnerOrRoot = true; }
+
     this.initForm();
     this.loadTeam();
-
-    
 
     this.searchControl.valueChanges.pipe(
       debounceTime(300),
@@ -287,9 +372,103 @@ export class Equipo implements OnInit {
   }
 
 
+  openView(member: TeamMember): void {
+
+    if (this.loadingViewMemberId) {
+      this.notify.error('Procesando ' + this.uiTerms().team.singularLower);
+      return;
+    }
+
+    this.loadingViewMemberId = member.id;
+
+    // Esto seria despues de la consulta del backend (next: (res) => {...})
+    this.viewingMember = member;
+
+    this.showViewModal = true;
+
+    this.loadingViewMemberId = null;
+
+
+    // Posteriormente tenemos que solictar data a backend para que el sistema quede más completo
+    /*this.clientService
+      .getClient(client.id)
+      .subscribe({
+
+        next: (res) => {
+
+          this.viewingClient = res.data;
+
+          this.loadingViewClientId = null;
+
+          this.showViewModal = true;
+        },
+
+        error: (err) => {
+
+          this.loadingViewClientId = null;
+
+          this.handleError(
+            err,
+            'Error al cargar información'
+          );
+        }
+
+      });*/
+
+  }
+
   // member: TeamMember
   edit(member: TeamMember) {
-    this.editingMember = true;
+
+    if (this.loadingMemberDetailId) {
+      this.notify.error('Procesando ' + this.uiTerms().team.singularLower);
+      return;
+    }
+
+    this.loadingMemberDetailId = member.id;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Aquí después irá la llamada al backend:
+    | this.teamService.getMember(member.id)
+    |--------------------------------------------------------------------------
+    */
+
+    // Simulación temporal
+    setTimeout(() => {
+
+      this.editingMember = true;
+
+      this.showModal = true;
+
+      this.currentMemberId = member.id;
+
+      this.resetForm();
+
+      // Cargamos los datos
+      this.form.patchValue({
+        first_name: member.first_name || '',
+        last_name: member.last_name || '',
+        email: member.email || '',
+        phone: member.phone || null,
+        title: member.title || '',
+        specialty: member.specialty || '',
+        bio: member.bio || '',
+        is_active: member.is_active ?? true,
+        is_public: member.is_public ?? true,
+        has_access: member.has_access,
+        role: member.role?.key || 'staff'
+      });
+
+      this.form
+        .get('has_access')
+        ?.updateValueAndValidity();
+
+      this.loadingMemberDetailId = null;
+
+    }, 300);
+
+    /*this.editingMember = true;
     this.showModal = true;
     this.currentMemberId = member.id;
     this.resetForm();
@@ -310,17 +489,21 @@ export class Equipo implements OnInit {
     });
 
     // FORZAR REEVALUACIÓN
-    this.form.get('has_access')?.updateValueAndValidity();
+    this.form.get('has_access')?.updateValueAndValidity();*/
   }
 
   toggleStaffStatus(staff: any) {
-    if (this.processingStaffId) return;
+
+    if (this.processingStaffId) {
+      this.notify.error('Procesando ' + this.uiTerms().team.singularLower);
+      return;
+    }
 
     // Solo confirmar si se va a desactivar
     if (staff.is_active) {
       this.confirm.open(
-        'Desactivar personal',
-        'Este integrante dejará de recibir citas en esta sucursal. ¿Deseas continuar?',
+        'Desactivar ' + this.uiTerms().team.singularLower,
+        'Este integrante dejará de recibir citas en esta sucursal y también perderá acceso al sistema.\n\n ¿Deseas continuar?',
         () => {
           this.executeToggle(staff);
         },
@@ -347,7 +530,11 @@ export class Equipo implements OnInit {
       .subscribe({
         next: (res: any) => {
 
-          this.notify.success(res.message);
+          this.notify.success(
+            res.data.is_active
+              ? this.uiTerms().team.singular + ' activado correctamente'
+              : this.uiTerms().team.singular + ' desactivado correctamente'
+          );
 
           //console.log(res.data.message);
           this.processingStaffId = null;
@@ -357,7 +544,7 @@ export class Equipo implements OnInit {
         error: (err) => {
           staff.is_active = prev; // rollback
           this.processingStaffId = null;
-          this.handleError(err, 'No se pudo actualizar la sucursal');
+          this.handleError(err, 'Error al actualizar');
         }
       });
   }
@@ -526,6 +713,24 @@ export class Equipo implements OnInit {
 
   getInitial(name: string | null | undefined): string {
     return name ? name.charAt(0).toUpperCase() : '?';
+  }
+
+  getInitials(member: TeamMember): string {
+
+    return (
+      member.first_name?.charAt(0) +
+      (member.last_name?.charAt(0) ?? '')
+    )
+      .toUpperCase()
+      || '?';
+
+  }
+
+  getWhatsappLink(phone: PhoneApi): string {
+
+    const number = phone.e164Number.replace('+', '');
+
+    return `https://wa.me/${number}`;
   }
 
   getError(controlName: string): string | null {

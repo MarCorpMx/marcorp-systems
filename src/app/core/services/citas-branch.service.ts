@@ -1,41 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Api } from './api';
-
-export interface BranchModel {
-
-  id: number;
-  name: string;
-  slug: string;
-  reference_prefix: string;
-
-  address: string;
-  city: string;
-  state: string;
-  country: string;
-  zip_code: string;
-
-  phone: any;
-  email: string;
-  website: string;
-
-  is_active: boolean;
-  is_primary: boolean;
-  locked_by_plan: boolean;
-
-  timezone: string;
-
-  manager?: string;
-}
-
-export interface ApiMeta {
-  organization_branches_count: number;
-}
-
-export interface BranchResponse {
-  data: BranchModel[];
-  meta: ApiMeta;
-}
+import { BranchModel, ApiMeta, BranchResponse } from '../models/citas-branch.model';
 
 @Injectable({
   providedIn: 'root',
@@ -60,6 +26,10 @@ export class CitasBranchService {
       `${this.endpoint}/${id}`,
       payload
     );
+  }
+
+  deleteBranch(id: number) {
+    return this.api.delete(`${this.endpoint}/${id}`);
   }
 
 

@@ -68,7 +68,8 @@ export class Disponibilidad implements OnInit {
   staffId: number | null = null;
 
   //branchTimezone = 'UTC';
-  branchTimezone = this.auth.getCurrentBranch();
+  currentBranch = this.auth.getCurrentBranch();
+  branchTimezone = this.currentBranch.timezone;
 
   professionals: Professional[] = [];
   selectedProfessionalId!: number;
@@ -342,8 +343,7 @@ export class Disponibilidad implements OnInit {
 
     const branch = this.auth.getCurrentBranch();
 
-    this.branchTimezone =
-      branch?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    this.branchTimezone = branch?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     this.calendarOptions = {
       ...this.calendarOptions,
